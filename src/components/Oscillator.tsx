@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 import * as Tone from "tone";
 
-function Oscillator() {
+interface OscillatorProps {
+  freqMin?: number;
+  freqMax?: number;
+}
+
+function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
+  // a Tone.Oscillator and its property
   const [osc, setOsc] = useState<Tone.Oscillator | undefined>();
-  const [channel, setChannel] = useState<Tone.Channel | undefined>();
   const [frequency, setFrequency] = useState(440);
+
+  // a Tone.Channel and its properties
+  const [channel, setChannel] = useState<Tone.Channel | undefined>();
   const [volume, setVolume] = useState(-20);
   const [pan, setPan] = useState(0);
+
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
@@ -37,8 +46,8 @@ function Oscillator() {
           name="frequency"
           type="range"
           className="w-48"
-          min="1"
-          max="14000"
+          min={freqMin}
+          max={freqMax}
           value={frequency}
           onChange={(e) => {
             setFrequency(parseFloat(e.target.value));

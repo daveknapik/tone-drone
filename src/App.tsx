@@ -15,7 +15,7 @@ function App() {
       <div className="my-5 ml-5">
         <button onClick={start}>Power On</button>
       </div>
-      <div>
+      <div className="m-4">
         <DroneSynth oscillatorCount={6} />
       </div>
     </div>
