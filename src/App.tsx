@@ -1,10 +1,7 @@
-import { useState } from "react";
-import Oscillator from "./components/Oscillator";
+import DroneSynth from "./components/DroneSynth";
 import * as Tone from "tone";
 
 function App() {
-  const [frequency, setFrequency] = useState(440);
-
   const start = async () => {
     try {
       await Tone.start();
@@ -13,16 +10,14 @@ function App() {
     }
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFrequency(parseFloat(event.target.value));
-  };
-
   return (
-    <div className="App">
-      <div>
+    <div>
+      <div className="my-5 ml-5">
         <button onClick={start}>Power On</button>
       </div>
-      <Oscillator frequency={frequency} onChange={handleChange} />
+      <div>
+        <DroneSynth oscillatorCount={6} />
+      </div>
     </div>
   );
 }
