@@ -36,20 +36,23 @@ function Oscillator() {
         <input
           name="frequency"
           type="range"
-          min="440"
-          max="880"
+          className="w-48"
+          min="1"
+          max="14000"
           value={frequency}
           onChange={(e) => {
             setFrequency(parseFloat(e.target.value));
             osc?.frequency.setValueAtTime(frequency, 0.1);
           }}
         />
+        <div>{frequency}</div>
       </div>
       <div className="flex items-center space-x-2">
         <label htmlFor="volume">V</label>
         <input
           name="volume"
           type="range"
+          className="w-48"
           min="-80"
           max="0"
           value={volume}
@@ -66,6 +69,7 @@ function Oscillator() {
         <input
           name="pan"
           type="range"
+          className="w-48"
           min="-1"
           max="1"
           value={pan}
