@@ -1,6 +1,7 @@
-import { useId, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import * as Tone from "tone";
 import Slider from "./Slider";
+import WaveformSelector from "./WaveformSelector";
 
 interface OscillatorProps {
   freqMin?: number;
@@ -19,8 +20,6 @@ function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
   const [pan, setPan] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
-
-  const id = useId();
 
   useEffect(() => {
     const o = new Tone.Oscillator(
@@ -68,7 +67,6 @@ function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
   };
 
   return (
-    // TODO: refactor waveform controls into its own component
     <div>
       <Slider
         inputName="frequency"
@@ -92,48 +90,11 @@ function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
         step={0.01}
         handleChange={(e) => setPan(parseFloat(e.target.value))}
       />
-
-      <div className="flex items-center space-x-2">
-        <input
-          name={`waveform-${id}`}
-          type="radio"
-          id={`waveform-sine-${id}`}
-          value="sine"
-          checked={waveform === "sine"}
-          onChange={(e) => setWaveform(e.target.value)}
-        />
-        <label htmlFor={`waveform-sine-${id}`}>Sine</label>
-
-        <input
-          name={`waveform-${id}`}
-          type="radio"
-          id={`waveform-square-${id}`}
-          value="square"
-          checked={waveform === "square"}
-          onChange={(e) => setWaveform(e.target.value)}
-        />
-        <label htmlFor={`waveform-square-${id}`}>Square</label>
-
-        <input
-          name={`waveform-${id}`}
-          type="radio"
-          id={`waveform-triangle-${id}`}
-          value="triangle"
-          checked={waveform === "triangle"}
-          onChange={(e) => setWaveform(e.target.value)}
-        />
-        <label htmlFor={`waveform-triangle-${id}`}>Triangle</label>
-
-        <input
-          name={`waveform-${id}`}
-          type="radio"
-          id={`waveform-sawtooth-${id}`}
-          value="sawtooth"
-          checked={waveform === "sawtooth"}
-          onChange={(e) => setWaveform(e.target.value)}
-        />
-        <label htmlFor={`waveform-sawtooth-${id}`}>Saw</label>
-      </div>
+      <WaveformSelector
+        handleChange={(e) => setWaveform(e.target.value)}
+        value={waveform}
+        waveforms={["sine", "square", "triangle", "sawtooth"]}
+      />
       <div className="text-center">
         <button onClick={toggleAudio}>{isPlaying ? "Stop" : "Start"}</button>
       </div>
