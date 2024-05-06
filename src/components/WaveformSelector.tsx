@@ -18,12 +18,12 @@ function WaveformSelector({
       {waveforms.map((waveform) => (
         <div key={waveform}>
           <input
-            name={`waveform-${id}`}
-            type="radio"
-            id={`waveform-${waveform}-${id}`}
-            value={waveform}
             checked={value === waveform}
+            id={`waveform-${waveform}-${id}`}
+            name={`waveform-${id}`}
             onChange={handleChange}
+            type="radio"
+            value={waveform}
           />
           <label htmlFor={`waveform-${waveform}-${id}`}>
             {waveform.charAt(0).toUpperCase() + waveform.slice(1)}
