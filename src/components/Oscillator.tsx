@@ -1,5 +1,6 @@
 import { useId, useEffect, useState } from "react";
 import * as Tone from "tone";
+import Slider from "./Slider";
 
 interface OscillatorProps {
   freqMin?: number;
@@ -67,47 +68,31 @@ function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
   };
 
   return (
+    // TODO: refactor waveform controls into its own component
     <div>
-      <div className="flex items-center space-x-2">
-        <label htmlFor="frequency">F</label>
-        <input
-          name="frequency"
-          type="range"
-          className="w-48"
-          min={freqMin}
-          max={freqMax}
-          value={frequency}
-          onChange={(e) => setFrequency(parseFloat(e.target.value))}
-        />
-        <div>{frequency}</div>
-      </div>
-      <div className="flex items-center space-x-2">
-        <label htmlFor="volume">V</label>
-        <input
-          name="volume"
-          type="range"
-          className="w-48"
-          min="-80"
-          max="0"
-          value={volume}
-          onChange={(e) => setVolume(parseFloat(e.target.value))}
-        />
-        <div>{volume}</div>
-      </div>
-      <div className="flex items-center space-x-2">
-        <label htmlFor="pan">P</label>
-        <input
-          name="pan"
-          type="range"
-          className="w-48"
-          min="-1"
-          max="1"
-          value={pan}
-          step="0.01"
-          onChange={(e) => setPan(parseFloat(e.target.value))}
-        />
-        <div>{pan}</div>
-      </div>
+      <Slider
+        inputName="frequency"
+        min={freqMin}
+        max={freqMax}
+        value={frequency}
+        handleChange={(e) => setFrequency(parseFloat(e.target.value))}
+      />
+      <Slider
+        inputName="volume"
+        min={-80}
+        max={0}
+        value={volume}
+        handleChange={(e) => setVolume(parseFloat(e.target.value))}
+      />
+      <Slider
+        inputName="pan"
+        min={-1}
+        max={1}
+        value={pan}
+        step={0.01}
+        handleChange={(e) => setPan(parseFloat(e.target.value))}
+      />
+
       <div className="flex items-center space-x-2">
         <input
           name={`waveform-${id}`}
