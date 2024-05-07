@@ -12,7 +12,7 @@ function DroneSynth({ oscillatorCount }: DroneSynthProps) {
   return (
     <div className="border-2 rounded">
       <div className="my-5 ml-5">Drone Synth</div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 place-items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 my-5 place-items-center">
         {oscillators}
       </div>
     </div>
