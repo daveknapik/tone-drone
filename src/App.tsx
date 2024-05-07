@@ -3,13 +3,26 @@ import DroneSynth from "./components/DroneSynth";
 import * as Tone from "tone";
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedDarkModeSetting = localStorage.getItem("dark");
+
+    // use the localStorage value if it exists, otherwise use false
+    const initialValue: boolean = savedDarkModeSetting
+      ? JSON.parse(savedDarkModeSetting)
+      : false;
+    return initialValue;
+  });
+
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
 
   useEffect(() => {
-    isDarkMode
-      ? document.documentElement.classList.add("dark")
-      : document.documentElement.classList.remove("dark");
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("dark", "true");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("dark", "false");
+    }
   }, [isDarkMode]);
 
   const handleStart = async () => {
