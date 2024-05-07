@@ -16,7 +16,7 @@ function WaveformSelector({
   return (
     <div className="flex items-center space-x-2">
       {waveforms.map((waveform) => (
-        <div key={waveform}>
+        <div key={waveform} className="flex space-x-2">
           <input
             checked={value === waveform}
             id={`waveform-${waveform}-${id}`}
