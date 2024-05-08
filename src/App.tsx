@@ -51,7 +51,7 @@ function App() {
         </button>
       </div>
       <div className="m-4">
-        <DroneSynth oscillatorCount={6} />
+        <DroneSynth />
       </div>
     </div>
   );
