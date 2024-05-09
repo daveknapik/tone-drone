@@ -20,6 +20,7 @@ function Slider({
       <label htmlFor={inputName}>{inputName.charAt(0).toUpperCase()}</label>
       <input
         className="w-48"
+        id={inputName}
         max={max}
         min={min}
         name={inputName}

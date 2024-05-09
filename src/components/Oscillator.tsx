@@ -4,14 +4,14 @@ import Slider from "./Slider";
 import WaveformSelector from "./WaveformSelector";
 
 interface OscillatorProps {
-  freqMin?: number;
-  freqMax?: number;
+  minFreq: number;
+  maxFreq: number;
 }
 
-function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
+function Oscillator({ minFreq, maxFreq }: OscillatorProps) {
   // a Tone.Oscillator and its property
   const [osc, setOsc] = useState<Tone.Oscillator | undefined>();
-  const [frequency, setFrequency] = useState(440);
+  const [frequency, setFrequency] = useState(minFreq);
   const [waveform, setWaveform] = useState("sine");
 
   // a Tone.Channel and its properties
@@ -36,26 +36,6 @@ function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // update volume on the channel
-  useEffect(() => {
-    channel && channel.volume.setTargetAtTime(volume, 0, 0.01);
-  }, [channel, volume]);
-
-  // update pan on the channel
-  useEffect(() => {
-    channel && channel.pan.setTargetAtTime(pan, 0, 0.01);
-  }, [channel, pan]);
-
-  // update frequency on the osc
-  useEffect(() => {
-    osc && osc.frequency.setValueAtTime(frequency, 0.1);
-  }, [osc, frequency]);
-
-  // update waveform on the osc
-  useEffect(() => {
-    osc && (osc.type = waveform as Tone.ToneOscillatorType);
-  }, [osc, waveform]);
-
   const toggleAudio = (): void => {
     if (isPlaying) {
       osc?.stop();
@@ -66,12 +46,31 @@ function Oscillator({ freqMin = 440, freqMax = 880 }: OscillatorProps) {
     }
   };
 
+  // ensure the frequency is within the min and max range
+  if (frequency < minFreq) {
+    setFrequency(minFreq);
+  } else if (frequency > maxFreq) {
+    setFrequency(maxFreq);
+  }
+
+  // update channel properties with state changes
+  if (channel !== undefined) {
+    channel.volume.setTargetAtTime(volume, 0, 0.01);
+    channel && channel.pan.setTargetAtTime(pan, 0, 0.01);
+  }
+
+  // update osc properties with state changes
+  if (osc !== undefined) {
+    osc && osc.frequency.setValueAtTime(frequency, 0.1);
+    osc && (osc.type = waveform as Tone.ToneOscillatorType);
+  }
+
   return (
     <div>
       <Slider
         inputName="frequency"
-        min={freqMin}
-        max={freqMax}
+        min={minFreq}
+        max={maxFreq}
         value={frequency}
         handleChange={(e) => setFrequency(parseFloat(e.target.value))}
       />
