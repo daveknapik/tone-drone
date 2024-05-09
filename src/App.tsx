@@ -8,7 +8,7 @@ function App() {
 
     // use the localStorage value if it exists, otherwise use false
     const initialValue: boolean = savedDarkModeSetting
-      ? JSON.parse(savedDarkModeSetting)
+      ? (JSON.parse(savedDarkModeSetting) as boolean)
       : false;
     return initialValue;
   });
@@ -28,6 +28,8 @@ function App() {
   const handleStart = async () => {
     try {
       await Tone.start();
+    } catch {
+      setIsAudioEnabled(false);
     } finally {
       setIsAudioEnabled(true);
     }
@@ -42,7 +44,9 @@ function App() {
       <div className="flex space-x-2 my-5 ml-5">
         <button
           className="border-2 rounded-md border-pink-500 dark:border-sky-300 px-2 py-1"
-          onClick={handleStart}
+          onClick={() => {
+            void handleStart();
+          }}
         >
           Power: {isAudioEnabled ? "On" : "Off"}
         </button>

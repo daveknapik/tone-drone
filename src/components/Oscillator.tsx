@@ -56,13 +56,13 @@ function Oscillator({ minFreq, maxFreq }: OscillatorProps) {
   // update channel properties with state changes
   if (channel !== undefined) {
     channel.volume.setTargetAtTime(volume, 0, 0.01);
-    channel && channel.pan.setTargetAtTime(pan, 0, 0.01);
+    channel.pan.setTargetAtTime(pan, 0, 0.01);
   }
 
   // update osc properties with state changes
   if (osc !== undefined) {
-    osc && osc.frequency.setValueAtTime(frequency, 0.1);
-    osc && (osc.type = waveform as Tone.ToneOscillatorType);
+    osc.frequency.setValueAtTime(frequency, 0.1);
+    osc.type = waveform as Tone.ToneOscillatorType;
   }
 
   return (
