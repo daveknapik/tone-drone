@@ -38,13 +38,16 @@ function App() {
   };
 
   return (
-    <div className="dark:text-sky-300">
+    <div className="text-pink-900 dark:text-sky-300">
       <div className="flex space-x-2 my-5 ml-5">
-        <button className="border-2 rounded-md px-2 py-1" onClick={handleStart}>
+        <button
+          className="border-2 rounded-md border-pink-500 dark:border-sky-300 px-2 py-1"
+          onClick={handleStart}
+        >
           Power: {isAudioEnabled ? "On" : "Off"}
         </button>
         <button
-          className="border-2 rounded-md px-2 py-1"
+          className="border-2 rounded-md border-pink-500 dark:border-sky-300 px-2 py-1"
           onClick={toggleDarkMode}
         >
           Theme: {isDarkMode ? "Dark" : "Light"}
