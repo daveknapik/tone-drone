@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import * as Tone from "tone";
 import Slider from "./Slider";
 import WaveformSelector from "./WaveformSelector";
@@ -6,42 +6,36 @@ import WaveformSelector from "./WaveformSelector";
 interface OscillatorProps {
   minFreq: number;
   maxFreq: number;
+  oscillator: Tone.Oscillator;
+  channel: Tone.Channel;
+  bus: Tone.Gain | undefined;
 }
 
-function Oscillator({ minFreq, maxFreq }: OscillatorProps) {
-  // a Tone.Oscillator and its property
-  const [osc, setOsc] = useState<Tone.Oscillator | undefined>();
+function Oscillator({
+  minFreq,
+  maxFreq,
+  oscillator,
+  channel,
+}: OscillatorProps) {
+  // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
   const [waveform, setWaveform] = useState("sine");
 
-  // a Tone.Channel and its properties
-  const [channel, setChannel] = useState<Tone.Channel | undefined>();
+  // Tone.Channel properties
   const [volume, setVolume] = useState(-20);
   const [pan, setPan] = useState(0);
 
+  // Bus properties
+  const [busSend, setBusSend] = useState(0);
+
   const [isPlaying, setIsPlaying] = useState(false);
-
-  useEffect(() => {
-    const o = new Tone.Oscillator(
-      frequency,
-      waveform as Tone.ToneOscillatorType
-    );
-    setOsc(o);
-
-    const c = new Tone.Channel(volume, 0).toDestination();
-    setChannel(c);
-
-    o.connect(c);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const toggleAudio = (): void => {
     if (isPlaying) {
-      osc?.stop();
+      oscillator?.stop();
       setIsPlaying(false);
     } else {
-      osc?.start();
+      oscillator?.start();
       setIsPlaying(true);
     }
   };
@@ -54,16 +48,12 @@ function Oscillator({ minFreq, maxFreq }: OscillatorProps) {
   }
 
   // update channel properties with state changes
-  if (channel !== undefined) {
-    channel.volume.setTargetAtTime(volume, 0, 0.01);
-    channel.pan.setTargetAtTime(pan, 0, 0.01);
-  }
+  channel.volume.setTargetAtTime(volume, 0, 0.01);
+  channel.pan.setTargetAtTime(pan, 0, 0.01);
 
   // update osc properties with state changes
-  if (osc !== undefined) {
-    osc.frequency.setValueAtTime(frequency, 0.1);
-    osc.type = waveform as Tone.ToneOscillatorType;
-  }
+  oscillator.frequency.setValueAtTime(frequency, 0.1);
+  oscillator.type = waveform as Tone.ToneOscillatorType;
 
   return (
     <div>
