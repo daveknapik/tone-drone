@@ -12,7 +12,7 @@ interface DroneSynthProps {
 function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [oscillators, setOscillators] = useState<Tone.Oscillator[]>([]);
   const [channels, setChannels] = useState<Tone.Channel[]>([]);
-  const [bus, setBus] = useState<Tone.Gain>();
+  const [bus, setBus] = useState<Tone.Channel>();
   const [delay, setDelay] = useState<Tone.FeedbackDelay>();
   const [delayTime, setDelayTime] = useState(1);
   const [delayFeedback, setDelayFeedback] = useState(0.9);
@@ -25,8 +25,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     const newChannels: Tone.Channel[] = [];
 
     // Create the effects
-    const freeverb = new Tone.Freeverb();
-    freeverb.set({ wet: 1 });
+    const freeverb = new Tone.Freeverb({ wet: 1 });
     const delay = new Tone.FeedbackDelay({
       delayTime: delayTime,
       feedback: delayFeedback,
@@ -34,7 +33,11 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
       wet: delayWet,
     });
 
-    const bus = new Tone.Gain().chain(delay, freeverb, Tone.getDestination());
+    const bus = new Tone.Channel().chain(
+      delay,
+      freeverb,
+      Tone.getDestination()
+    );
 
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -62,7 +65,11 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const createOscillator = () => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
     const channel = new Tone.Channel(-20, 0).toDestination();
-    return oscillator.connect(channel);
+    oscillator.connect(channel);
+    if (bus !== undefined) {
+      channel.connect(bus);
+    }
+    return oscillator;
   };
 
   const addOscillator = (): void => {
@@ -131,7 +138,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
               maxFreq={maxFreq}
               oscillator={oscillator}
               channel={channels[i]}
-              bus={bus}
             />
           ))}
         </div>

@@ -8,7 +8,6 @@ interface OscillatorProps {
   maxFreq: number;
   oscillator: Tone.Oscillator;
   channel: Tone.Channel;
-  bus: Tone.Gain | undefined;
 }
 
 function Oscillator({
@@ -25,7 +24,6 @@ function Oscillator({
   const [volume, setVolume] = useState(-20);
   const [pan, setPan] = useState(0);
 
-  // Bus properties
   const [isPlaying, setIsPlaying] = useState(false);
 
   const toggleAudio = (): void => {
@@ -46,8 +44,8 @@ function Oscillator({
   }
 
   // update channel properties with state changes
-  channel.volume.setTargetAtTime(volume, 0, 0.01);
-  channel.pan.setTargetAtTime(pan, 0, 0.01);
+  channel?.volume.setTargetAtTime(volume, 0, 0.01);
+  channel?.pan.setTargetAtTime(pan, 0, 0.01);
 
   // update osc properties with state changes
   oscillator.frequency.setValueAtTime(frequency, 0.1);
