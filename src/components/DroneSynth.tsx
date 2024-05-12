@@ -59,6 +59,14 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     setChannels(newChannels);
     setBus(bus);
     setDelay(delay);
+
+    return () => {
+      newOscillators.forEach((oscillator) => oscillator.dispose());
+      newChannels.forEach((channel) => channel.dispose());
+      bus.dispose();
+      delay.dispose();
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
