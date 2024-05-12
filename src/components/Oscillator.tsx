@@ -26,8 +26,6 @@ function Oscillator({
   const [pan, setPan] = useState(0);
 
   // Bus properties
-  const [busSend, setBusSend] = useState(0);
-
   const [isPlaying, setIsPlaying] = useState(false);
 
   const toggleAudio = (): void => {
