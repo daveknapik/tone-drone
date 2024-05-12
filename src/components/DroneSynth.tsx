@@ -13,6 +13,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [oscillators, setOscillators] = useState<Tone.Oscillator[]>([]);
   const [channels, setChannels] = useState<Tone.Channel[]>([]);
   const [bus, setBus] = useState<Tone.Channel>();
+  const [busVolume, setBusVolume] = useState(-20);
   const [delay, setDelay] = useState<Tone.FeedbackDelay>();
   const [delayTime, setDelayTime] = useState(1);
   const [delayFeedback, setDelayFeedback] = useState(0.9);
@@ -31,19 +32,24 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
       feedback: delayFeedback,
       maxDelay: 10,
       wet: delayWet,
-    });
+    }).toDestination();
 
-    const bus = new Tone.Channel().chain(
-      delay,
-      freeverb,
-      Tone.getDestination()
-    );
+    // const bus = new Tone.Channel().chain(
+    //   delay,
+    //   freeverb,
+    //   Tone.getDestination()
+    // );
+
+    const bus = new Tone.Channel({ volume: busVolume }).connect(delay);
+    bus.receive("delay");
 
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(minFreq, "sine");
       const channel = new Tone.Channel(-20, 0).toDestination();
 
       oscillator.connect(channel);
+
+      channel.send("delay");
       channel.connect(bus);
 
       newOscillators.push(oscillator);
@@ -61,6 +67,12 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     feedback: delayFeedback,
     wet: delayWet,
   });
+
+  console.log(bus?.volume.value);
+
+  if (bus !== undefined) {
+    bus.volume.value = busVolume;
+  }
 
   const createOscillator = () => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -127,6 +139,14 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
               value={delayWet}
               step={0.01}
               handleChange={(e) => setDelayWet(parseFloat(e.target.value))}
+            />
+            <Slider
+              inputName="bus"
+              min={-80}
+              max={0}
+              value={busVolume}
+              step={0.01}
+              handleChange={(e) => setBusVolume(parseFloat(e.target.value))}
             />
           </div>
         </div>
