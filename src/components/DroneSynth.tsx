@@ -15,11 +15,18 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [mainAudioEffectsBus, setMainAudioEffectsBus] =
     useState<Tone.Channel>();
   const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
-    useState(-20);
+    useState(-10);
+
   const [delay, setDelay] = useState<Tone.FeedbackDelay>();
   const [delayTime, setDelayTime] = useState(1);
   const [delayFeedback, setDelayFeedback] = useState(0.9);
   const [delayWet, setDelayWet] = useState(0.5);
+
+  const [reverb, setReverb] = useState<Tone.Freeverb>();
+  const [reverbDampening, setReverbDampening] = useState(3000);
+  const [reverbRoomSize, setReverbRoomSize] = useState(0.95);
+  const [reverbWet, setReverbWet] = useState(1);
+
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
 
@@ -28,7 +35,11 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     const newChannels: Tone.Channel[] = [];
 
     // Create the effects
-    const freeverb = new Tone.Freeverb({ wet: 1 });
+    const reverb = new Tone.Freeverb({
+      dampening: 1000,
+      roomSize: 0.5,
+      wet: 1,
+    });
     const delay = new Tone.FeedbackDelay({
       delayTime: delayTime,
       feedback: delayFeedback,
@@ -38,7 +49,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
 
     const bus = new Tone.Channel({ volume: mainAudioEffectsBusVolume }).chain(
       delay,
-      freeverb,
+      reverb,
       Tone.getDestination()
     );
     bus.receive("mainAudioEffectsBus");
@@ -59,6 +70,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     setChannels(newChannels);
     setMainAudioEffectsBus(bus);
     setDelay(delay);
+    setReverb(reverb);
 
     return () => {
       newOscillators.forEach((oscillator) => oscillator.dispose());
@@ -76,7 +88,11 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     wet: delayWet,
   });
 
-  console.log(mainAudioEffectsBus?.volume.value);
+  reverb?.set({
+    dampening: reverbDampening,
+    roomSize: reverbRoomSize,
+    wet: reverbWet,
+  });
 
   if (mainAudioEffectsBus !== undefined) {
     mainAudioEffectsBus.volume.value = mainAudioEffectsBusVolume;
@@ -117,13 +133,17 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   return (
     <div className="dark:text-sky-300">
       <div className="border-2 rounded border-pink-500 dark:border-sky-300 pt-2 px-3">
-        <div className="grid grid-cols-2 gap-y-3 sm:grid-cols-6">
-          <div className="col-span-1">Drone Synth</div>
+        <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-6">
+          <div className="col-span-full">Drone Synth</div>
           <div className="col-start-7">
             <button onClick={addOscillator}>+</button>
           </div>
           <FrequencyRangeControl handleFormSubmit={handleFormSubmit} />
-          <div className="col-start-1 col-end-4 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+        </div>
+        <div className="grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+          <div className="col-span-full">Effects</div>
+          <div className="col-start-1 md:col-start-1 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+            <div className="col-span-full mb-1">Delay</div>
             <Slider
               inputName="time"
               min={0}
@@ -149,7 +169,38 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
               handleChange={(e) => setDelayWet(parseFloat(e.target.value))}
             />
           </div>
-          <div className="col-start-1 col-end-4 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+          <div className="col-start-1 md:col-start-2 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+            <div className="col-span-full mb-1">Reverb</div>
+            <Slider
+              inputName="roomSize"
+              min={0}
+              max={1}
+              value={reverbRoomSize}
+              step={0.01}
+              handleChange={(e) =>
+                setReverbRoomSize(parseFloat(e.target.value))
+              }
+            />
+            <Slider
+              inputName="dampening"
+              min={30}
+              max={10000}
+              value={reverbDampening}
+              step={0.01}
+              handleChange={(e) =>
+                setReverbDampening(parseFloat(e.target.value))
+              }
+            />
+            <Slider
+              inputName="wet"
+              min={0}
+              max={1}
+              value={reverbWet}
+              step={0.01}
+              handleChange={(e) => setReverbWet(parseFloat(e.target.value))}
+            />
+          </div>
+          <div className="col-start-1 md:col-start-1 md:col-end-3 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
             <Slider
               inputName="bus"
               min={-80}
