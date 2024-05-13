@@ -12,8 +12,10 @@ interface DroneSynthProps {
 function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [oscillators, setOscillators] = useState<Tone.Oscillator[]>([]);
   const [channels, setChannels] = useState<Tone.Channel[]>([]);
-  const [bus, setBus] = useState<Tone.Channel>();
-  const [busVolume, setBusVolume] = useState(-20);
+  const [mainAudioEffectsBus, setMainAudioEffectsBus] =
+    useState<Tone.Channel>();
+  const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
+    useState(-20);
   const [delay, setDelay] = useState<Tone.FeedbackDelay>();
   const [delayTime, setDelayTime] = useState(1);
   const [delayFeedback, setDelayFeedback] = useState(0.9);
@@ -32,16 +34,14 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
       feedback: delayFeedback,
       maxDelay: 10,
       wet: delayWet,
-    }).toDestination();
+    });
 
-    // const bus = new Tone.Channel().chain(
-    //   delay,
-    //   freeverb,
-    //   Tone.getDestination()
-    // );
-
-    const bus = new Tone.Channel({ volume: busVolume }).connect(delay);
-    bus.receive("delay");
+    const bus = new Tone.Channel({ volume: mainAudioEffectsBusVolume }).chain(
+      delay,
+      freeverb,
+      Tone.getDestination()
+    );
+    bus.receive("mainAudioEffectsBus");
 
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -49,7 +49,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
 
       oscillator.connect(channel);
 
-      channel.send("delay");
+      channel.send("mainAudioEffectsBus");
       channel.connect(bus);
 
       newOscillators.push(oscillator);
@@ -57,7 +57,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     }
     setOscillators(newOscillators);
     setChannels(newChannels);
-    setBus(bus);
+    setMainAudioEffectsBus(bus);
     setDelay(delay);
 
     return () => {
@@ -76,18 +76,18 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     wet: delayWet,
   });
 
-  console.log(bus?.volume.value);
+  console.log(mainAudioEffectsBus?.volume.value);
 
-  if (bus !== undefined) {
-    bus.volume.value = busVolume;
+  if (mainAudioEffectsBus !== undefined) {
+    mainAudioEffectsBus.volume.value = mainAudioEffectsBusVolume;
   }
 
   const createOscillator = () => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
     const channel = new Tone.Channel(-20, 0).toDestination();
     oscillator.connect(channel);
-    if (bus !== undefined) {
-      channel.connect(bus);
+    if (mainAudioEffectsBus !== undefined) {
+      channel.connect(mainAudioEffectsBus);
     }
     return oscillator;
   };
@@ -148,13 +148,17 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
               step={0.01}
               handleChange={(e) => setDelayWet(parseFloat(e.target.value))}
             />
+          </div>
+          <div className="col-start-1 col-end-4 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
             <Slider
               inputName="bus"
               min={-80}
               max={0}
-              value={busVolume}
+              value={mainAudioEffectsBusVolume}
               step={0.01}
-              handleChange={(e) => setBusVolume(parseFloat(e.target.value))}
+              handleChange={(e) =>
+                setMainAudioEffectsBusVolume(parseFloat(e.target.value))
+              }
             />
           </div>
         </div>
