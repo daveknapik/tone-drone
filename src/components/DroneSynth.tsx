@@ -214,6 +214,9 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+          <div className="col-span-full mb-1 justify-self-start">
+            Oscillators
+          </div>
           {oscillators.map((oscillator, i) => (
             <Oscillator
               key={i}
