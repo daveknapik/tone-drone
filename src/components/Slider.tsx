@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 interface SliderProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   inputName: string;
@@ -15,12 +17,14 @@ function Slider({
   step,
   value,
 }: SliderProps) {
+  const id = useId();
+
   return (
     <div className="flex space-x-2">
-      <label htmlFor={inputName}>{inputName.charAt(0).toUpperCase()}</label>
+      <label htmlFor={id}>{inputName.charAt(0).toUpperCase()}</label>
       <input
         className="w-48"
-        id={inputName}
+        id={id}
         max={max}
         min={min}
         name={inputName}

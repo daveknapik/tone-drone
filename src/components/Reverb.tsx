@@ -2,7 +2,7 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface ReverbProps {
   reverb: Tone.Freeverb | undefined;
