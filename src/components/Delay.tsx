@@ -20,7 +20,7 @@ function Delay({ delay }: DelayProps) {
   });
 
   return (
-    <div>
+    <div className="col-start-1 md:col-start-1 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
       <div className="col-span-full mb-1">Delay</div>
       <Slider
         inputName="time"

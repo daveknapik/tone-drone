@@ -6,77 +6,26 @@ import FrequencyRangeControl from "./FrequencyRangeControl";
 import Oscillator from "./Oscillator";
 import Reverb from "./Reverb";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+import { useDroneSynth } from "../hooks/useDroneSynth";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
 }
 
 function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
-  const [oscillators, setOscillators] = useState<Tone.Oscillator[]>([]);
-  const [channels, setChannels] = useState<Tone.Channel[]>([]);
-  const [mainAudioEffectsBus, setMainAudioEffectsBus] =
-    useState<Tone.Channel>();
-
-  const [delay, setDelay] = useState<Tone.FeedbackDelay>();
-  const [reverb, setReverb] = useState<Tone.Freeverb>();
-
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
 
-  useEffect(() => {
-    const newOscillators: Tone.Oscillator[] = [];
-    const newChannels: Tone.Channel[] = [];
-
-    // Create the effects
-    const reverb = new Tone.Freeverb({
-      dampening: 1000,
-      roomSize: 0.5,
-      wet: 1,
-    });
-
-    const delay = new Tone.FeedbackDelay({
-      delayTime: 1,
-      feedback: 0.9,
-      maxDelay: 10,
-      wet: 0.5,
-    });
-
-    const bus = new Tone.Channel({ volume: -10 }).chain(
-      delay,
-      reverb,
-      Tone.getDestination()
-    );
-    bus.receive("mainAudioEffectsBus");
-
-    for (let i = 0; i < oscillatorCount; i++) {
-      const oscillator = new Tone.Oscillator(minFreq, "sine");
-      const channel = new Tone.Channel(-20, 0).toDestination();
-
-      oscillator.connect(channel);
-
-      channel.send("mainAudioEffectsBus");
-      channel.connect(bus);
-
-      newOscillators.push(oscillator);
-      newChannels.push(channel);
-    }
-
-    setOscillators(newOscillators);
-    setChannels(newChannels);
-    setMainAudioEffectsBus(bus);
-    setDelay(delay);
-    setReverb(reverb);
-
-    return () => {
-      newOscillators.forEach((oscillator) => oscillator.dispose());
-      newChannels.forEach((channel) => channel.dispose());
-      bus.dispose();
-      delay.dispose();
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [
+    oscillators,
+    setOscillators,
+    channels,
+    mainAudioEffectsBus,
+    delay,
+    reverb,
+  ] = useDroneSynth(oscillatorCount);
 
   const createOscillator = () => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -123,16 +72,14 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
             className="mb-7"
           />
         </div>
+
         <div className="col-span-full justify-self-start mt-5">Effects</div>
         <div className="grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-          <div className="col-start-1 md:col-start-1 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-            <Delay delay={delay} />
-          </div>
-          <div className="col-start-1 md:col-start-2 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-            <Reverb reverb={reverb} />
-          </div>
+          <Delay delay={delay} />
+          <Reverb reverb={reverb} />
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </div>
+
         <div className="col-span-full justify-self-start">Oscillators</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
           {oscillators.map((oscillator, i) => (
