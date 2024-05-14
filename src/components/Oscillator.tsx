@@ -55,6 +55,7 @@ function Oscillator({
     <div>
       <Slider
         inputName="frequency"
+        labelText="Freq (Hz)"
         min={minFreq}
         max={maxFreq}
         value={frequency}
@@ -62,6 +63,7 @@ function Oscillator({
       />
       <Slider
         inputName="volume"
+        labelText="Volume"
         min={-80}
         max={0}
         value={volume}
@@ -69,6 +71,7 @@ function Oscillator({
       />
       <Slider
         inputName="pan"
+        labelText="Pan"
         min={-1}
         max={1}
         value={pan}

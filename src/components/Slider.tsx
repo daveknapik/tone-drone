@@ -3,6 +3,7 @@ import { useId } from "react";
 interface SliderProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   inputName: string;
+  labelText?: string;
   max: number;
   min: number;
   step?: number;
@@ -12,6 +13,7 @@ interface SliderProps {
 function Slider({
   handleChange,
   inputName,
+  labelText,
   max,
   min,
   step,
@@ -21,7 +23,9 @@ function Slider({
 
   return (
     <div className="flex space-x-2">
-      <label htmlFor={id}>{inputName.charAt(0).toUpperCase()}</label>
+      <label htmlFor={id} className={labelText ? "w-24" : ""}>
+        {labelText ? labelText : inputName.charAt(0).toUpperCase()}
+      </label>
       <input
         className="w-48"
         id={id}

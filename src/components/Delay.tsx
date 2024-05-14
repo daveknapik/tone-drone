@@ -27,6 +27,7 @@ function Delay({ delay }: DelayProps) {
         min={0}
         max={10}
         value={time}
+        labelText="Time"
         step={0.01}
         handleChange={(e) => setTime(parseFloat(e.target.value))}
       />
@@ -35,6 +36,7 @@ function Delay({ delay }: DelayProps) {
         min={0}
         max={1}
         value={feedback}
+        labelText="Feedback"
         step={0.01}
         handleChange={(e) => setFeedback(parseFloat(e.target.value))}
       />
@@ -44,6 +46,7 @@ function Delay({ delay }: DelayProps) {
         max={1}
         value={wet}
         step={0.01}
+        labelText="Dry / Wet"
         handleChange={(e) => setWet(parseFloat(e.target.value))}
       />
     </div>

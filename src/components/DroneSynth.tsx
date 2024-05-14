@@ -124,10 +124,13 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           <div className="col-start-7">
             <button onClick={addOscillator}>+</button>
           </div>
-          <FrequencyRangeControl handleFormSubmit={handleFormSubmit} />
+          <FrequencyRangeControl
+            handleFormSubmit={handleFormSubmit}
+            className="mb-7"
+          />
         </div>
+        <div className="col-span-full justify-self-start mt-5">Effects</div>
         <div className="grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-          <div className="col-span-full">Effects</div>
           <div className="col-start-1 md:col-start-1 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
             <Delay delay={delay} />
           </div>
@@ -137,6 +140,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           <div className="col-start-1 md:col-start-1 md:col-end-3 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
             <Slider
               inputName="bus"
+              labelText="Effects Send"
               min={-80}
               max={0}
               value={mainAudioEffectsBusVolume}
@@ -146,10 +150,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
             />
           </div>
         </div>
+        <div className="col-span-full justify-self-start">Oscillators</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-          <div className="col-span-full mb-1 justify-self-start">
-            Oscillators
-          </div>
           {oscillators.map((oscillator, i) => (
             <Oscillator
               key={i}

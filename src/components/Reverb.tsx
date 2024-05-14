@@ -21,20 +21,22 @@ function Reverb({ reverb }: ReverbProps) {
     <div>
       <div className="col-span-full mb-1">Reverb</div>
       <Slider
-        inputName="roomSize"
-        min={0}
-        max={1}
-        value={roomSize}
-        step={0.01}
         handleChange={(e) => setRoomSize(parseFloat(e.target.value))}
+        inputName="roomSize"
+        labelText="Room Size"
+        max={1}
+        min={0}
+        step={0.01}
+        value={roomSize}
       />
       <Slider
-        inputName="wet"
-        min={0}
-        max={1}
-        value={wet}
-        step={0.01}
         handleChange={(e) => setWet(parseFloat(e.target.value))}
+        inputName="wet"
+        labelText="Dry / Wet"
+        max={1}
+        min={0}
+        step={0.01}
+        value={wet}
       />
     </div>
   );
