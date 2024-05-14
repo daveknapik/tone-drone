@@ -1,9 +1,9 @@
 import * as Tone from "tone";
 
-import Oscillator from "./Oscillator";
-import FrequencyRangeControl from "./FrequencyRangeControl";
-import Slider from "./Slider";
 import Delay from "./Delay";
+import EffectsBusSendControl from "./EffectsBusSendControl";
+import FrequencyRangeControl from "./FrequencyRangeControl";
+import Oscillator from "./Oscillator";
 import Reverb from "./Reverb";
 
 import { useEffect, useState } from "react";
@@ -17,8 +17,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [channels, setChannels] = useState<Tone.Channel[]>([]);
   const [mainAudioEffectsBus, setMainAudioEffectsBus] =
     useState<Tone.Channel>();
-  const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
-    useState(-10);
 
   const [delay, setDelay] = useState<Tone.FeedbackDelay>();
   const [reverb, setReverb] = useState<Tone.Freeverb>();
@@ -44,7 +42,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
       wet: 0.5,
     });
 
-    const bus = new Tone.Channel({ volume: mainAudioEffectsBusVolume }).chain(
+    const bus = new Tone.Channel({ volume: -10 }).chain(
       delay,
       reverb,
       Tone.getDestination()
@@ -79,10 +77,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (mainAudioEffectsBus !== undefined) {
-    mainAudioEffectsBus.volume.value = mainAudioEffectsBusVolume;
-  }
 
   const createOscillator = () => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -137,18 +131,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           <div className="col-start-1 md:col-start-2 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
             <Reverb reverb={reverb} />
           </div>
-          <div className="col-start-1 md:col-start-1 md:col-end-3 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-            <Slider
-              inputName="bus"
-              labelText="Effects Send"
-              min={-80}
-              max={0}
-              value={mainAudioEffectsBusVolume}
-              handleChange={(e) =>
-                setMainAudioEffectsBusVolume(parseFloat(e.target.value))
-              }
-            />
-          </div>
+          <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </div>
         <div className="col-span-full justify-self-start">Oscillators</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
