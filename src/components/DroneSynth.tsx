@@ -18,14 +18,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
 
-  const [
-    oscillators,
-    setOscillators,
-    channels,
-    mainAudioEffectsBus,
-    delay,
-    reverb,
-  ] = useDroneSynth(oscillatorCount);
+  const [oscillators, setOscillators, mainAudioEffectsBus, delay, reverb] =
+    useDroneSynth(oscillatorCount);
 
   const createOscillator = () => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -33,11 +27,15 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     oscillator.connect(channel);
     channel.connect(mainAudioEffectsBus.current);
 
-    return oscillator;
+    return { oscillator, channel };
   };
 
   const addOscillator = (): void => {
-    setOscillators([...oscillators, createOscillator()]);
+    // setOscillators([...oscillators, createOscillator()]);
+    setOscillators((prevOscillators) => [
+      ...prevOscillators,
+      createOscillator(),
+    ]);
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -86,8 +84,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
               key={i}
               minFreq={minFreq}
               maxFreq={maxFreq}
-              oscillator={oscillator}
-              channel={channels[i]}
+              oscillator={oscillator.oscillator}
+              channel={oscillator.channel}
             />
           ))}
         </div>
