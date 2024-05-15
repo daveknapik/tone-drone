@@ -5,10 +5,14 @@ import EffectsBusSendControl from "./EffectsBusSendControl";
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Oscillator from "./Oscillator";
 import Reverb from "./Reverb";
+import { OscillatorWithChannel } from "../interfaces/OscillatorWithChannel";
 
 import { useState } from "react";
 
-import { useDroneSynth } from "../hooks/useDroneSynth";
+import { useDelay } from "../hooks/useDelay";
+import { useReverb } from "../hooks/useReverb";
+import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
+import { useOscillators } from "../hooks/useOscillators";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
@@ -18,10 +22,21 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
 
-  const [oscillators, setOscillators, mainAudioEffectsBus, delay, reverb] =
-    useDroneSynth(oscillatorCount);
+  const delay = useDelay();
+  const reverb = useReverb();
+  const mainAudioEffectsBus = useAudioEffectsBus();
 
-  const createOscillator = () => {
+  // TODO:
+  // - consider decoupling bus<>effects connection and oscilliator creation in useOscillators
+  // - hook that connects the bus to audio effects should accept audio effects as a generic array it can destructure
+  const [oscillators, setOscillators] = useOscillators(
+    oscillatorCount,
+    mainAudioEffectsBus.current,
+    delay.current,
+    reverb.current
+  );
+
+  const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
     const channel = new Tone.Channel(-20, 0).toDestination();
     oscillator.connect(channel);
@@ -31,8 +46,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   };
 
   const addOscillator = (): void => {
-    // setOscillators([...oscillators, createOscillator()]);
-    setOscillators((prevOscillators) => [
+    setOscillators((prevOscillators: OscillatorWithChannel[]) => [
       ...prevOscillators,
       createOscillator(),
     ]);
