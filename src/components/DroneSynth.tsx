@@ -38,7 +38,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
-    const channel = new Tone.Channel(-20, 0).toDestination();
+    const channel = new Tone.Channel(-5, 0).toDestination();
     oscillator.connect(channel);
     channel.connect(mainAudioEffectsBus.current);
 
