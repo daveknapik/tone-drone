@@ -3,8 +3,8 @@ import { MutableRefObject, useEffect, useState } from "react";
 
 import { useDelay } from "./useDelay";
 import { useReverb } from "./useReverb";
-import { Dispatch, SetStateAction } from "react";
 import { useAudioEffectsBus } from "./useAudioEffectsBus";
+import { Dispatch, SetStateAction } from "react";
 import { OscillatorWithChannel } from "../interfaces/OscillatorWithChannel";
 
 export function useDroneSynth(
@@ -31,18 +31,19 @@ export function useDroneSynth(
       Tone.getDestination()
     );
 
-    // Create the oscillators and their channels and connect them to the effects bus
+    // Create the oscillators and their channels
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(440, "sine");
       const channel = new Tone.Channel(-20, 0).toDestination();
-
       oscillator.connect(channel);
-
-      channel.send("mainAudioEffectsBus");
-      channel.connect(mainAudioEffectsBus.current);
-
       newOscillators.push({ oscillator, channel });
     }
+
+    // connect channels to the effects bus
+    newOscillators.forEach(({ channel }) => {
+      channel.send("mainAudioEffectsBus");
+      channel.connect(mainAudioEffectsBus.current);
+    });
 
     setOscillators(newOscillators);
 
