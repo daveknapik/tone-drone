@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { useEffect, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 
 import { Dispatch, SetStateAction } from "react";
 
@@ -10,38 +10,36 @@ export function useDroneSynth(
   Dispatch<SetStateAction<Tone.Oscillator[]>>,
   Tone.Channel[],
   Tone.Channel,
-  Tone.FeedbackDelay,
-  Tone.Freeverb
+  MutableRefObject<Tone.FeedbackDelay>,
+  MutableRefObject<Tone.Freeverb>
 ] {
   const [oscillators, setOscillators] = useState<Tone.Oscillator[]>([]);
   const [channels, setChannels] = useState<Tone.Channel[]>([]);
   const [mainAudioEffectsBus, setMainAudioEffectsBus] = useState<Tone.Channel>(
     new Tone.Channel()
   );
-  const [delay, setDelay] = useState<Tone.FeedbackDelay>(
-    new Tone.FeedbackDelay()
+  const delay = useRef<Tone.FeedbackDelay>(
+    new Tone.FeedbackDelay({
+      delayTime: 1,
+      feedback: 0.9,
+      maxDelay: 10,
+      wet: 0.5,
+    })
   );
-  const [reverb, setReverb] = useState<Tone.Freeverb>(new Tone.Freeverb());
+  const reverb = useRef<Tone.Freeverb>(
+    new Tone.Freeverb({
+      dampening: 1000,
+      roomSize: 0.5,
+      wet: 1,
+    })
+  );
 
   useEffect(() => {
     const newOscillators: Tone.Oscillator[] = [];
     const newChannels: Tone.Channel[] = [];
 
-    const delay = new Tone.FeedbackDelay({
-      delayTime: 1,
-      feedback: 0.9,
-      maxDelay: 10,
-      wet: 0.5,
-    });
-
-    const reverb = new Tone.Freeverb({
-      dampening: 1000,
-      roomSize: 0.5,
-      wet: 1,
-    });
-
     const bus = new Tone.Channel({ volume: -10 });
-    bus.chain(delay, reverb, Tone.getDestination());
+    bus.chain(delay.current, reverb.current, Tone.getDestination());
 
     bus.receive("mainAudioEffectsBus");
     // Create the oscillators and their channels and connect them to the effects bus
@@ -58,8 +56,6 @@ export function useDroneSynth(
       newChannels.push(channel);
     }
 
-    setDelay(delay);
-    setReverb(reverb);
     setOscillators(newOscillators);
     setChannels(newChannels);
     setMainAudioEffectsBus(bus);
@@ -70,8 +66,6 @@ export function useDroneSynth(
       if (bus !== undefined) {
         bus.dispose();
       }
-      delay?.dispose();
-      reverb.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

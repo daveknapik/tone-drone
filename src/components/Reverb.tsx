@@ -2,17 +2,17 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useState } from "react";
+import { MutableRefObject, useState } from "react";
 
 interface ReverbProps {
-  reverb: Tone.Freeverb | undefined;
+  reverb: MutableRefObject<Tone.Freeverb>;
 }
 
 function Reverb({ reverb }: ReverbProps) {
   const [roomSize, setRoomSize] = useState(0.95);
   const [wet, setWet] = useState(1);
 
-  reverb?.set({
+  reverb.current.set({
     roomSize: roomSize,
     wet: wet,
   });

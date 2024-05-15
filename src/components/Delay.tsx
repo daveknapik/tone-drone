@@ -2,10 +2,10 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useState } from "react";
+import { MutableRefObject, useState } from "react";
 
 interface DelayProps {
-  delay: Tone.FeedbackDelay | undefined;
+  delay: MutableRefObject<Tone.FeedbackDelay>;
 }
 
 function Delay({ delay }: DelayProps) {
@@ -13,7 +13,7 @@ function Delay({ delay }: DelayProps) {
   const [feedback, setFeedback] = useState(0.9);
   const [wet, setWet] = useState(0.5);
 
-  delay?.set({
+  delay.current.set({
     delayTime: time,
     feedback: feedback,
     wet: wet,
