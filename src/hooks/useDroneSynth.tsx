@@ -1,7 +1,10 @@
 import * as Tone from "tone";
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 
+import { useDelay } from "./useDelay";
+import { useReverb } from "./useReverb";
 import { Dispatch, SetStateAction } from "react";
+import { useAudioEffectsBus } from "./useAudioEffectsBus";
 
 export function useDroneSynth(
   oscillatorCount = 6
@@ -9,39 +12,27 @@ export function useDroneSynth(
   Tone.Oscillator[],
   Dispatch<SetStateAction<Tone.Oscillator[]>>,
   Tone.Channel[],
-  Tone.Channel,
+  MutableRefObject<Tone.Channel>,
   MutableRefObject<Tone.FeedbackDelay>,
   MutableRefObject<Tone.Freeverb>
 ] {
   const [oscillators, setOscillators] = useState<Tone.Oscillator[]>([]);
   const [channels, setChannels] = useState<Tone.Channel[]>([]);
-  const [mainAudioEffectsBus, setMainAudioEffectsBus] = useState<Tone.Channel>(
-    new Tone.Channel()
-  );
-  const delay = useRef<Tone.FeedbackDelay>(
-    new Tone.FeedbackDelay({
-      delayTime: 1,
-      feedback: 0.9,
-      maxDelay: 10,
-      wet: 0.5,
-    })
-  );
-  const reverb = useRef<Tone.Freeverb>(
-    new Tone.Freeverb({
-      dampening: 1000,
-      roomSize: 0.5,
-      wet: 1,
-    })
-  );
+
+  const delay = useDelay();
+  const reverb = useReverb();
+  const mainAudioEffectsBus = useAudioEffectsBus();
 
   useEffect(() => {
     const newOscillators: Tone.Oscillator[] = [];
     const newChannels: Tone.Channel[] = [];
 
-    const bus = new Tone.Channel({ volume: -10 });
-    bus.chain(delay.current, reverb.current, Tone.getDestination());
+    mainAudioEffectsBus.current.chain(
+      delay.current,
+      reverb.current,
+      Tone.getDestination()
+    );
 
-    bus.receive("mainAudioEffectsBus");
     // Create the oscillators and their channels and connect them to the effects bus
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(440, "sine");
@@ -50,7 +41,7 @@ export function useDroneSynth(
       oscillator.connect(channel);
 
       channel.send("mainAudioEffectsBus");
-      channel.connect(bus);
+      channel.connect(mainAudioEffectsBus.current);
 
       newOscillators.push(oscillator);
       newChannels.push(channel);
@@ -58,14 +49,10 @@ export function useDroneSynth(
 
     setOscillators(newOscillators);
     setChannels(newChannels);
-    setMainAudioEffectsBus(bus);
 
     return () => {
       newOscillators.forEach((oscillator) => oscillator.dispose());
       newChannels.forEach((channel) => channel.dispose());
-      if (bus !== undefined) {
-        bus.dispose();
-      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

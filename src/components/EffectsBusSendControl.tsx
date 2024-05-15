@@ -2,19 +2,17 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useState } from "react";
+import { MutableRefObject, useState } from "react";
 
 interface EffectsBusSendControlProps {
-  bus: Tone.Channel | undefined;
+  bus: MutableRefObject<Tone.Channel>;
 }
 
 function EffectsBusSendControl({ bus }: EffectsBusSendControlProps) {
   const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
     useState(-10);
 
-  if (bus !== undefined) {
-    bus.volume.value = mainAudioEffectsBusVolume;
-  }
+  bus.current.volume.value = mainAudioEffectsBusVolume;
 
   return (
     <div className="col-start-1 md:col-start-1 md:col-end-3 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
