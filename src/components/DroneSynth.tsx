@@ -13,6 +13,7 @@ import { useDelay } from "../hooks/useDelay";
 import { useReverb } from "../hooks/useReverb";
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
 import { useOscillators } from "../hooks/useOscillators";
+import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
@@ -27,13 +28,17 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const mainAudioEffectsBus = useAudioEffectsBus();
 
   // TODO:
-  // - consider decoupling bus<>effects connection and oscilliator creation in useOscillators
   // - hook that connects the bus to audio effects should accept audio effects as a generic array it can destructure
   const [oscillators, setOscillators] = useOscillators(
     oscillatorCount,
     mainAudioEffectsBus.current,
     delay.current,
     reverb.current
+  );
+
+  useConnectChannelsToBus(
+    oscillators.map((osc) => osc.channel),
+    mainAudioEffectsBus.current
   );
 
   const createOscillator = (): OscillatorWithChannel => {

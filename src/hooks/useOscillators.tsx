@@ -21,21 +21,13 @@ export function useOscillators(
     const newOscillators: OscillatorWithChannel[] = [];
     bus.chain(delay, reverb, Tone.getDestination());
 
-    console.log("useOscillators");
-
     // Create the oscillators and their channels
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(440, "sine");
-      const channel = new Tone.Channel(-5, 0).toDestination();
+      const channel = new Tone.Channel(-15, 0).toDestination();
       oscillator.connect(channel);
       newOscillators.push({ oscillator, channel });
     }
-
-    // connect channels to the effects bus
-    newOscillators.forEach(({ channel }) => {
-      channel.send("bus");
-      channel.connect(bus);
-    });
 
     setOscillators(newOscillators);
     // eslint-disable-next-line react-hooks/exhaustive-deps
