@@ -11,9 +11,11 @@ import { useState } from "react";
 
 import { useDelay } from "../hooks/useDelay";
 import { useReverb } from "../hooks/useReverb";
+import { useAutoFilter } from "../hooks/useAutoFilter";
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
 import { useOscillators } from "../hooks/useOscillators";
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
+import AutoFilter from "./AutoFilter";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
@@ -25,6 +27,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
 
   const delay = useDelay();
   const reverb = useReverb();
+  const filter = useAutoFilter();
   const mainAudioEffectsBus = useAudioEffectsBus();
 
   // TODO:
@@ -33,7 +36,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     oscillatorCount,
     mainAudioEffectsBus.current,
     delay.current,
-    reverb.current
+    reverb.current,
+    filter.current
   );
 
   useConnectChannelsToBus(
@@ -93,6 +97,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
         <div className="grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5">
           <Delay delay={delay} />
           <Reverb reverb={reverb} />
+          <AutoFilter filter={filter} />
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </div>
 

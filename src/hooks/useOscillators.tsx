@@ -10,7 +10,8 @@ export function useOscillators(
   oscillatorCount = 6,
   bus: Tone.Channel,
   delay: Tone.FeedbackDelay,
-  reverb: Tone.Freeverb
+  reverb: Tone.Freeverb,
+  filter: Tone.AutoFilter
 ): [
   OscillatorWithChannel[],
   Dispatch<SetStateAction<OscillatorWithChannel[]>>
@@ -19,12 +20,17 @@ export function useOscillators(
 
   useEffect(() => {
     const newOscillators: OscillatorWithChannel[] = [];
-    bus.chain(delay, reverb, Tone.getDestination());
+    bus.chain(delay, reverb, filter, Tone.getDestination());
 
     // Create the oscillators and their channels
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(440, "sine");
-      const channel = new Tone.Channel(-15, 0).toDestination();
+
+      // if we send the channel .toDestination(),
+      // later when we connect to the effects bus we will effectively create a parallel chain
+      // of the oscillator to the bus, alongside the osc to the main mix
+      // without sending to destination, the channel only passes through effects
+      const channel = new Tone.Channel(-15, 0);
       oscillator.connect(channel);
       newOscillators.push({ oscillator, channel });
     }
