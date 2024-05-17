@@ -4,17 +4,19 @@ import Slider from "./Slider";
 import WaveformSelector from "./WaveformSelector";
 
 interface OscillatorProps {
-  minFreq: number;
-  maxFreq: number;
-  oscillator: Tone.Oscillator;
   channel: Tone.Channel;
+  handleBrowserAudioStart: () => Promise<void>;
+  maxFreq: number;
+  minFreq: number;
+  oscillator: Tone.Oscillator;
 }
 
 function Oscillator({
-  minFreq,
-  maxFreq,
-  oscillator,
   channel,
+  handleBrowserAudioStart,
+  maxFreq,
+  minFreq,
+  oscillator,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
@@ -27,6 +29,8 @@ function Oscillator({
   const [isPlaying, setIsPlaying] = useState(false);
 
   const toggleAudio = (): void => {
+    void handleBrowserAudioStart();
+
     if (isPlaying) {
       oscillator?.stop();
       setIsPlaying(false);
