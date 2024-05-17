@@ -10,14 +10,14 @@ function App() {
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
 
   const handleBrowserAudioStart = async () => {
-    try {
-      if (!isAudioEnabled) {
+    if (!isAudioEnabled) {
+      try {
         await Tone.start();
+      } catch {
+        setIsAudioEnabled(false);
+      } finally {
+        setIsAudioEnabled(true);
       }
-    } catch {
-      setIsAudioEnabled(false);
-    } finally {
-      setIsAudioEnabled(true);
     }
   };
 
