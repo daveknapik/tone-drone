@@ -3,7 +3,7 @@ import { useId } from "react";
 interface WaveformSelectorProps {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
-  waveforms: string[];
+  waveforms: ["sine", "square", "triangle", "sawtooth"];
 }
 
 function WaveformSelector({
