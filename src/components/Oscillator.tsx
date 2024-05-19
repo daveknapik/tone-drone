@@ -1,7 +1,7 @@
 import { useState } from "react";
 import * as Tone from "tone";
 import Slider from "./Slider";
-import WaveformSelector from "./WaveformSelector";
+import OptionsSelector from "./OptionsSelector";
 
 interface OscillatorProps {
   channel: Tone.Channel;
@@ -82,10 +82,10 @@ function Oscillator({
         step={0.01}
         handleChange={(e) => setPan(parseFloat(e.target.value))}
       />
-      <WaveformSelector
+      <OptionsSelector<OscillatorType>
         handleChange={(e) => setWaveform(e.target.value)}
         value={waveform}
-        waveforms={["sine", "square", "triangle", "sawtooth"]}
+        options={["sine", "square", "triangle", "sawtooth"]}
       />
       <div className="text-center">
         <button onClick={toggleAudio}>{isPlaying ? "Stop" : "Start"}</button>

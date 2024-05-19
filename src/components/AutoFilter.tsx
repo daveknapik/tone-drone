@@ -3,6 +3,7 @@ import * as Tone from "tone";
 import Slider from "./Slider";
 
 import { MutableRefObject, useState } from "react";
+import OptionsSelector from "./OptionsSelector";
 
 interface AutoFilterProps {
   filter: MutableRefObject<Tone.AutoFilter>;
@@ -16,12 +17,14 @@ function AutoFilter({ filter }: AutoFilterProps) {
   const [depth, setDepth] = useState(1);
   const [frequency, setFrequency] = useState(4);
   const [wet, setWet] = useState(0);
+  const [type, setType] = useState<BiquadFilterType>("highpass");
 
   filter.current.set({
     baseFrequency,
     depth,
     frequency,
     wet,
+    filter: { type },
   });
 
   return (
@@ -29,8 +32,8 @@ function AutoFilter({ filter }: AutoFilterProps) {
       <div className="col-span-full mb-1">Filter</div>
       <Slider
         inputName="baseFrequency"
-        min={100}
-        max={1000}
+        min={30}
+        max={7000}
         value={baseFrequency}
         labelText="Base Freq"
         step={1}
@@ -62,6 +65,11 @@ function AutoFilter({ filter }: AutoFilterProps) {
         labelText="Dry / Wet"
         step={0.01}
         handleChange={(e) => setWet(parseFloat(e.target.value))}
+      />
+      <OptionsSelector<BiquadFilterType>
+        handleChange={(e) => setType(e.target.value as BiquadFilterType)}
+        value={type}
+        options={["highpass", "lowpass"]}
       />
     </div>
   );

@@ -5,7 +5,7 @@ export function useAutoFilter() {
   const filter = useRef<Tone.AutoFilter>(
     new Tone.AutoFilter({
       baseFrequency: 300,
-      octaves: 4,
+      octaves: 1,
       frequency: 4,
       type: "sine",
       depth: 1,
