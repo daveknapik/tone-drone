@@ -19,13 +19,9 @@ import AutoFilter from "./AutoFilter";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
-  handleBrowserAudioStart: () => Promise<void>;
 }
 
-function DroneSynth({
-  handleBrowserAudioStart,
-  oscillatorCount = 6,
-}: DroneSynthProps) {
+function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
 
@@ -114,7 +110,6 @@ function DroneSynth({
               maxFreq={maxFreq}
               oscillator={oscillator.oscillator}
               channel={oscillator.channel}
-              handleBrowserAudioStart={handleBrowserAudioStart}
             />
           ))}
         </div>

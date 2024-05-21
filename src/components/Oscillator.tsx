@@ -1,11 +1,14 @@
-import { useState } from "react";
 import * as Tone from "tone";
+
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 
+import { useState } from "react";
+
+import { useAudioContext } from "../hooks/useAudioContext";
+
 interface OscillatorProps {
   channel: Tone.Channel;
-  handleBrowserAudioStart: () => Promise<void>;
   maxFreq: number;
   minFreq: number;
   oscillator: Tone.Oscillator;
@@ -13,7 +16,6 @@ interface OscillatorProps {
 
 function Oscillator({
   channel,
-  handleBrowserAudioStart,
   maxFreq,
   minFreq,
   oscillator,
@@ -27,6 +29,8 @@ function Oscillator({
   const [pan, setPan] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const { handleBrowserAudioStart } = useAudioContext();
 
   const toggleAudio = (): void => {
     void handleBrowserAudioStart();
