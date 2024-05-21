@@ -26,6 +26,15 @@ export function useOscillators(
     }
 
     setOscillators(newOscillators);
+
+    return () => {
+      newOscillators.forEach(({ oscillator, channel }) => {
+        oscillator.dispose();
+        channel.dispose();
+      });
+
+      setOscillators([]);
+    };
   }, [oscillatorCount]);
 
   return [oscillators, setOscillators];
