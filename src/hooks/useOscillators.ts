@@ -2,16 +2,12 @@ import * as Tone from "tone";
 
 import { useEffect, useState } from "react";
 
-import { OscillatorWithChannel } from "../interfaces/OscillatorWithChannel";
+import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
 import { Dispatch, SetStateAction } from "react";
 
 export function useOscillators(
-  oscillatorCount = 6,
-  bus: Tone.Channel,
-  delay: Tone.FeedbackDelay,
-  reverb: Tone.Freeverb,
-  filter: Tone.AutoFilter
+  oscillatorCount = 6
 ): [
   OscillatorWithChannel[],
   Dispatch<SetStateAction<OscillatorWithChannel[]>>
@@ -20,7 +16,6 @@ export function useOscillators(
 
   useEffect(() => {
     const newOscillators: OscillatorWithChannel[] = [];
-    bus.chain(delay, reverb, filter, Tone.getDestination());
 
     // Create the oscillators and their channels
     for (let i = 0; i < oscillatorCount; i++) {

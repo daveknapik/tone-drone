@@ -5,7 +5,7 @@ import EffectsBusSendControl from "./EffectsBusSendControl";
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Oscillator from "./Oscillator";
 import Reverb from "./Reverb";
-import { OscillatorWithChannel } from "../interfaces/OscillatorWithChannel";
+import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
 import { useState } from "react";
 
@@ -28,17 +28,13 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const delay = useDelay();
   const reverb = useReverb();
   const filter = useAutoFilter();
-  const mainAudioEffectsBus = useAudioEffectsBus();
 
-  // TODO:
-  // - hook that connects the bus to audio effects should accept audio effects as a generic array it can destructure
-  const [oscillators, setOscillators] = useOscillators(
-    oscillatorCount,
-    mainAudioEffectsBus.current,
+  const [oscillators, setOscillators] = useOscillators(oscillatorCount);
+  const mainAudioEffectsBus = useAudioEffectsBus([
     delay.current,
     reverb.current,
-    filter.current
-  );
+    filter.current,
+  ]);
 
   useConnectChannelsToBus(
     oscillators.map((osc) => osc.channel),
