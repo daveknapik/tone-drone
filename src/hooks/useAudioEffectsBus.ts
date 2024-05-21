@@ -1,17 +1,23 @@
 import * as Tone from "tone";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AudioEffect } from "../types/AudioEffect";
 
-export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
+export function useAudioEffectsBus(
+  busName: string,
+  audioEffects: AudioEffect[]
+) {
   const mainAudioEffectsBus = useRef<Tone.Channel>(
     new Tone.Channel({ volume: -20, channelCount: 2 })
   );
 
-  useEffect(() => {
-    mainAudioEffectsBus.current.receive("mainAudioEffectsBus");
-  }, []);
+  const updateAudioEffects = useCallback(() => {
+    mainAudioEffectsBus.current.receive(busName);
+    mainAudioEffectsBus.current.chain(...audioEffects, Tone.getDestination());
+  }, [audioEffects, busName]);
 
-  mainAudioEffectsBus.current.chain(...audioEffects, Tone.getDestination());
+  useEffect(() => {
+    updateAudioEffects();
+  }, [updateAudioEffects]);
 
   return mainAudioEffectsBus;
 }

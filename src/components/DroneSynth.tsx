@@ -30,7 +30,9 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const filter = useAutoFilter();
 
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
-  const mainAudioEffectsBus = useAudioEffectsBus([
+
+  const busName = "mainAudioEffectsBus";
+  const mainAudioEffectsBus = useAudioEffectsBus(busName, [
     delay.current,
     reverb.current,
     filter.current,
@@ -38,7 +40,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
 
   useConnectChannelsToBus(
     oscillators.map((osc) => osc.channel),
-    mainAudioEffectsBus.current
+    mainAudioEffectsBus.current,
+    busName
   );
 
   const createOscillator = (): OscillatorWithChannel => {
@@ -57,7 +60,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     ]);
   };
 
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
+  const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
     const formData = new FormData(form);
@@ -84,7 +87,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
             <button onClick={addOscillator}>+</button>
           </div>
           <FrequencyRangeControl
-            handleFormSubmit={handleFormSubmit}
+            handleFormSubmit={updateFrequencyRange}
             className="mb-7"
           />
         </div>
