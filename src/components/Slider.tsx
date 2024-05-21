@@ -37,7 +37,7 @@ function Slider({
         type="range"
         value={value}
       />
-      <div>{value}</div>
+      <div className="w-8">{value}</div>
     </div>
   );
 }
