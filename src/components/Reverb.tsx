@@ -18,7 +18,7 @@ function Reverb({ reverb }: ReverbProps) {
   });
 
   return (
-    <div className="col-start-1 md:col-start-2 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+    <div className="place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
       <div className="col-span-full mb-1">Reverb</div>
       <Slider
         handleChange={(e) => setRoomSize(parseFloat(e.target.value))}

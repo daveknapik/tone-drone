@@ -28,7 +28,7 @@ function AutoFilter({ filter }: AutoFilterProps) {
   });
 
   return (
-    <div className="col-start-1 md:col-start-1 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+    <div className="place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
       <div className="col-span-full mb-1">Filter</div>
       <Slider
         inputName="baseFrequency"
