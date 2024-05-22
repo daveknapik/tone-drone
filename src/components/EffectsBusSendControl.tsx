@@ -10,7 +10,7 @@ interface EffectsBusSendControlProps {
 
 function EffectsBusSendControl({ bus }: EffectsBusSendControlProps) {
   const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
-    useState(-20);
+    useState(-10);
 
   bus.current.volume.value = mainAudioEffectsBusVolume;
 

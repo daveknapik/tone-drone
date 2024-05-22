@@ -11,7 +11,7 @@ interface DelayProps {
 function Delay({ delay }: DelayProps) {
   const [time, setTime] = useState(1);
   const [feedback, setFeedback] = useState(0.95);
-  const [wet, setWet] = useState(0.5);
+  const [wet, setWet] = useState(0);
 
   delay.current.set({
     delayTime: time,

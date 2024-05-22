@@ -5,8 +5,8 @@ export function useReverb() {
   const reverb = useRef<Tone.Freeverb>(
     new Tone.Freeverb({
       dampening: 1000,
-      roomSize: 0.5,
-      wet: 1,
+      roomSize: 0.95,
+      wet: 0,
     })
   );
 

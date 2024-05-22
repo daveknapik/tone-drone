@@ -1,21 +1,25 @@
 import * as Tone from "tone";
 
+import AutoFilter from "./AutoFilter";
+import BitCrusher from "./BitCrusher";
+import Chebyshev from "./Chebyshev";
 import Delay from "./Delay";
 import EffectsBusSendControl from "./EffectsBusSendControl";
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Oscillator from "./Oscillator";
 import Reverb from "./Reverb";
-import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
-import { useState } from "react";
-
-import { useDelay } from "../hooks/useDelay";
-import { useReverb } from "../hooks/useReverb";
-import { useAutoFilter } from "../hooks/useAutoFilter";
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
-import { useOscillators } from "../hooks/useOscillators";
+import { useAutoFilter } from "../hooks/useAutoFilter";
+import { useBitCrusher } from "../hooks/useBitCrusher";
+import { useChebyshev } from "../hooks/useChebyshev";
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
-import AutoFilter from "./AutoFilter";
+import { useDelay } from "../hooks/useDelay";
+import { useOscillators } from "../hooks/useOscillators";
+import { useReverb } from "../hooks/useReverb";
+
+import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
+import { useState } from "react";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
@@ -26,6 +30,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [maxFreq, setMaxFreq] = useState(454);
 
   const beforeFilter = useAutoFilter();
+  const bitCrusher = useBitCrusher();
+  const chebyshev = useChebyshev();
   const delay = useDelay();
   const reverb = useReverb();
   const afterFilter = useAutoFilter();
@@ -35,6 +41,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const busName = "mainAudioEffectsBus";
   const mainAudioEffectsBus = useAudioEffectsBus(busName, [
     beforeFilter.current,
+    bitCrusher.current,
+    chebyshev.current,
     delay.current,
     reverb.current,
     afterFilter.current,
@@ -97,6 +105,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
         <div className="col-span-full justify-self-start mt-5">Effects</div>
         <div className="grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5">
           <AutoFilter filter={beforeFilter} />
+          <BitCrusher bitCrusher={bitCrusher} />
+          <Chebyshev chebyshev={chebyshev} />
           <Delay delay={delay} />
           <Reverb reverb={reverb} />
           <AutoFilter filter={afterFilter} />

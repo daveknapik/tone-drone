@@ -20,7 +20,7 @@ export function useOscillators(
     // Create the oscillators and their channels
     for (let i = 0; i < oscillatorCount; i++) {
       const oscillator = new Tone.Oscillator(440, "sine");
-      const channel = new Tone.Channel(-15, 0);
+      const channel = new Tone.Channel(-10, 0);
       oscillator.connect(channel);
       newOscillators.push({ oscillator, channel });
     }

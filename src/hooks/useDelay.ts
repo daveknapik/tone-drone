@@ -7,7 +7,7 @@ export function useDelay() {
       delayTime: 1,
       feedback: 0.95,
       maxDelay: 10,
-      wet: 0.5,
+      wet: 0,
     })
   );
   return delay;

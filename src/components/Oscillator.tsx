@@ -25,7 +25,7 @@ function Oscillator({
   const [waveform, setWaveform] = useState("sine");
 
   // Tone.Channel properties
-  const [volume, setVolume] = useState(-15);
+  const [volume, setVolume] = useState(-10);
   const [pan, setPan] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(false);

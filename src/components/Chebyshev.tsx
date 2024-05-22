@@ -4,30 +4,29 @@ import Slider from "./Slider";
 
 import { MutableRefObject, useState } from "react";
 
-interface ReverbProps {
-  reverb: MutableRefObject<Tone.Freeverb>;
+interface ChebyshevProps {
+  chebyshev: MutableRefObject<Tone.Chebyshev>;
 }
 
-function Reverb({ reverb }: ReverbProps) {
-  const [roomSize, setRoomSize] = useState(0.95);
+function Chebyshev({ chebyshev }: ChebyshevProps) {
+  const [order, setOrder] = useState(1);
   const [wet, setWet] = useState(0);
 
-  reverb.current.set({
-    roomSize,
+  chebyshev.current.set({
+    order,
     wet,
   });
 
   return (
     <div className="place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-      <div className="col-span-full mb-1">Reverb</div>
+      <div className="col-span-full mb-1">Chebyshev</div>
       <Slider
-        handleChange={(e) => setRoomSize(parseFloat(e.target.value))}
-        inputName="roomSize"
-        labelText="Room Size"
-        max={1}
-        min={0}
-        step={0.01}
-        value={roomSize}
+        handleChange={(e) => setOrder(parseInt(e.target.value))}
+        inputName="order"
+        labelText="Order"
+        max={100}
+        min={1}
+        value={order}
       />
       <Slider
         handleChange={(e) => setWet(parseFloat(e.target.value))}
@@ -42,4 +41,4 @@ function Reverb({ reverb }: ReverbProps) {
   );
 }
 
-export default Reverb;
+export default Chebyshev;
