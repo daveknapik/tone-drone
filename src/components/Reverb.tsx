@@ -12,7 +12,7 @@ function Reverb({ reverb }: ReverbProps) {
   const [roomSize, setRoomSize] = useState(0.95);
   const [wet, setWet] = useState(0);
 
-  reverb.current.set({
+  reverb?.current?.set({
     roomSize,
     wet,
   });

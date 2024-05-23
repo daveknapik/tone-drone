@@ -1,19 +1,27 @@
 import * as Tone from "tone";
-import { useRef } from "react";
+import { useEffect, useRef, MutableRefObject } from "react";
 
 export function useAutoFilter() {
   const filter = useRef<Tone.AutoFilter>(
-    new Tone.AutoFilter({
+    null
+  ) as MutableRefObject<Tone.AutoFilter>;
+
+  useEffect(() => {
+    filter.current = new Tone.AutoFilter({
       baseFrequency: 300,
       octaves: 1,
       frequency: 4,
       type: "sine",
       depth: 1,
       wet: 1,
-    }).start()
-  );
+    }).start();
 
-  filter.current.set({ filter: { type: "highpass" } });
+    filter.current.set({ filter: { type: "highpass" } });
+
+    return () => {
+      filter.current.dispose();
+    };
+  }, []);
 
   return filter;
 }

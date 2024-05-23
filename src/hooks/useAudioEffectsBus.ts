@@ -12,7 +12,7 @@ import { AudioEffect } from "../types/AudioEffect";
 
 export function useAudioEffectsBus(
   busName: string,
-  audioEffects: AudioEffect[]
+  audioEffects: (AudioEffect | null)[]
 ) {
   const mainAudioEffectsBus = useRef<Tone.Channel>(
     new Tone.Channel({ volume: -10, channelCount: 2 })
@@ -20,7 +20,12 @@ export function useAudioEffectsBus(
 
   const updateAudioEffects = useCallback(() => {
     mainAudioEffectsBus.current.receive(busName);
-    mainAudioEffectsBus.current.chain(...audioEffects, Tone.getDestination());
+    if (!audioEffects.includes(null)) {
+      mainAudioEffectsBus.current.chain(
+        ...(audioEffects as AudioEffect[]),
+        Tone.getDestination()
+      );
+    }
   }, [audioEffects, busName]);
 
   useEffect(() => {

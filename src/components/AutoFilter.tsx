@@ -17,7 +17,7 @@ function AutoFilter({ filter }: AutoFilterProps) {
   const [type, setType] = useState<BiquadFilterType>("highpass");
   const [oscillatorType, setOscillatorType] = useState<OscillatorType>("sine");
 
-  filter.current.set({
+  filter?.current?.set({
     baseFrequency,
     depth,
     frequency,

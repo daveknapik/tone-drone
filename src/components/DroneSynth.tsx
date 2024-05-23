@@ -35,17 +35,19 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const delay = useDelay();
   const reverb = useReverb();
   const afterFilter = useAutoFilter();
+  const compressor = new Tone.Compressor(-30, 3);
 
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
 
   const busName = "mainAudioEffectsBus";
   const mainAudioEffectsBus = useAudioEffectsBus(busName, [
-    beforeFilter.current,
-    bitCrusher.current,
-    chebyshev.current,
-    delay.current,
-    reverb.current,
-    afterFilter.current,
+    beforeFilter?.current,
+    bitCrusher?.current,
+    chebyshev?.current,
+    delay?.current,
+    reverb?.current,
+    afterFilter?.current,
+    compressor,
   ]);
 
   useConnectChannelsToBus(
@@ -56,7 +58,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
-    const channel = new Tone.Channel(-5, 0).toDestination();
+    const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
     channel.connect(mainAudioEffectsBus.current);
 

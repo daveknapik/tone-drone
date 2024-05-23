@@ -7,6 +7,7 @@ export type AudioEffect =
   | Tone.BitCrusher
   | Tone.Chebyshev
   | Tone.Chorus
+  | Tone.Compressor
   | Tone.Distortion
   | Tone.FeedbackDelay
   | Tone.Freeverb
