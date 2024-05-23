@@ -9,15 +9,13 @@ interface AutoFilterProps {
   filter: MutableRefObject<Tone.AutoFilter>;
 }
 
-// TODO
-// - Add bypass control
-
 function AutoFilter({ filter }: AutoFilterProps) {
   const [baseFrequency, setBaseFrequency] = useState(300);
   const [depth, setDepth] = useState(1);
   const [frequency, setFrequency] = useState(4);
   const [wet, setWet] = useState(0);
   const [type, setType] = useState<BiquadFilterType>("highpass");
+  const [oscillatorType, setOscillatorType] = useState<OscillatorType>("sine");
 
   filter.current.set({
     baseFrequency,
@@ -25,6 +23,7 @@ function AutoFilter({ filter }: AutoFilterProps) {
     frequency,
     wet,
     filter: { type },
+    type: oscillatorType,
   });
 
   return (
@@ -66,11 +65,20 @@ function AutoFilter({ filter }: AutoFilterProps) {
         step={0.01}
         handleChange={(e) => setWet(parseFloat(e.target.value))}
       />
-      <OptionsSelector<BiquadFilterType>
-        handleChange={(e) => setType(e.target.value as BiquadFilterType)}
-        value={type}
-        options={["highpass", "lowpass"]}
-      />
+      <div className="mt-3">
+        <OptionsSelector<BiquadFilterType>
+          handleChange={(e) => setType(e.target.value as BiquadFilterType)}
+          value={type}
+          options={["highpass", "lowpass"]}
+        />
+        <OptionsSelector<OscillatorType>
+          handleChange={(e) =>
+            setOscillatorType(e.target.value as OscillatorType)
+          }
+          value={oscillatorType}
+          options={["sine", "square", "triangle", "sawtooth"]}
+        />
+      </div>
     </div>
   );
 }
