@@ -5,7 +5,7 @@ import Slider from "./Slider";
 import { MutableRefObject, useState } from "react";
 
 interface BitCrusherProps {
-  bitCrusher: MutableRefObject<Tone.BitCrusher>;
+  bitCrusher: MutableRefObject<Tone.BitCrusher> | null;
 }
 
 function BitCrusher({ bitCrusher }: BitCrusherProps) {

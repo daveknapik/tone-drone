@@ -5,7 +5,7 @@ import Slider from "./Slider";
 import { MutableRefObject, useState } from "react";
 
 interface ReverbProps {
-  reverb: MutableRefObject<Tone.Freeverb>;
+  reverb: MutableRefObject<Tone.Freeverb> | null;
 }
 
 function Reverb({ reverb }: ReverbProps) {
