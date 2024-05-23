@@ -22,7 +22,7 @@ function BitCrusher({ bitCrusher }: BitCrusherProps) {
       <div className="col-span-full mb-1">Bitcrusher</div>
       <Slider
         inputName="bits"
-        min={5}
+        min={2}
         max={8}
         value={bits}
         labelText="Bits"
