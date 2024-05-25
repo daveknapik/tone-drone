@@ -13,7 +13,6 @@ interface PolysynthProps {
 
 function PolySynth({ polySynth }: PolysynthProps) {
   const [frequency, setFrequency] = useState(666);
-  const [foo, setFoo] = useState(666);
   const [waveform, setWaveform] = useState<OscillatorType>("sine");
   const [volume, setVolume] = useState(-5);
   const [attack, setAttack] = useState(0.5);
@@ -22,13 +21,6 @@ function PolySynth({ polySynth }: PolysynthProps) {
   const [release, setRelease] = useState(1);
 
   const { handleBrowserAudioStart } = useAudioContext();
-
-  // const updateActiveKey = (ev: KeyboardEvent): void => {
-  //   setActiveKey(ev.key);
-  //   if (ev.key === "a") {
-  //     setFrequency(440);
-  //   }
-  // };
 
   polySynth.volume.setTargetAtTime(volume, 0, 0.01);
 

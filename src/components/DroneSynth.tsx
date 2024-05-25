@@ -21,6 +21,7 @@ import { useReverb } from "../hooks/useReverb";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { useState } from "react";
+import { usePolysynths } from "../hooks/usePolysynths";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
@@ -40,6 +41,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const compressor = new Tone.Compressor(-30, 3);
 
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
+  const polysynths = usePolysynths(2);
 
   const busName = "mainAudioEffectsBus";
   const mainAudioEffectsBus = useAudioEffectsBus(busName, [
@@ -58,8 +60,9 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     busName
   );
 
-  const polysynth = new Tone.PolySynth();
-  polysynth.connect(mainAudioEffectsBus.current);
+  polysynths.forEach((polysynth) => {
+    polysynth.connect(mainAudioEffectsBus.current);
+  });
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -121,8 +124,10 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
         </div>
 
         <div className="col-span-full justify-self-start">PolySynth</div>
-        <div className="grid grid-cols-1 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-          <PolySynth polySynth={polysynth} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+          {polysynths.map((polysynth, i) => (
+            <PolySynth key={i} polySynth={polysynth} />
+          ))}
         </div>
 
         <div className="col-span-full justify-self-start">Oscillators</div>
