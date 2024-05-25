@@ -7,6 +7,7 @@ import Delay from "./Delay";
 import EffectsBusSendControl from "./EffectsBusSendControl";
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Oscillator from "./Oscillator";
+import PolySynth from "./Polysynth";
 import Reverb from "./Reverb";
 
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
@@ -28,6 +29,7 @@ interface DroneSynthProps {
 function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
+  const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
 
   const beforeFilter = useAutoFilter();
   const bitCrusher = useBitCrusher();
@@ -55,6 +57,9 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     mainAudioEffectsBus.current,
     busName
   );
+
+  const polysynth = new Tone.PolySynth();
+  polysynth.connect(mainAudioEffectsBus.current);
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -115,10 +120,16 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </div>
 
+        <div className="col-span-full justify-self-start">PolySynth</div>
+        <div className="grid grid-cols-1 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+          <PolySynth polySynth={polysynth} />
+        </div>
+
         <div className="col-span-full justify-self-start">Oscillators</div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
           {oscillators.map((oscillator, i) => (
             <Oscillator
+              playPauseKey={playKeys[i]}
               key={i}
               minFreq={minFreq}
               maxFreq={maxFreq}

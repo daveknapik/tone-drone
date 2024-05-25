@@ -6,12 +6,14 @@ import OptionsSelector from "./OptionsSelector";
 import { useState } from "react";
 
 import { useAudioContext } from "../hooks/useAudioContext";
+import { useKeyDown } from "../hooks/useKeyDown";
 
 interface OscillatorProps {
   channel: Tone.Channel;
   maxFreq: number;
   minFreq: number;
   oscillator: Tone.Oscillator;
+  playPauseKey: string;
 }
 
 function Oscillator({
@@ -19,6 +21,7 @@ function Oscillator({
   maxFreq,
   minFreq,
   oscillator,
+  playPauseKey,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
@@ -43,6 +46,10 @@ function Oscillator({
       setIsPlaying(true);
     }
   };
+
+  useKeyDown(() => {
+    toggleAudio();
+  }, [playPauseKey]);
 
   // ensure the frequency is within the min and max range
   if (frequency < minFreq) {
@@ -92,7 +99,9 @@ function Oscillator({
         options={["sine", "square", "triangle", "sawtooth"]}
       />
       <div className="text-center">
-        <button onClick={toggleAudio}>{isPlaying ? "Stop" : "Start"}</button>
+        <button className="text-3xl" onClick={toggleAudio}>
+          {isPlaying ? "😊" : "😴"}
+        </button>
       </div>
     </div>
   );
