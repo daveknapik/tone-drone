@@ -62,6 +62,7 @@ function PolySynth({ polySynth }: PolysynthProps) {
       />
       <Slider
         inputName="attack"
+        labelText="Attack"
         min={0}
         max={2}
         step={0.01}
@@ -70,6 +71,7 @@ function PolySynth({ polySynth }: PolysynthProps) {
       />
       <Slider
         inputName="decay"
+        labelText="Decay"
         min={0}
         max={1}
         step={0.01}
@@ -78,6 +80,7 @@ function PolySynth({ polySynth }: PolysynthProps) {
       />
       <Slider
         inputName="sustain"
+        labelText="Sustain"
         min={0}
         max={1}
         step={0.01}
@@ -86,6 +89,7 @@ function PolySynth({ polySynth }: PolysynthProps) {
       />
       <Slider
         inputName="release"
+        labelText="Release"
         min={0}
         max={60}
         step={0.01}

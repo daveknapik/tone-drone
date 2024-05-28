@@ -23,11 +23,14 @@ function Slider({
 
   return (
     <div className="flex space-x-2">
-      <label htmlFor={id} className={labelText ? "w-24" : ""}>
+      <label
+        htmlFor={id}
+        className={labelText ? "w-18 md:w-24 basis-1/4" : "basis-2/8"}
+      >
         {labelText ? labelText : inputName.charAt(0).toUpperCase()}
       </label>
       <input
-        className="w-48"
+        className="w-36 md:w-48 basis-5/8"
         id={id}
         max={max}
         min={min}
@@ -37,7 +40,7 @@ function Slider({
         type="range"
         value={value}
       />
-      <div className="w-8">{value}</div>
+      <div className="w-6 md:w-8 basis-1/8">{value}</div>
     </div>
   );
 }

@@ -23,7 +23,7 @@ function Reverb({ reverb }: ReverbProps) {
       <Slider
         handleChange={(e) => setRoomSize(parseFloat(e.target.value))}
         inputName="roomSize"
-        labelText="Room Size"
+        labelText="Size"
         max={1}
         min={0}
         step={0.01}

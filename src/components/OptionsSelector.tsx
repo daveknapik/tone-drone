@@ -16,7 +16,7 @@ function OptionsSelector<T extends OptionType>({
   const id = useId();
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex flex-wrap items-center space-x-2">
       {options.map((option) => (
         <div key={option} className="flex space-x-2">
           <input
