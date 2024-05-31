@@ -10,6 +10,7 @@ import FrequencyRangeControl from "./FrequencyRangeControl";
 import Oscillator from "./Oscillator";
 import PolySynth from "./Polysynth";
 import Reverb from "./Reverb";
+import Recorder from "./Recorder.tsx";
 
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
 import { useAutoFilter } from "../hooks/useAutoFilter";
@@ -18,6 +19,7 @@ import { useChebyshev } from "../hooks/useChebyshev";
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import { useDelay } from "../hooks/useDelay";
 import { useOscillators } from "../hooks/useOscillators";
+import { useRecorder } from "../hooks/useRecorder.ts";
 import { useReverb } from "../hooks/useReverb";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
@@ -47,11 +49,13 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const afterFilter = useAutoFilter();
   const compressor = new Tone.Compressor(-30, 3);
 
+  const recorder = useRecorder();
+
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
   const polysynths = usePolysynths(2);
 
   const busName = "mainAudioEffectsBus";
-  const mainAudioEffectsBus = useAudioEffectsBus(busName, [
+  const mainAudioEffectsBus = useAudioEffectsBus(busName, recorder.current, [
     beforeFilter?.current,
     bitCrusher?.current,
     chebyshev?.current,
@@ -129,6 +133,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
             handleFormSubmit={updateFrequencyRange}
             className="mb-7"
           />
+          <Recorder recorder={recorder} />
         </div>
 
         <div
