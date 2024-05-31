@@ -12,6 +12,7 @@ import { AudioEffect } from "../types/AudioEffect";
 
 export function useAudioEffectsBus(
   busName: string,
+  recorder: Tone.Recorder,
   audioEffects: (AudioEffect | null)[]
 ) {
   const mainAudioEffectsBus = useRef<Tone.Channel>(
@@ -23,10 +24,11 @@ export function useAudioEffectsBus(
     if (!audioEffects.includes(null)) {
       mainAudioEffectsBus.current.chain(
         ...(audioEffects as AudioEffect[]),
-        Tone.getDestination()
+        Tone.getDestination(),
+        recorder
       );
     }
-  }, [audioEffects, busName]);
+  }, [audioEffects, busName, recorder]);
 
   useEffect(() => {
     updateAudioEffects();
