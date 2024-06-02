@@ -37,8 +37,9 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
-  const [expandAudioEffects, setExpandAudioEffects] = useState(true);
-  const [expandPolysynths, setExpandPolysynths] = useState(true);
+  const [expandRecording, setExpandRecording] = useState(true);
+  const [expandAudioEffects, setExpandAudioEffects] = useState(false);
+  const [expandPolysynths, setExpandPolysynths] = useState(false);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
   const beforeFilter = useAutoFilter();
@@ -109,6 +110,10 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     }
   };
 
+  const toggleExpandRecording = (): void => {
+    setExpandRecording((prev) => !prev);
+  };
+
   const toggleExpandAudioEffects = (): void => {
     setExpandAudioEffects((prev) => !prev);
   };
@@ -124,7 +129,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   return (
     <div className="dark:text-sky-300">
       <div className="border-2 rounded border-pink-500 dark:border-sky-300 pt-2 px-3">
-        <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-6">
+        <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-6 justify-items-start">
           <div className="col-span-full">Drone Synth</div>
           <div className="col-start-7">
             <button onClick={addOscillator}>+</button>
@@ -133,9 +138,22 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
             handleFormSubmit={updateFrequencyRange}
             className="mb-7"
           />
+        </div>
+        <div
+          className="flex items-center align-items-center mt-5"
+          onClick={toggleExpandRecording}
+        >
+          {expandRecording ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
+          Recording
+        </div>
+        <div
+          className={clsx(
+            "my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5",
+            !expandRecording && "hidden"
+          )}
+        >
           <Recorder recorder={recorder} />
         </div>
-
         <div
           className="flex items-center align-items-center mt-5"
           onClick={toggleExpandAudioEffects}
@@ -161,7 +179,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           <AutoFilter filter={afterFilter} />
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </div>
-
         <div
           className="flex items-center align-items-center mt-5"
           onClick={toggleExpandPolysynths}
@@ -183,7 +200,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
             <PolySynth key={i} polySynth={polysynth} />
           ))}
         </div>
-
         <div
           className="flex items-center align-items-center my-5"
           onClick={toggleExpandOscillators}
