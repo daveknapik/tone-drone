@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-
+import Button from "./Button";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 
@@ -98,10 +98,10 @@ function Oscillator({
         value={waveform}
         options={["sine", "square", "triangle", "sawtooth"]}
       />
-      <div className="text-center">
-        <button className="text-3xl" onClick={toggleAudio}>
-          {isPlaying ? "😊" : "😴"}
-        </button>
+      <div className="text-center mt-2">
+        <Button handleClick={toggleAudio} isActive={isPlaying}>
+          {isPlaying ? "Stop" : "Start"}
+        </Button>
       </div>
     </div>
   );
