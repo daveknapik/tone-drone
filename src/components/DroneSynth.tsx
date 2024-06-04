@@ -1,5 +1,4 @@
 import * as Tone from "tone";
-import { clsx } from "clsx";
 
 import Effects from "./Effects.tsx";
 import AutoFilter from "./AutoFilter";
@@ -7,8 +6,7 @@ import BitCrusher from "./BitCrusher";
 import Chebyshev from "./Chebyshev";
 import Delay from "./Delay";
 import EffectsBusSendControl from "./EffectsBusSendControl";
-import FrequencyRangeControl from "./FrequencyRangeControl";
-import Oscillator from "./Oscillator";
+import Oscillators from "./Oscillators.tsx";
 import PolySynths from "./Polysynths";
 import Reverb from "./Reverb";
 import Recorder from "./Recorder.tsx";
@@ -23,23 +21,13 @@ import { useOscillators } from "../hooks/useOscillators";
 import { useRecorder } from "../hooks/useRecorder.ts";
 import { useReverb } from "../hooks/useReverb";
 
-import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
-import { useState } from "react";
 import { usePolysynths } from "../hooks/usePolysynths";
-
-import { MdKeyboardArrowRight } from "react-icons/md";
-import { MdKeyboardArrowDown } from "react-icons/md";
 
 interface DroneSynthProps {
   oscillatorCount?: number;
 }
 
 function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
-  const [minFreq, setMinFreq] = useState(440);
-  const [maxFreq, setMaxFreq] = useState(454);
-  const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
-  const [expandOscillators, setExpandOscillators] = useState(true);
-
   const beforeFilter = useAutoFilter();
   const bitCrusher = useBitCrusher();
   const chebyshev = useChebyshev();
@@ -74,44 +62,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     polysynth.connect(mainAudioEffectsBus.current);
   });
 
-  const createOscillator = (): OscillatorWithChannel => {
-    const oscillator = new Tone.Oscillator(minFreq, "sine");
-    const channel = new Tone.Channel(-5, 0);
-    oscillator.connect(channel);
-    channel.connect(mainAudioEffectsBus.current);
-
-    return { oscillator, channel };
-  };
-
-  const addOscillator = (): void => {
-    setOscillators((prevOscillators: OscillatorWithChannel[]) => [
-      ...prevOscillators,
-      createOscillator(),
-    ]);
-  };
-
-  const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    const form = e.currentTarget as HTMLFormElement;
-    const formData = new FormData(form);
-    const min = Number(formData.get("minFreq"));
-    const max = Number(formData.get("maxFreq"));
-
-    if (min && max) {
-      if (min > max) {
-        setMinFreq(min);
-        setMaxFreq(min + 10);
-      } else {
-        setMinFreq(min);
-        setMaxFreq(max);
-      }
-    }
-  };
-
-  const toggleExpandOscillators = (): void => {
-    setExpandOscillators((prev) => !prev);
-  };
-
   return (
     <div className="dark:text-sky-300">
       <div className="border-2 rounded border-pink-500 dark:border-sky-300 pt-2 px-3">
@@ -127,40 +77,11 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
         </Effects>
 
         <PolySynths polysynths={polysynths} />
-        <div
-          className="flex items-center align-items-center my-5"
-          onClick={toggleExpandOscillators}
-        >
-          {expandOscillators ? (
-            <MdKeyboardArrowDown />
-          ) : (
-            <MdKeyboardArrowRight />
-          )}
-          Oscillators
-        </div>
-        <div
-          className={clsx(
-            "border-2 rounded border-pink-500 dark:border-sky-300 p-5 mb-3",
-            !expandOscillators && "hidden"
-          )}
-        >
-          <div className="flex items-start justify-between">
-            <FrequencyRangeControl handleFormSubmit={updateFrequencyRange} />
-            <button onClick={addOscillator}>+</button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">
-            {oscillators.map((oscillator, i) => (
-              <Oscillator
-                playPauseKey={playKeys[i]}
-                key={i}
-                minFreq={minFreq}
-                maxFreq={maxFreq}
-                oscillator={oscillator.oscillator}
-                channel={oscillator.channel}
-              />
-            ))}
-          </div>
-        </div>
+        <Oscillators
+          oscillators={oscillators}
+          setOscillators={setOscillators}
+          bus={mainAudioEffectsBus}
+        />
       </div>
     </div>
   );

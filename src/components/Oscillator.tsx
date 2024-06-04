@@ -73,6 +73,7 @@ function Oscillator({
         labelText="Freq (Hz)"
         min={minFreq}
         max={maxFreq}
+        step={0.01}
         value={frequency}
         handleChange={(e) => setFrequency(parseFloat(e.target.value))}
       />
