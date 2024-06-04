@@ -38,7 +38,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
-  const [expandRecording, setExpandRecording] = useState(true);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
   const beforeFilter = useAutoFilter();
@@ -109,10 +108,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     }
   };
 
-  const toggleExpandRecording = (): void => {
-    setExpandRecording((prev) => !prev);
-  };
-
   const toggleExpandOscillators = (): void => {
     setExpandOscillators((prev) => !prev);
   };
@@ -130,21 +125,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
             className="mb-7"
           />
         </div>
-        <div
-          className="flex items-center align-items-center mt-5"
-          onClick={toggleExpandRecording}
-        >
-          {expandRecording ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
-          Recording
-        </div>
-        <div
-          className={clsx(
-            "my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5",
-            !expandRecording && "hidden"
-          )}
-        >
-          <Recorder recorder={recorder} />
-        </div>
+
+        <Recorder recorder={recorder} />
         <Effects>
           <AutoFilter filter={beforeFilter} />
           <BitCrusher bitCrusher={bitCrusher} />
