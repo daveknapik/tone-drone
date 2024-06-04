@@ -1,6 +1,7 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
 
+import Effects from "./Effects.tsx";
 import AutoFilter from "./AutoFilter";
 import BitCrusher from "./BitCrusher";
 import Chebyshev from "./Chebyshev";
@@ -38,7 +39,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [maxFreq, setMaxFreq] = useState(454);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandRecording, setExpandRecording] = useState(true);
-  const [expandAudioEffects, setExpandAudioEffects] = useState(false);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
   const beforeFilter = useAutoFilter();
@@ -113,10 +113,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     setExpandRecording((prev) => !prev);
   };
 
-  const toggleExpandAudioEffects = (): void => {
-    setExpandAudioEffects((prev) => !prev);
-  };
-
   const toggleExpandOscillators = (): void => {
     setExpandOscillators((prev) => !prev);
   };
@@ -149,23 +145,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
         >
           <Recorder recorder={recorder} />
         </div>
-        <div
-          className="flex items-center align-items-center mt-5"
-          onClick={toggleExpandAudioEffects}
-        >
-          {expandAudioEffects ? (
-            <MdKeyboardArrowDown />
-          ) : (
-            <MdKeyboardArrowRight />
-          )}
-          Effects
-        </div>
-        <div
-          className={clsx(
-            "grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5",
-            !expandAudioEffects && "hidden"
-          )}
-        >
+        <Effects>
           <AutoFilter filter={beforeFilter} />
           <BitCrusher bitCrusher={bitCrusher} />
           <Chebyshev chebyshev={chebyshev} />
@@ -173,7 +153,8 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           <Reverb reverb={reverb} />
           <AutoFilter filter={afterFilter} />
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
-        </div>
+        </Effects>
+
         <PolySynths polysynths={polysynths} />
         <div
           className="flex items-center align-items-center my-5"
