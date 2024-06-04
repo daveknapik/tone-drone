@@ -115,17 +115,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   return (
     <div className="dark:text-sky-300">
       <div className="border-2 rounded border-pink-500 dark:border-sky-300 pt-2 px-3">
-        <div className="grid grid-cols-2 gap-x-2 gap-y-3 sm:grid-cols-6 justify-items-start">
-          <div className="col-span-full">Drone Synth</div>
-          <div className="col-start-7">
-            <button onClick={addOscillator}>+</button>
-          </div>
-          <FrequencyRangeControl
-            handleFormSubmit={updateFrequencyRange}
-            className="mb-7"
-          />
-        </div>
-
         <Recorder recorder={recorder} />
         <Effects>
           <AutoFilter filter={beforeFilter} />
@@ -151,20 +140,26 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
         </div>
         <div
           className={clsx(
-            "grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5",
+            "border-2 rounded border-pink-500 dark:border-sky-300 p-5 mb-3",
             !expandOscillators && "hidden"
           )}
         >
-          {oscillators.map((oscillator, i) => (
-            <Oscillator
-              playPauseKey={playKeys[i]}
-              key={i}
-              minFreq={minFreq}
-              maxFreq={maxFreq}
-              oscillator={oscillator.oscillator}
-              channel={oscillator.channel}
-            />
-          ))}
+          <div className="flex items-start justify-between">
+            <FrequencyRangeControl handleFormSubmit={updateFrequencyRange} />
+            <button onClick={addOscillator}>+</button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">
+            {oscillators.map((oscillator, i) => (
+              <Oscillator
+                playPauseKey={playKeys[i]}
+                key={i}
+                minFreq={minFreq}
+                maxFreq={maxFreq}
+                oscillator={oscillator.oscillator}
+                channel={oscillator.channel}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
