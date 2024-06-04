@@ -8,7 +8,7 @@ import Delay from "./Delay";
 import EffectsBusSendControl from "./EffectsBusSendControl";
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Oscillator from "./Oscillator";
-import PolySynth from "./Polysynth";
+import PolySynths from "./Polysynths";
 import Reverb from "./Reverb";
 import Recorder from "./Recorder.tsx";
 
@@ -39,7 +39,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandRecording, setExpandRecording] = useState(true);
   const [expandAudioEffects, setExpandAudioEffects] = useState(false);
-  const [expandPolysynths, setExpandPolysynths] = useState(false);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
   const beforeFilter = useAutoFilter();
@@ -118,10 +117,6 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     setExpandAudioEffects((prev) => !prev);
   };
 
-  const toggleExpandPolysynths = (): void => {
-    setExpandPolysynths((prev) => !prev);
-  };
-
   const toggleExpandOscillators = (): void => {
     setExpandOscillators((prev) => !prev);
   };
@@ -179,27 +174,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
           <AutoFilter filter={afterFilter} />
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </div>
-        <div
-          className="flex items-center align-items-center mt-5"
-          onClick={toggleExpandPolysynths}
-        >
-          {expandPolysynths ? (
-            <MdKeyboardArrowDown />
-          ) : (
-            <MdKeyboardArrowRight />
-          )}
-          PolySynth
-        </div>
-        <div
-          className={clsx(
-            "grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5",
-            !expandPolysynths && "hidden"
-          )}
-        >
-          {polysynths.map((polysynth, i) => (
-            <PolySynth key={i} polySynth={polysynth} />
-          ))}
-        </div>
+        <PolySynths polysynths={polysynths} />
         <div
           className="flex items-center align-items-center my-5"
           onClick={toggleExpandOscillators}
