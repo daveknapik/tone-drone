@@ -1,8 +1,7 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
 
-import { MdKeyboardArrowRight } from "react-icons/md";
-import { MdKeyboardArrowDown } from "react-icons/md";
+import Heading from "./Heading";
 
 import { useState, Fragment } from "react";
 
@@ -21,13 +20,12 @@ function PolySynths({ polysynths }: PolySynthsProps) {
 
   return (
     <Fragment>
-      <div
-        className="flex items-center align-items-center mt-5"
-        onClick={toggleExpandPolysynths}
+      <Heading
+        expanded={expandPolysynths}
+        toggleExpanded={toggleExpandPolysynths}
       >
-        {expandPolysynths ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
         PolySynth
-      </div>
+      </Heading>
       <div
         className={clsx(
           "grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5",

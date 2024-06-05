@@ -1,10 +1,7 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
-
+import Heading from "./Heading";
 import { useState, MutableRefObject, Fragment } from "react";
-
-import { MdKeyboardArrowRight } from "react-icons/md";
-import { MdKeyboardArrowDown } from "react-icons/md";
 
 interface RecorderProps {
   recorder: MutableRefObject<Tone.Recorder | null>;
@@ -34,13 +31,12 @@ function Recorder({ recorder }: RecorderProps) {
 
   return (
     <Fragment>
-      <div
-        className="flex items-center align-items-center mt-5"
-        onClick={toggleExpandRecording}
+      <Heading
+        expanded={expandRecording}
+        toggleExpanded={toggleExpandRecording}
       >
-        {expandRecording ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
         Recording
-      </div>
+      </Heading>
       <div
         className={clsx(
           "my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5",

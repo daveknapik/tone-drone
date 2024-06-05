@@ -1,12 +1,10 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
 
-import { MdKeyboardArrowRight } from "react-icons/md";
-import { MdKeyboardArrowDown } from "react-icons/md";
-
 import { useState, MutableRefObject, Fragment } from "react";
 
 import FrequencyRangeControl from "./FrequencyRangeControl";
+import Heading from "./Heading";
 import Oscillator from "./Oscillator";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
@@ -65,13 +63,12 @@ function Oscillators({ bus, oscillators, setOscillators }: OscillatorsProps) {
 
   return (
     <Fragment>
-      <div
-        className="flex items-center align-items-center my-5"
-        onClick={toggleExpandOscillators}
+      <Heading
+        expanded={expandOscillators}
+        toggleExpanded={toggleExpandOscillators}
       >
-        {expandOscillators ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
         Oscillators
-      </div>
+      </Heading>
       <div
         className={clsx(
           "border-2 rounded border-pink-500 dark:border-sky-300 p-5 mb-3",
