@@ -11,7 +11,6 @@ import { useCallback, useEffect, useRef } from "react";
 import { AudioEffect } from "../types/AudioEffect";
 
 export function useAudioEffectsBus(
-  busName: string,
   recorder: Tone.Recorder,
   audioEffects: (AudioEffect | null)[]
 ) {
@@ -20,7 +19,6 @@ export function useAudioEffectsBus(
   );
 
   const updateAudioEffects = useCallback(() => {
-    mainAudioEffectsBus.current.receive(busName);
     if (!audioEffects.includes(null)) {
       mainAudioEffectsBus.current.chain(
         ...(audioEffects as AudioEffect[]),
@@ -28,7 +26,7 @@ export function useAudioEffectsBus(
         recorder
       );
     }
-  }, [audioEffects, busName, recorder]);
+  }, [audioEffects, recorder]);
 
   useEffect(() => {
     updateAudioEffects();

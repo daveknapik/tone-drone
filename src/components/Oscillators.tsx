@@ -9,19 +9,26 @@ import Oscillator from "./Oscillator";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
-import { Dispatch, SetStateAction } from "react";
+import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
+import { useOscillators } from "../hooks/useOscillators";
 
 interface OscillatorsProps {
   bus: MutableRefObject<Tone.Channel>;
-  oscillators: OscillatorWithChannel[];
-  setOscillators: Dispatch<SetStateAction<OscillatorWithChannel[]>>;
+  oscillatorCount?: number;
 }
 
-function Oscillators({ bus, oscillators, setOscillators }: OscillatorsProps) {
+function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
+
+  const [oscillators, setOscillators] = useOscillators(oscillatorCount);
+
+  useConnectChannelsToBus(
+    oscillators.map((osc) => osc.channel),
+    bus.current
+  );
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");

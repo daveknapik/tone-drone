@@ -15,19 +15,15 @@ import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
 import { useAutoFilter } from "../hooks/useAutoFilter";
 import { useBitCrusher } from "../hooks/useBitCrusher";
 import { useChebyshev } from "../hooks/useChebyshev";
-import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import { useDelay } from "../hooks/useDelay";
-import { useOscillators } from "../hooks/useOscillators";
 import { useRecorder } from "../hooks/useRecorder.ts";
 import { useReverb } from "../hooks/useReverb";
 
 import { usePolysynths } from "../hooks/usePolysynths";
 
-interface DroneSynthProps {
-  oscillatorCount?: number;
-}
+function DroneSynth() {
+  const recorder = useRecorder();
 
-function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const beforeFilter = useAutoFilter();
   const bitCrusher = useBitCrusher();
   const chebyshev = useChebyshev();
@@ -36,13 +32,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
   const afterFilter = useAutoFilter();
   const compressor = new Tone.Compressor(-30, 3);
 
-  const recorder = useRecorder();
-
-  const [oscillators, setOscillators] = useOscillators(oscillatorCount);
-  const polysynths = usePolysynths(2);
-
-  const busName = "mainAudioEffectsBus";
-  const mainAudioEffectsBus = useAudioEffectsBus(busName, recorder.current, [
+  const mainAudioEffectsBus = useAudioEffectsBus(recorder.current, [
     beforeFilter?.current,
     bitCrusher?.current,
     chebyshev?.current,
@@ -52,11 +42,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
     compressor,
   ]);
 
-  useConnectChannelsToBus(
-    oscillators.map((osc) => osc.channel),
-    mainAudioEffectsBus.current,
-    busName
-  );
+  const polysynths = usePolysynths(2);
 
   polysynths.forEach((polysynth) => {
     polysynth.connect(mainAudioEffectsBus.current);
@@ -77,11 +63,7 @@ function DroneSynth({ oscillatorCount = 6 }: DroneSynthProps) {
         </Effects>
 
         <PolySynths polysynths={polysynths} />
-        <Oscillators
-          oscillators={oscillators}
-          setOscillators={setOscillators}
-          bus={mainAudioEffectsBus}
-        />
+        <Oscillators bus={mainAudioEffectsBus} />
       </div>
     </div>
   );
