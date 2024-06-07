@@ -10,10 +10,7 @@ import * as Tone from "tone";
 import { useCallback, useEffect, useRef } from "react";
 import { AudioEffect } from "../types/AudioEffect";
 
-export function useAudioEffectsBus(
-  recorder: Tone.Recorder,
-  audioEffects: AudioEffect[]
-) {
+export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
   const mainAudioEffectsBus = useRef<Tone.Channel>(
     new Tone.Channel({ volume: -10, channelCount: 2 })
   );
