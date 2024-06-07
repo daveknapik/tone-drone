@@ -5,7 +5,7 @@ import Slider from "./Slider";
 import { MutableRefObject, useState } from "react";
 
 interface DelayProps {
-  delay: MutableRefObject<Tone.FeedbackDelay | null>;
+  delay: MutableRefObject<Tone.FeedbackDelay>;
 }
 
 function Delay({ delay }: DelayProps) {
