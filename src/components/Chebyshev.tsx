@@ -5,7 +5,7 @@ import Slider from "./Slider";
 import { MutableRefObject, useState } from "react";
 
 interface ChebyshevProps {
-  chebyshev: MutableRefObject<Tone.Chebyshev> | null;
+  chebyshev: MutableRefObject<Tone.Chebyshev>;
 }
 
 function Chebyshev({ chebyshev }: ChebyshevProps) {

@@ -44,9 +44,11 @@ function DroneSynth() {
     compressor,
   ];
 
-  const mainAudioEffectsBus = useAudioEffectsBus(recorder.current, [
-    bitCrusher?.current,
-    chebyshev?.current,
+  const mainAudioEffectsBus = useAudioEffectsBus([
+    beforeFilter.current,
+    bitCrusher.current,
+    chebyshev.current,
+    afterFilter.current,
   ]);
 
   useEffect(() => {

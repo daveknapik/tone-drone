@@ -6,7 +6,7 @@ import { MutableRefObject, useState } from "react";
 import OptionsSelector from "./OptionsSelector";
 
 interface AutoFilterProps {
-  filter: MutableRefObject<Tone.AutoFilter> | null;
+  filter: MutableRefObject<Tone.AutoFilter>;
 }
 
 function AutoFilter({ filter }: AutoFilterProps) {
