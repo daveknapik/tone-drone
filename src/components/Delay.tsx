@@ -13,7 +13,7 @@ function Delay({ delay }: DelayProps) {
   const [feedback, setFeedback] = useState(0.95);
   const [wet, setWet] = useState(0);
 
-  delay?.current?.set({
+  delay.current.set({
     delayTime: time,
     feedback: feedback,
     wet: wet,

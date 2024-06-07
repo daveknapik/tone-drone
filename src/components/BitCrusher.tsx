@@ -12,7 +12,7 @@ function BitCrusher({ bitCrusher }: BitCrusherProps) {
   const [bits, setBits] = useState(5);
   const [wet, setWet] = useState(0);
 
-  bitCrusher?.current?.set({
+  bitCrusher.current.set({
     bits,
     wet,
   });
