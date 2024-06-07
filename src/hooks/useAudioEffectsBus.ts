@@ -16,22 +16,7 @@ export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
   );
 
   const updateAudioEffects = useCallback(() => {
-    // mainAudioEffectsBus.current.disconnect();
-
-    for (let i = 0; i < audioEffects.length; i++) {
-      if (i === 0) {
-        mainAudioEffectsBus.current.connect(audioEffects[i]);
-      } else {
-        audioEffects[i - 1]?.connect(audioEffects[i]);
-      }
-    }
-    audioEffects[audioEffects.length - 1]?.connect(Tone.getDestination());
-
-    // mainAudioEffectsBus.current.chain(
-    //   ...(audioEffects as AudioEffect[]),
-    //   Tone.getDestination(),
-    //   recorder
-    // );
+    mainAudioEffectsBus.current.chain(...audioEffects, Tone.getDestination());
   }, [audioEffects]);
 
   useEffect(() => {
