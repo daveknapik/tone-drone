@@ -48,7 +48,9 @@ function DroneSynth() {
     beforeFilter.current,
     bitCrusher.current,
     chebyshev.current,
+    delay.current,
     afterFilter.current,
+    compressor,
   ]);
 
   useEffect(() => {
