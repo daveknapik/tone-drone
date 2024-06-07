@@ -10,11 +10,10 @@ export function useAutoFilter() {
       type: "sine",
       depth: 1,
       wet: 1,
-    })
+    }).start()
   );
 
   useEffect(() => {
-    filter.current.start();
     filter.current.set({ filter: { type: "highpass" } });
   }, []);
 
