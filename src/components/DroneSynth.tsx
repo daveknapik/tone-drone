@@ -6,9 +6,9 @@ import BitCrusher from "./BitCrusher";
 import Chebyshev from "./Chebyshev";
 import Delay from "./Delay";
 import EffectsBusSendControl from "./EffectsBusSendControl";
+import Freeverb from "./Freeverb.tsx";
 import Oscillators from "./Oscillators.tsx";
 import PolySynths from "./Polysynths";
-import Reverb from "./Reverb";
 import Recorder from "./Recorder.tsx";
 
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus";
@@ -16,8 +16,9 @@ import { useAutoFilter } from "../hooks/useAutoFilter";
 import { useBitCrusher } from "../hooks/useBitCrusher";
 import { useChebyshev } from "../hooks/useChebyshev";
 import { useDelay } from "../hooks/useDelay";
+import { useFreeverb } from "../hooks/useFreeverb.ts";
+
 import { useRecorder } from "../hooks/useRecorder.ts";
-import { useReverb } from "../hooks/useReverb";
 
 import { usePolysynths } from "../hooks/usePolysynths";
 
@@ -30,7 +31,7 @@ function DroneSynth() {
   const bitCrusher = useBitCrusher();
   const chebyshev = useChebyshev();
   const delay = useDelay();
-  const reverb = useReverb();
+  const freeverb = useFreeverb();
   const afterFilter = useAutoFilter();
   const compressor = new Tone.Compressor(-30, 3);
 
@@ -39,8 +40,8 @@ function DroneSynth() {
     bitCrusher.current,
     chebyshev.current,
     delay.current,
+    freeverb.current,
     afterFilter.current,
-    reverb.current,
     compressor,
   ];
 
@@ -67,7 +68,7 @@ function DroneSynth() {
           <BitCrusher bitCrusher={bitCrusher} />
           <Chebyshev chebyshev={chebyshev} />
           <Delay delay={delay} />
-          <Reverb reverb={reverb} />
+          <Freeverb freeverb={freeverb} />
           <AutoFilter filter={afterFilter} />
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </Effects>

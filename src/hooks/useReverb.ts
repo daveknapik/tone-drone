@@ -2,10 +2,10 @@ import * as Tone from "tone";
 import { useRef } from "react";
 
 export function useReverb() {
-  const reverb = useRef<Tone.Freeverb>(
-    new Tone.Freeverb({
-      dampening: 1000,
-      roomSize: 0.95,
+  const reverb = useRef<Tone.Reverb>(
+    new Tone.Reverb({
+      decay: 1.5,
+      preDelay: 0.01,
       wet: 0,
     })
   );
