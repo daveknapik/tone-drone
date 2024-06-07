@@ -35,23 +35,16 @@ function DroneSynth() {
   const compressor = new Tone.Compressor(-30, 3);
 
   const effects = [
-    beforeFilter?.current,
-    bitCrusher?.current,
-    chebyshev?.current,
-    delay?.current,
-    reverb?.current,
-    afterFilter?.current,
-    compressor,
-  ];
-
-  const mainAudioEffectsBus = useAudioEffectsBus([
     beforeFilter.current,
     bitCrusher.current,
     chebyshev.current,
     delay.current,
     afterFilter.current,
+    reverb.current,
     compressor,
-  ]);
+  ];
+
+  const mainAudioEffectsBus = useAudioEffectsBus(effects);
 
   useEffect(() => {
     if (recorder.current) {
