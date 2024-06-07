@@ -12,21 +12,30 @@ import { AudioEffect } from "../types/AudioEffect";
 
 export function useAudioEffectsBus(
   recorder: Tone.Recorder,
-  audioEffects: (AudioEffect | null)[]
+  audioEffects: AudioEffect[]
 ) {
   const mainAudioEffectsBus = useRef<Tone.Channel>(
     new Tone.Channel({ volume: -10, channelCount: 2 })
   );
 
   const updateAudioEffects = useCallback(() => {
-    if (!audioEffects.includes(null)) {
-      mainAudioEffectsBus.current.chain(
-        ...(audioEffects as AudioEffect[]),
-        Tone.getDestination(),
-        recorder
-      );
+    // mainAudioEffectsBus.current.disconnect();
+
+    for (let i = 0; i < audioEffects.length; i++) {
+      if (i === 0) {
+        mainAudioEffectsBus.current.connect(audioEffects[i]);
+      } else {
+        audioEffects[i - 1]?.connect(audioEffects[i]);
+      }
     }
-  }, [audioEffects, recorder]);
+    audioEffects[audioEffects.length - 1]?.connect(Tone.getDestination());
+
+    // mainAudioEffectsBus.current.chain(
+    //   ...(audioEffects as AudioEffect[]),
+    //   Tone.getDestination(),
+    //   recorder
+    // );
+  }, [audioEffects]);
 
   useEffect(() => {
     updateAudioEffects();

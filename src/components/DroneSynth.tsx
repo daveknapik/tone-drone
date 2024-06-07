@@ -21,6 +21,8 @@ import { useReverb } from "../hooks/useReverb";
 
 import { usePolysynths } from "../hooks/usePolysynths";
 
+import { useEffect } from "react";
+
 function DroneSynth() {
   const recorder = useRecorder();
 
@@ -32,7 +34,7 @@ function DroneSynth() {
   const afterFilter = useAutoFilter();
   const compressor = new Tone.Compressor(-30, 3);
 
-  const mainAudioEffectsBus = useAudioEffectsBus(recorder.current, [
+  const effects = [
     beforeFilter?.current,
     bitCrusher?.current,
     chebyshev?.current,
@@ -40,13 +42,24 @@ function DroneSynth() {
     reverb?.current,
     afterFilter?.current,
     compressor,
+  ];
+
+  const mainAudioEffectsBus = useAudioEffectsBus(recorder.current, [
+    bitCrusher?.current,
+    chebyshev?.current,
   ]);
 
-  const polysynths = usePolysynths(2);
+  useEffect(() => {
+    if (recorder.current) {
+      Tone.getDestination().connect(recorder.current);
+    }
+  }, [recorder]);
 
-  polysynths.forEach((polysynth) => {
-    polysynth.connect(mainAudioEffectsBus.current);
-  });
+  // const polysynths = usePolysynths(2);
+
+  // polysynths.forEach((polysynth) => {
+  //   polysynth.connect(mainAudioEffectsBus.current);
+  // });
 
   return (
     <div className="dark:text-sky-300">
@@ -62,7 +75,7 @@ function DroneSynth() {
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </Effects>
 
-        <PolySynths polysynths={polysynths} />
+        {/* <PolySynths polysynths={polysynths} /> */}
         <Oscillators bus={mainAudioEffectsBus} />
       </div>
     </div>
