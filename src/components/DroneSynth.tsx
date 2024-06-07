@@ -52,11 +52,11 @@ function DroneSynth() {
     }
   }, [recorder]);
 
-  // const polysynths = usePolysynths(2);
+  const polysynths = usePolysynths(2);
 
-  // polysynths.forEach((polysynth) => {
-  //   polysynth.connect(mainAudioEffectsBus.current);
-  // });
+  polysynths.forEach((polysynth) => {
+    polysynth.connect(mainAudioEffectsBus.current);
+  });
 
   return (
     <div className="dark:text-sky-300">
@@ -72,7 +72,7 @@ function DroneSynth() {
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </Effects>
 
-        {/* <PolySynths polysynths={polysynths} /> */}
+        <PolySynths polysynths={polysynths} />
         <Oscillators bus={mainAudioEffectsBus} />
       </div>
     </div>
