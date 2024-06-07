@@ -12,7 +12,7 @@ function Chebyshev({ chebyshev }: ChebyshevProps) {
   const [order, setOrder] = useState(1);
   const [wet, setWet] = useState(0);
 
-  chebyshev?.current?.set({
+  chebyshev.current.set({
     order,
     wet,
   });
