@@ -91,7 +91,7 @@ function PolySynth({ polySynth }: PolysynthProps) {
         inputName="release"
         labelText="Release"
         min={0}
-        max={60}
+        max={15}
         step={0.01}
         value={release}
         handleChange={(e) => setRelease(parseFloat(e.target.value))}

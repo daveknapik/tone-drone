@@ -1,4 +1,4 @@
-import DroneSynth from "./components/DroneSynth";
+import DroneSynthLite from "./components/DroneSynthLite";
 import ThemeControls from "./components/ThemeControls";
 import { AudioContextProvider } from "./context/audio";
 
@@ -10,7 +10,7 @@ function App() {
           <ThemeControls />
         </div>
         <div className="m-4">
-          <DroneSynth />
+          <DroneSynthLite />
         </div>
       </div>
     </AudioContextProvider>

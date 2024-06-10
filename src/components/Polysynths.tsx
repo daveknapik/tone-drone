@@ -28,8 +28,9 @@ function PolySynths({ polysynths }: PolySynthsProps) {
       </Heading>
       <div
         className={clsx(
-          "grid grid-cols-1 md:grid-cols-2 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5",
-          !expandPolysynths && "hidden"
+          "grid grid-cols-1 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5",
+          !expandPolysynths && "hidden",
+          polysynths.length > 1 && "md:grid-cols-2"
         )}
       >
         {polysynths.map((polysynth, i) => (
