@@ -10,6 +10,7 @@ export type AudioEffect =
   | Tone.Compressor
   | Tone.Distortion
   | Tone.FeedbackDelay
+  | Tone.Filter
   | Tone.Freeverb
   | Tone.FrequencyShifter
   | Tone.JCReverb

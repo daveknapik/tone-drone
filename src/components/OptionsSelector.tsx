@@ -1,10 +1,11 @@
+import * as Tone from "tone";
 import { useId } from "react";
 
-type OptionType = OscillatorType | BiquadFilterType;
+type OptionType = OscillatorType | BiquadFilterType | Tone.FilterRollOff;
 
 interface OptionsSelectorProps<T extends OptionType> {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  value: string;
+  value: string | number;
   options: T[];
 }
 
@@ -14,6 +15,14 @@ function OptionsSelector<T extends OptionType>({
   options,
 }: OptionsSelectorProps<T>) {
   const id = useId();
+
+  const buildLabelText = (value: string | number) => {
+    if (typeof value === "string") {
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    } else {
+      return value;
+    }
+  };
 
   return (
     <div className="flex flex-wrap items-center space-x-2">
@@ -28,7 +37,7 @@ function OptionsSelector<T extends OptionType>({
             value={option}
           />
           <label htmlFor={`option-${option}-${id}`}>
-            {option.charAt(0).toUpperCase() + option.slice(1)}
+            {buildLabelText(option)}
           </label>
         </div>
       ))}
