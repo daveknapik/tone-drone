@@ -6,9 +6,17 @@ import { MutableRefObject, useState } from "react";
 
 interface DelayProps {
   delay: MutableRefObject<Tone.FeedbackDelay>;
+  label?: string;
+  maxTime?: number;
+  minFeedback?: number;
 }
 
-function Delay({ delay }: DelayProps) {
+function Delay({
+  delay,
+  label = "Delay",
+  maxTime = 10,
+  minFeedback = 0,
+}: DelayProps) {
   const [time, setTime] = useState(1);
   const [feedback, setFeedback] = useState(0.95);
   const [wet, setWet] = useState(0);
@@ -21,11 +29,11 @@ function Delay({ delay }: DelayProps) {
 
   return (
     <div className="place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
-      <div className="col-span-full mb-1">Delay</div>
+      <div className="col-span-full mb-1">{label}</div>
       <Slider
         inputName="time"
         min={0}
-        max={10}
+        max={maxTime}
         value={time}
         labelText="Time"
         step={0.01}
@@ -33,7 +41,7 @@ function Delay({ delay }: DelayProps) {
       />
       <Slider
         inputName="feedback"
-        min={0}
+        min={minFeedback}
         max={1}
         value={feedback}
         labelText="Feedback"

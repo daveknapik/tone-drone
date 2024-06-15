@@ -30,8 +30,9 @@ function DroneSynthLite() {
   const beforeFilter = useAutoFilter();
   const bitCrusher = useBitCrusher();
   const chebyshev = useChebyshev();
-  const delay = useDelay();
+  const microlooper = useDelay();
   const afterFilter = useFilter();
+  const delay = useDelay();
 
   const compressor = new Tone.Compressor(-30, 3);
 
@@ -39,8 +40,9 @@ function DroneSynthLite() {
     beforeFilter.current,
     bitCrusher.current,
     chebyshev.current,
-    delay.current,
+    microlooper.current,
     afterFilter.current,
+    delay.current,
     compressor,
   ];
 
@@ -67,8 +69,14 @@ function DroneSynthLite() {
           <AutoFilter filter={beforeFilter} />
           <BitCrusher bitCrusher={bitCrusher} />
           <Chebyshev chebyshev={chebyshev} />
-          <Delay delay={delay} />
+          <Delay
+            delay={microlooper}
+            label="Microlooper"
+            maxTime={1}
+            minFeedback={0.6}
+          />
           <Filter filter={afterFilter} />
+          <Delay delay={delay} />
           <EffectsBusSendControl bus={mainAudioEffectsBus} />
         </Effects>
         <PolySynths polysynths={polysynths} />
