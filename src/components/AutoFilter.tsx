@@ -13,6 +13,8 @@ function AutoFilter({ filter }: AutoFilterProps) {
   const [baseFrequency, setBaseFrequency] = useState(300);
   const [depth, setDepth] = useState(1);
   const [frequency, setFrequency] = useState(4);
+  const [rolloff, setRolloff] = useState<Tone.FilterRollOff>(-12);
+  const [Q, setQ] = useState(1);
   const [wet, setWet] = useState(0);
   const [type, setType] = useState<BiquadFilterType>("highpass");
   const [oscillatorType, setOscillatorType] = useState<OscillatorType>("sine");
@@ -22,7 +24,7 @@ function AutoFilter({ filter }: AutoFilterProps) {
     depth,
     frequency,
     wet,
-    filter: { type },
+    filter: { type, Q, rolloff },
     type: oscillatorType,
   });
 
@@ -48,6 +50,15 @@ function AutoFilter({ filter }: AutoFilterProps) {
         handleChange={(e) => setFrequency(parseFloat(e.target.value))}
       />
       <Slider
+        inputName="q"
+        min={0}
+        max={9}
+        value={Q}
+        labelText="Q"
+        step={0.01}
+        handleChange={(e) => setQ(parseFloat(e.target.value))}
+      />
+      <Slider
         inputName="depth"
         min={0}
         max={1}
@@ -69,7 +80,14 @@ function AutoFilter({ filter }: AutoFilterProps) {
         <OptionsSelector<BiquadFilterType>
           handleChange={(e) => setType(e.target.value as BiquadFilterType)}
           value={type}
-          options={["highpass", "lowpass"]}
+          options={["highpass", "lowpass", "bandpass", "notch"]}
+        />
+        <OptionsSelector<Tone.FilterRollOff>
+          handleChange={(e) =>
+            setRolloff(parseFloat(e.target.value) as Tone.FilterRollOff)
+          }
+          value={rolloff}
+          options={[-12, -24, -48, -96]}
         />
         <OptionsSelector<OscillatorType>
           handleChange={(e) =>
