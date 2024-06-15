@@ -14,11 +14,11 @@ interface PolysynthProps {
 function PolySynth({ polySynth }: PolysynthProps) {
   const [frequency, setFrequency] = useState(666);
   const [waveform, setWaveform] = useState<OscillatorType>("sine");
-  const [volume, setVolume] = useState(-5);
+  const [volume, setVolume] = useState(-10);
   const [attack, setAttack] = useState(0.5);
   const [decay, setDecay] = useState(0.7);
   const [sustain, setSustain] = useState(1);
-  const [release, setRelease] = useState(1);
+  const [release, setRelease] = useState(3);
 
   const { handleBrowserAudioStart } = useAudioContext();
 
