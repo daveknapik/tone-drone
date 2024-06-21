@@ -1,27 +1,34 @@
-import usePrettyElapsedTimer from "use-pretty-elapsed-timer";
-import { useCallback, useEffect } from "react";
+import formatDuration from "format-duration";
+import { useTimer } from "react-use-precision-timer";
+import { useCallback, useEffect, useState } from "react";
 
 interface TimerProps {
   shouldRun: boolean;
 }
 
 function Timer({ shouldRun }: TimerProps) {
-  const { elapsedTime, start, stop, reset } = usePrettyElapsedTimer("HH:mm:ss");
+  const [duration, setDuration] = useState(0);
 
-  const updateDisplyedTime = useCallback(() => {
+  const updateDisplayedTime = () => {
+    setDuration(timer.getElapsedStartedTime());
+  };
+
+  const timer = useTimer({ delay: 1000 }, updateDisplayedTime);
+
+  const startStopTimer = useCallback(() => {
     if (shouldRun) {
-      reset();
-      start();
+      setDuration(0);
+      timer.start();
     } else {
-      stop();
+      timer.stop();
     }
-  }, [reset, start, stop, shouldRun]);
+  }, [shouldRun, timer]);
 
   useEffect(() => {
-    updateDisplyedTime();
-  }, [updateDisplyedTime]);
+    startStopTimer();
+  }, [startStopTimer]);
 
-  return <div>{elapsedTime}</div>;
+  return <div>{formatDuration(duration, { leading: true })}</div>;
 }
 
 export default Timer;
