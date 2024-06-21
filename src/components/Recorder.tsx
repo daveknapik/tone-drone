@@ -1,6 +1,5 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
-import { useStopwatch } from "react-timer-hook";
 
 import Heading from "./Heading";
 import Timer from "./Timer";
@@ -15,14 +14,6 @@ function Recorder({ recorder }: RecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
   const [expandRecording, setExpandRecording] = useState(true);
   const [url, setUrl] = useState("");
-  const {
-    seconds,
-    minutes,
-    hours,
-    start: startStopwatch,
-    pause: pauseStopwatch,
-    reset: resetStopwatch,
-  } = useStopwatch();
 
   const toggleExpandRecording = (): void => {
     setExpandRecording((prev) => !prev);
@@ -34,12 +25,9 @@ function Recorder({ recorder }: RecorderProps) {
       if (recording) {
         setUrl(URL.createObjectURL(recording));
       }
-      pauseStopwatch();
       setIsRecording(false);
     } else {
       void recorder?.current?.start();
-      resetStopwatch();
-      startStopwatch();
       setIsRecording(true);
     }
   };
@@ -79,7 +67,7 @@ function Recorder({ recorder }: RecorderProps) {
                 </a>
               </Fragment>
             )}
-            <Timer hours={hours} minutes={minutes} seconds={seconds} />
+            <Timer shouldRun={isRecording} />
           </div>
           {url && !isRecording && (
             <div className="text-sm mt-2">
