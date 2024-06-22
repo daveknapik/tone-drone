@@ -2,7 +2,7 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { MutableRefObject, useState } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import OptionsSelector from "./OptionsSelector";
 
 interface AutoFilterProps {
@@ -24,9 +24,14 @@ function AutoFilter({ filter }: AutoFilterProps) {
     depth,
     frequency,
     wet,
-    filter: { type, Q, rolloff },
+    filter: { type, Q },
     type: oscillatorType,
   });
+
+  // rolloff can't go via the set method or it makes the filter stutter and glitch, but this works
+  useEffect(() => {
+    filter.current.filter.rolloff = rolloff;
+  }, [filter, rolloff]);
 
   return (
     <div className="place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
