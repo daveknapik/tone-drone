@@ -1,5 +1,6 @@
 import * as Tone from "tone";
 
+import Button from "./Button";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 
@@ -101,8 +102,8 @@ function PolySynth({ polySynth }: PolysynthProps) {
         value={waveform}
         options={["sine", "square", "triangle", "sawtooth"]}
       />
-      <div className="text-center">
-        <button onClick={playNote}>Play Note</button>
+      <div className="text-center mt-2">
+        <Button handleClick={playNote}>Play Note</Button>
       </div>
     </div>
   );

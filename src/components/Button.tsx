@@ -3,12 +3,12 @@ import { PropsWithChildren } from "react";
 
 interface ButtonProps {
   handleClick: (e: React.MouseEvent<HTMLElement>) => void;
-  isActive: boolean;
+  isActive?: boolean;
 }
 
 function Button({
   handleClick,
-  isActive,
+  isActive = false,
   children,
 }: PropsWithChildren<ButtonProps>) {
   return (
