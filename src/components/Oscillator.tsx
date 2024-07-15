@@ -83,6 +83,8 @@ function Oscillator({
         min={-80}
         max={0}
         value={volume}
+        step={0.01}
+        logarithmic={true}
         handleChange={(e) => setVolume(parseFloat(e.target.value))}
       />
       <Slider

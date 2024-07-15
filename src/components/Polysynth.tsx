@@ -50,6 +50,8 @@ function PolySynth({ polySynth }: PolysynthProps) {
         labelText="Volume"
         min={-80}
         max={0}
+        step={0.01}
+        logarithmic={true}
         value={volume}
         handleChange={(e) => setVolume(parseFloat(e.target.value))}
       />
