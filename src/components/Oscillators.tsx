@@ -32,7 +32,7 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
-    const channel = new Tone.Channel(-5, 0);
+    const channel = new Tone.Channel(-10, 0);
     oscillator.connect(channel);
     channel.connect(bus.current);
 
