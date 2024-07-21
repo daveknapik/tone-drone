@@ -11,6 +11,7 @@ import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import { useOscillators } from "../hooks/useOscillators";
+import { useSynth } from "../hooks/useSynth";
 
 interface OscillatorsProps {
   bus: MutableRefObject<Tone.Channel>;
@@ -24,9 +25,10 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
   const [expandOscillators, setExpandOscillators] = useState(true);
 
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
+  const synth = useSynth();
 
   useConnectChannelsToBus(
-    oscillators.map((osc) => osc.channel),
+    [...oscillators.map((osc) => osc.channel), synth],
     bus.current
   );
 
@@ -95,6 +97,7 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
               maxFreq={maxFreq}
               oscillator={oscillator.oscillator}
               channel={oscillator.channel}
+              synth={synth}
             />
           ))}
         </div>

@@ -15,6 +15,7 @@ interface OscillatorProps {
   minFreq: number;
   oscillator: Tone.Oscillator;
   playPauseKey: string;
+  synth: Tone.Synth;
 }
 
 function Oscillator({
@@ -23,6 +24,7 @@ function Oscillator({
   minFreq,
   oscillator,
   playPauseKey,
+  synth,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
@@ -65,6 +67,7 @@ function Oscillator({
 
   // update osc properties with state changes
   oscillator.frequency.setValueAtTime(frequency, 0.1);
+  synth.frequency.setValueAtTime(frequency, 0.1);
   oscillator.type = waveform as Tone.ToneOscillatorType;
 
   return (
@@ -102,7 +105,7 @@ function Oscillator({
         value={waveform}
         options={["sine", "square", "triangle", "sawtooth"]}
       />
-      <Sequencer frequency={frequency} oscillator={oscillator} />
+      <Sequencer frequency={frequency} oscillator={oscillator} synth={synth} />
       <div className="text-center mt-2">
         <Button handleClick={toggleAudio} isActive={isPlaying}>
           {isPlaying ? "Stop" : "Start"}
