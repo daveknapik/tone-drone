@@ -1,5 +1,6 @@
 import * as Tone from "tone";
 import Button from "./Button";
+import Sequencer from "./Sequencer";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 
@@ -101,6 +102,7 @@ function Oscillator({
         value={waveform}
         options={["sine", "square", "triangle", "sawtooth"]}
       />
+      <Sequencer frequency={frequency} oscillator={oscillator} />
       <div className="text-center mt-2">
         <Button handleClick={toggleAudio} isActive={isPlaying}>
           {isPlaying ? "Stop" : "Start"}
