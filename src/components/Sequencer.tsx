@@ -6,12 +6,23 @@ import { MutableRefObject, useEffect, useRef, useState } from "react";
 
 interface SequencerProps {
   frequency: number;
-  oscillator: Tone.Oscillator;
+  pan: number;
+  panner: Tone.Panner;
   stepCount?: number;
   synth: Tone.Synth;
+  volume: number;
+  waveform: string;
 }
 
-function Sequencer({ frequency, stepCount = 8, synth }: SequencerProps) {
+function Sequencer({
+  frequency,
+  pan,
+  panner,
+  stepCount = 8,
+  synth,
+  volume,
+  waveform,
+}: SequencerProps) {
   const [sequence, setSequence] = useState<StepInterface[]>(() => {
     const steps = [];
 
@@ -26,74 +37,35 @@ function Sequencer({ frequency, stepCount = 8, synth }: SequencerProps) {
     return steps;
   });
 
-  const beatRef: MutableRefObject<number> = useRef<number>(0);
+  const beat: MutableRefObject<number> = useRef<number>(0);
+
+  synth.volume.setTargetAtTime(volume, 0, 0.01);
+  panner?.pan.setTargetAtTime(pan, 0, 0.01);
+
+  synth.set({ oscillator: { type: waveform as OscillatorType } });
 
   useEffect(() => {
     const loop = new Tone.Loop((time) => {
-      const step = sequence[beatRef.current];
-      console.log(beatRef.current);
+      const step = sequence[beat.current];
+      console.log(beat.current);
       if (step.isActive) {
-        console.log("triggering", step.frequency, "8n", time);
-        synth.triggerAttackRelease(step.frequency, "8n", time);
+        console.log(frequency);
+
+        console.log("triggering", frequency, "8n", time);
+        synth.triggerAttackRelease(frequency, "8n", time);
       }
-      beatRef.current = (beatRef.current + 1) % sequence.length;
+      beat.current = (beat.current + 1) % sequence.length;
     }, "8n").start(0);
 
     return () => {
       loop.stop();
       loop.dispose();
     };
-  }, [sequence, synth]); // Re-run the effect if sequence or synth changes
-
-  // useEffect(() => {
-  //   const loop = new Tone.Loop((time) => {
-  //     sequence.forEach((step, index) => {
-  //       if (step.isActive) {
-  //         console.log("triggering", step.frequency, "8n", `+${index}n`);
-  //         synth.triggerAttackRelease(step.frequency, "8n", time);
-  //       }
-  //     });
-  //   }, "8n").start(0);
-
-  //   return () => {
-  //     loop.stop();
-  //     loop.dispose();
-  //   };
-  // }, [sequence, synth]); // Re-run the effect if sequence or synth changes
-
-  /*
-   *
-   *
-   *
-   *
-   */
-
-  // let repeatId = 0;
-
-  // useEffect(() => {
-  //   Tone.Transport.clear(repeatId);
-  //   const repeat = (time: number) => {
-  //     const step = sequence[beat];
-  //     console.log(sequence);
-  //     console.log(beat);
-
-  //     if (step.isActive) {
-  //       console.log("triggering", step.frequency, "8n", beat);
-  //       synth.triggerAttackRelease(step.frequency, "8n", time);
-  //     }
-  //     setBeat((currentBeat) => (currentBeat + 1) % sequence.length);
-  //   };
-  //   repeatId = Tone.Transport.scheduleRepeat(repeat, "8n");
-
-  //   return () => {
-  //     Tone.Transport.clear(repeatId);
-  //   };
-  // }, [sequence, synth]); // Re-run the effect if sequence or synth changes
+  }, [frequency, sequence, synth]);
 
   const handleStepClick = (clickedStep: StepInterface) => {
     const updatedSequence = sequence.map((step) => {
       if (step.index === clickedStep.index) {
-        // Toggle isActive for the clicked step
         return { ...step, isActive: !step.isActive };
       }
       return { ...step };

@@ -14,6 +14,7 @@ interface OscillatorProps {
   maxFreq: number;
   minFreq: number;
   oscillator: Tone.Oscillator;
+  panner: Tone.Panner;
   playPauseKey: string;
   synth: Tone.Synth;
 }
@@ -23,6 +24,7 @@ function Oscillator({
   maxFreq,
   minFreq,
   oscillator,
+  panner,
   playPauseKey,
   synth,
 }: OscillatorProps) {
@@ -31,7 +33,7 @@ function Oscillator({
   const [waveform, setWaveform] = useState("sine");
 
   // Tone.Channel properties
-  const [volume, setVolume] = useState(-10);
+  const [volume, setVolume] = useState(-5);
   const [pan, setPan] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -67,7 +69,6 @@ function Oscillator({
 
   // update osc properties with state changes
   oscillator.frequency.setValueAtTime(frequency, 0.1);
-  synth.frequency.setValueAtTime(frequency, 0.1);
   oscillator.type = waveform as Tone.ToneOscillatorType;
 
   return (
@@ -105,7 +106,14 @@ function Oscillator({
         value={waveform}
         options={["sine", "square", "triangle", "sawtooth"]}
       />
-      <Sequencer frequency={frequency} oscillator={oscillator} synth={synth} />
+      <Sequencer
+        frequency={frequency}
+        pan={pan}
+        panner={panner}
+        synth={synth}
+        volume={volume}
+        waveform={waveform}
+      />
       <div className="text-center mt-2">
         <Button handleClick={toggleAudio} isActive={isPlaying}>
           {isPlaying ? "Stop" : "Start"}

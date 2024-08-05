@@ -11,7 +11,7 @@ import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import { useOscillators } from "../hooks/useOscillators";
-import { useSynth } from "../hooks/useSynth";
+import { useSynths } from "../hooks/useSynths";
 
 interface OscillatorsProps {
   bus: MutableRefObject<Tone.Channel>;
@@ -25,16 +25,16 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
   const [expandOscillators, setExpandOscillators] = useState(true);
 
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
-  const synth = useSynth();
+  const [synths, panners] = useSynths(oscillatorCount);
 
   useConnectChannelsToBus(
-    [...oscillators.map((osc) => osc.channel), synth],
+    [...oscillators.map((osc) => osc.channel), ...panners],
     bus.current
   );
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
-    const channel = new Tone.Channel(-10, 0);
+    const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
     channel.connect(bus.current);
 
@@ -91,13 +91,14 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">
           {oscillators.map((oscillator, i) => (
             <Oscillator
-              playPauseKey={playKeys[i]}
-              key={i}
-              minFreq={minFreq}
-              maxFreq={maxFreq}
-              oscillator={oscillator.oscillator}
               channel={oscillator.channel}
-              synth={synth}
+              key={i}
+              maxFreq={maxFreq}
+              minFreq={minFreq}
+              oscillator={oscillator.oscillator}
+              panner={panners[i]}
+              playPauseKey={playKeys[i]}
+              synth={synths[i]}
             />
           ))}
         </div>
