@@ -52,7 +52,7 @@ function DroneSynthLite() {
     if (recorder.current) {
       Tone.getDestination().connect(recorder.current);
     }
-    Tone.Transport.bpm.value = 60;
+    Tone.Transport.bpm.value = 120;
     Tone.Transport.start();
   }, [recorder]);
 

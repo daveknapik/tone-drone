@@ -7,7 +7,7 @@
 import * as Tone from "tone";
 
 export function useConnectChannelsToBus(
-  channels: (Tone.Channel | Tone.Synth)[],
+  channels: (Tone.Channel | Tone.Panner)[],
   bus: Tone.Channel
 ): void {
   channels.forEach((channel) => {
