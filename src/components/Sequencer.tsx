@@ -37,6 +37,7 @@ function Sequencer({
     return steps;
   });
 
+  const [currentBeat, setCurrentBeat] = useState(0);
   const beat: MutableRefObject<number> = useRef<number>(0);
 
   synth.volume.setTargetAtTime(volume, 0, 0.01);
@@ -47,12 +48,10 @@ function Sequencer({
   useEffect(() => {
     const loop = new Tone.Loop((time) => {
       const step = sequence[beat.current];
-      console.log(beat.current);
-      if (step.isActive) {
-        console.log(frequency);
+      setCurrentBeat(beat.current);
 
-        console.log("triggering", frequency, "8n", time);
-        synth.triggerAttackRelease(frequency, "8n", time);
+      if (step.isActive) {
+        synth.triggerAttackRelease(frequency, "16n", time);
       }
       beat.current = (beat.current + 1) % sequence.length;
     }, "8n").start(0);
@@ -78,7 +77,12 @@ function Sequencer({
     <div>
       Sequencer {stepCount}
       {sequence.map((step, i) => (
-        <Step key={i} step={step} handleClick={() => handleStepClick(step)} />
+        <Step
+          handleClick={() => handleStepClick(step)}
+          isCurrentBeat={currentBeat === i}
+          key={i}
+          step={step}
+        />
       ))}
     </div>
   );
