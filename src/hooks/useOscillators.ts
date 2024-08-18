@@ -1,10 +1,8 @@
 import * as Tone from "tone";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
-
-import { Dispatch, SetStateAction } from "react";
 
 export function useOscillators(
   oscillatorCount = 6

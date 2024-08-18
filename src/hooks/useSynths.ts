@@ -1,14 +1,15 @@
 import * as Tone from "tone";
 
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { SynthWithPanner } from "../types/SynthWithPanner";
 
-export function useSynths(synthCount = 6): [Tone.Synth[], Tone.Panner[]] {
-  const [synths, setSynths] = useState<Tone.Synth[]>([]);
-  const [panners, setPanners] = useState<Tone.Panner[]>([]);
+export function useSynths(
+  synthCount = 6
+): [SynthWithPanner[], Dispatch<SetStateAction<SynthWithPanner[]>>] {
+  const [synths, setSynths] = useState<SynthWithPanner[]>([]);
 
   useEffect(() => {
-    const newSynths: Tone.Synth[] = [];
-    const newPanners: Tone.Panner[] = [];
+    const newSynths: SynthWithPanner[] = [];
 
     for (let i = 0; i < synthCount; i++) {
       const synth = new Tone.Synth();
@@ -16,26 +17,20 @@ export function useSynths(synthCount = 6): [Tone.Synth[], Tone.Panner[]] {
 
       synth.connect(panner);
 
-      newSynths.push(synth);
-      newPanners.push(panner);
+      newSynths.push({ synth, panner });
     }
 
     setSynths(newSynths);
-    setPanners(newPanners);
 
     return () => {
-      newSynths.forEach((synth) => {
+      newSynths.forEach(({ synth, panner }) => {
         synth.dispose();
-      });
-
-      newPanners.forEach((panner) => {
         panner.dispose();
       });
 
       setSynths([]);
-      setPanners([]);
     };
   }, [synthCount]);
 
-  return [synths, panners];
+  return [synths, setSynths];
 }

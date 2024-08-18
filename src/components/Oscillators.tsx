@@ -1,17 +1,20 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
 
-import { useState, MutableRefObject, Fragment } from "react";
+import { useState, MutableRefObject, Fragment, useEffect, useRef } from "react";
 
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Heading from "./Heading";
+// import SequenceManager from "./SequenceManager.tsx";
 import Oscillator from "./Oscillator";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import { useOscillators } from "../hooks/useOscillators";
+import { useSequences } from "../hooks/useSequences";
 import { useSynths } from "../hooks/useSynths";
+import { SynthWithPanner } from "../types/SynthWithPanner";
 
 interface OscillatorsProps {
   bus: MutableRefObject<Tone.Channel>;
@@ -25,12 +28,72 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
   const [expandOscillators, setExpandOscillators] = useState(true);
 
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
-  const [synths, panners] = useSynths(oscillatorCount);
+  const [synths, setSynths] = useSynths(oscillatorCount);
+  const [sequences, setSequences] = useSequences(oscillatorCount, 8);
 
   useConnectChannelsToBus(
-    [...oscillators.map((osc) => osc.channel), ...panners],
+    [
+      ...oscillators.map((osc) => osc.channel),
+      ...synths.map((synth) => synth.panner),
+    ],
     bus.current
   );
+
+  const beat: MutableRefObject<number> = useRef<number>(0);
+  const [currentBeat, setCurrentBeat] = useState(0);
+
+  useEffect(() => {
+    const loop = new Tone.Loop((time) => {
+      setCurrentBeat(beat.current);
+
+      // Sound the active notes on each synth
+      sequences.forEach((sequence, i) => {
+        if (sequence.steps[beat.current].isActive) {
+          console.log(`synth ${i} play ${sequence.frequency} Hz`);
+          synths[i].synth.triggerAttackRelease(sequence.frequency, "8n", time);
+        }
+      });
+      beat.current = (beat.current + 1) % 8; // Ensure stepCount is defined or replace with a constant
+    }, "8n").start(0);
+
+    return () => {
+      loop.stop();
+      loop.dispose();
+    };
+  }, [synths, sequences]);
+
+  const handleStepClick = (sequenceIndex: number, stepIndex: number) => {
+    const newSequences = sequences.map((sequence, i) => {
+      if (i === sequenceIndex) {
+        return {
+          ...sequence,
+          steps: sequence.steps.map((step, j) => {
+            if (j === stepIndex) {
+              return { ...step, isActive: !step.isActive };
+            }
+            return { ...step };
+          }),
+        };
+      }
+      return sequence;
+    });
+
+    setSequences(newSequences);
+  };
+
+  const updateSequenceFrequency = (
+    sequenceIndex: number,
+    frequency: number
+  ) => {
+    const newSequences = sequences.map((sequence, i) => {
+      if (i === sequenceIndex) {
+        return { ...sequence, frequency };
+      }
+      return sequence;
+    });
+
+    setSequences(newSequences);
+  };
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -41,11 +104,28 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
     return { oscillator, channel };
   };
 
+  const createSynth = (): SynthWithPanner => {
+    const synth = new Tone.Synth();
+    const panner = new Tone.Panner();
+
+    synth.connect(panner);
+    panner.connect(bus.current);
+
+    return { synth, panner };
+  };
+
   const addOscillator = (): void => {
     setOscillators((prevOscillators: OscillatorWithChannel[]) => [
       ...prevOscillators,
       createOscillator(),
     ]);
+
+    setSynths((prevSynths: SynthWithPanner[]) => [
+      ...prevSynths,
+      createSynth(),
+    ]);
+
+    // Todo: Create new sequence and add to sequences
   };
 
   const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -92,13 +172,18 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
           {oscillators.map((oscillator, i) => (
             <Oscillator
               channel={oscillator.channel}
+              currentBeat={currentBeat}
+              handleStepClick={handleStepClick}
               key={i}
               maxFreq={maxFreq}
               minFreq={minFreq}
               oscillator={oscillator.oscillator}
-              panner={panners[i]}
+              panner={synths[i].panner}
               playPauseKey={playKeys[i]}
-              synth={synths[i]}
+              sequence={sequences[i]}
+              sequenceIndex={i}
+              synth={synths[i].synth}
+              updateSequenceFrequency={updateSequenceFrequency}
             />
           ))}
         </div>

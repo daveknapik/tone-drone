@@ -3,6 +3,7 @@ import Button from "./Button";
 import Sequencer from "./Sequencer";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
+import { Sequence } from "../types/Sequence";
 
 import { useState } from "react";
 
@@ -11,22 +12,32 @@ import { useKeyDown } from "../hooks/useKeyDown";
 
 interface OscillatorProps {
   channel: Tone.Channel;
+  currentBeat: number;
+  handleStepClick: (sequenceIndex: number, stepIndex: number) => void;
   maxFreq: number;
   minFreq: number;
   oscillator: Tone.Oscillator;
   panner: Tone.Panner;
   playPauseKey: string;
+  sequence: Sequence;
+  sequenceIndex: number;
   synth: Tone.Synth;
+  updateSequenceFrequency: (sequenceIndex: number, frequency: number) => void;
 }
 
 function Oscillator({
   channel,
+  currentBeat,
+  handleStepClick,
   maxFreq,
   minFreq,
   oscillator,
   panner,
   playPauseKey,
+  sequence,
+  sequenceIndex,
   synth,
+  updateSequenceFrequency,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
@@ -71,6 +82,12 @@ function Oscillator({
   oscillator.frequency.setValueAtTime(frequency, 0.1);
   oscillator.type = waveform as Tone.ToneOscillatorType;
 
+  const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFrequency(parseFloat(e.target.value));
+    synth.frequency.setValueAtTime(frequency, 0.1);
+    updateSequenceFrequency(sequenceIndex, frequency);
+  };
+
   return (
     <div>
       <Slider
@@ -80,7 +97,7 @@ function Oscillator({
         max={maxFreq}
         step={0.01}
         value={frequency}
-        handleChange={(e) => setFrequency(parseFloat(e.target.value))}
+        handleChange={handleFrequencyChange}
       />
       <Slider
         inputName="volume"
@@ -107,9 +124,12 @@ function Oscillator({
         options={["sine", "square", "triangle", "sawtooth"]}
       />
       <Sequencer
-        frequency={frequency}
+        currentBeat={currentBeat}
+        handleStepClick={handleStepClick}
         pan={pan}
         panner={panner}
+        sequence={sequence}
+        sequenceIndex={sequenceIndex}
         synth={synth}
         volume={volume}
         waveform={waveform}
