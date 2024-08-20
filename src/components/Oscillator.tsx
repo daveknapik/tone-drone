@@ -83,9 +83,10 @@ function Oscillator({
   oscillator.type = waveform as Tone.ToneOscillatorType;
 
   const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFrequency(parseFloat(e.target.value));
-    synth.frequency.setValueAtTime(frequency, 0.1);
-    updateSequenceFrequency(sequenceIndex, frequency);
+    const newFrequency = parseFloat(e.target.value);
+    setFrequency(newFrequency);
+    synth.frequency.setValueAtTime(newFrequency, 0.1);
+    updateSequenceFrequency(sequenceIndex, newFrequency);
   };
 
   return (
