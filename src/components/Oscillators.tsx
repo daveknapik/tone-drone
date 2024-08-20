@@ -49,7 +49,6 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
       // Sound the active notes on each synth
       sequences.forEach((sequence, i) => {
         if (sequence.steps[beat.current].isActive) {
-          console.log(`synth ${i} play ${sequence.frequency} Hz`);
           synths[i].synth.triggerAttackRelease(sequence.frequency, "8n", time);
         }
       });
