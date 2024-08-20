@@ -9,6 +9,7 @@ import Heading from "./Heading";
 import Oscillator from "./Oscillator";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
+import { Sequence } from "../types/Sequence";
 
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import { useOscillators } from "../hooks/useOscillators";
@@ -19,9 +20,14 @@ import { SynthWithPanner } from "../types/SynthWithPanner";
 interface OscillatorsProps {
   bus: MutableRefObject<Tone.Channel>;
   oscillatorCount?: number;
+  stepCount?: number;
 }
 
-function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
+function Oscillators({
+  bus,
+  oscillatorCount = 6,
+  stepCount = 8,
+}: OscillatorsProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
@@ -29,7 +35,7 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
 
   const [oscillators, setOscillators] = useOscillators(oscillatorCount);
   const [synths, setSynths] = useSynths(oscillatorCount);
-  const [sequences, setSequences] = useSequences(oscillatorCount, 8);
+  const [sequences, setSequences] = useSequences(oscillatorCount, stepCount);
 
   useConnectChannelsToBus(
     [
@@ -114,17 +120,31 @@ function Oscillators({ bus, oscillatorCount = 6 }: OscillatorsProps) {
   };
 
   const addOscillator = (): void => {
+    // Create new oscillator and add to oscillators
     setOscillators((prevOscillators: OscillatorWithChannel[]) => [
       ...prevOscillators,
       createOscillator(),
     ]);
 
+    // Create new synth and add to synths
     setSynths((prevSynths: SynthWithPanner[]) => [
       ...prevSynths,
       createSynth(),
     ]);
 
-    // Todo: Create new sequence and add to sequences
+    // Create new sequence with steps and add to sequences
+    const sequence: Sequence = {
+      frequency: 440,
+      steps: [],
+    };
+
+    for (let i = 0; i < stepCount; i++) {
+      sequence.steps.push({
+        isActive: false,
+      });
+    }
+
+    setSequences((prevSequences: Sequence[]) => [...prevSequences, sequence]);
   };
 
   const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {

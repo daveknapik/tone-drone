@@ -9,7 +9,6 @@ interface SequencerProps {
   panner: Tone.Panner;
   sequence: Sequence;
   sequenceIndex: number;
-  stepCount?: number;
   synth: Tone.Synth;
   volume: number;
   waveform: string;
@@ -22,7 +21,6 @@ function Sequencer({
   panner,
   sequence,
   sequenceIndex,
-  stepCount = 8,
   synth,
   volume,
   waveform,
@@ -34,7 +32,6 @@ function Sequencer({
 
   return (
     <div>
-      Sequencer {stepCount}
       {sequence.steps.map((_step, i) => (
         <Step
           handleClick={() => handleStepClick(sequenceIndex, i)}
