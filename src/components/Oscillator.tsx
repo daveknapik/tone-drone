@@ -84,9 +84,9 @@ function Oscillator({
 
   const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFrequency = parseFloat(e.target.value);
-    setFrequency(newFrequency);
-    synth.frequency.setValueAtTime(newFrequency, 0.1);
-    updateSequenceFrequency(sequenceIndex, newFrequency);
+    setFrequency(newFrequency); // sets the frequency on the oscillator
+    synth.frequency.setValueAtTime(newFrequency, 0.1); // sets the frequency on the synth, enabling pitch changes whilst playing
+    updateSequenceFrequency(sequenceIndex, newFrequency); // updates the sequence frequency so future notes in the sequence play at the new frequency
   };
 
   return (

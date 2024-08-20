@@ -3,8 +3,8 @@ import { Sequence } from "../types/Sequence";
 import { Dispatch, SetStateAction, useState } from "react";
 
 export function useSequences(
-  sequenceCount = 6,
-  stepCount = 8
+  sequenceCount: number,
+  stepCount: number
 ): [Sequence[], Dispatch<SetStateAction<Sequence[]>>] {
   const [sequences, setSequences] = useState<Sequence[]>(() => {
     const sequences: Sequence[] = [];
