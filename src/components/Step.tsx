@@ -16,7 +16,7 @@ function Step({ handleClick, isCurrentBeat, step: { isActive } }: StepProps) {
           isActive && "bg-green-500",
           !isActive && "bg-gray-500",
           isCurrentBeat && "bg-pink-500",
-          isCurrentBeat && isActive && "bg-yellow-500"
+          isCurrentBeat && isActive && "bg-yellow-300"
         )}
         onClick={handleClick}
       />

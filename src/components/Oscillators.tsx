@@ -26,7 +26,7 @@ interface OscillatorsProps {
 function Oscillators({
   bus,
   oscillatorCount = 6,
-  stepCount = 8,
+  stepCount = 16,
 }: OscillatorsProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
@@ -58,14 +58,14 @@ function Oscillators({
           synths[i].synth.triggerAttackRelease(sequence.frequency, "8n", time);
         }
       });
-      beat.current = (beat.current + 1) % 8; // Ensure stepCount is defined or replace with a constant
+      beat.current = (beat.current + 1) % stepCount;
     }, "8n").start(0);
 
     return () => {
       loop.stop();
       loop.dispose();
     };
-  }, [synths, sequences]);
+  }, [sequences, stepCount, synths]);
 
   useEffect(() => {
     setSequences((prevSequences) => {

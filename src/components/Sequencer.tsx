@@ -31,7 +31,7 @@ function Sequencer({
   synth.set({ oscillator: { type: waveform as OscillatorType } });
 
   return (
-    <div>
+    <div className="grid grid-cols-8 gap-2">
       {sequence.steps.map((_step, i) => (
         <Step
           handleClick={() => handleStepClick(sequenceIndex, i)}
