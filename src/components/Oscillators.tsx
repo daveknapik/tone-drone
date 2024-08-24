@@ -6,6 +6,7 @@ import { useState, MutableRefObject, Fragment, useEffect, useRef } from "react";
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Heading from "./Heading";
 import Oscillator from "./Oscillator";
+import Slider from "./Slider";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { Sequence } from "../types/Sequence";
@@ -29,6 +30,7 @@ function Oscillators({
 }: OscillatorsProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
+  const [bpm, setBpm] = useState(120);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
@@ -178,6 +180,11 @@ function Oscillators({
     }
   };
 
+  const updateBpm = (bpm: number): void => {
+    Tone.getTransport().bpm.value = bpm;
+    setBpm(bpm);
+  };
+
   const toggleExpandOscillators = (): void => {
     setExpandOscillators((prev) => !prev);
   };
@@ -197,7 +204,28 @@ function Oscillators({
         )}
       >
         <div className="flex items-start justify-between">
-          <FrequencyRangeControl handleFormSubmit={updateFrequencyRange} />
+          <div>
+            <FrequencyRangeControl handleFormSubmit={updateFrequencyRange} />
+            {/* <input
+              className="col-span-6 mt-2 w-20 mr-2 rounded-md border-0 px-1 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600"
+              max="999"
+              min="1"
+              name="bpm"
+              onChange={(e) => updateBpm(parseFloat(e.target.value))}
+              step="0.01"
+              type="number"
+              value={bpm | 0}
+            /> */}
+            <Slider
+              inputName="bpm"
+              min={0}
+              max={999}
+              value={bpm}
+              labelText="bpm"
+              step={0.01}
+              handleChange={(e) => updateBpm(parseFloat(e.target.value))}
+            />
+          </div>
           <button onClick={addOscillator}>+</button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">

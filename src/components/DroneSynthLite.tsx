@@ -52,8 +52,7 @@ function DroneSynthLite() {
     if (recorder.current) {
       Tone.getDestination().connect(recorder.current);
     }
-    Tone.Transport.bpm.value = 60;
-    Tone.Transport.start();
+    Tone.getTransport().start();
   }, [recorder]);
 
   const polysynths = usePolysynths(1);
