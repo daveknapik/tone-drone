@@ -1,18 +1,21 @@
 import * as Tone from "tone";
+import { clsx } from "clsx";
 import { useId } from "react";
 
 type OptionType = OscillatorType | BiquadFilterType | Tone.FilterRollOff;
 
 interface OptionsSelectorProps<T extends OptionType> {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  value: string | number;
+  justifyBetween?: boolean;
   options: T[];
+  value: string | number;
 }
 
 function OptionsSelector<T extends OptionType>({
   handleChange,
-  value,
+  justifyBetween = false,
   options,
+  value,
 }: OptionsSelectorProps<T>) {
   const id = useId();
 
@@ -25,7 +28,12 @@ function OptionsSelector<T extends OptionType>({
   };
 
   return (
-    <div className="flex flex-wrap items-center space-x-2">
+    <div
+      className={clsx(
+        "flex flex-wrap space-x-2",
+        justifyBetween && "justify-between"
+      )}
+    >
       {options.map((option) => (
         <div key={option} className="flex space-x-2">
           <input

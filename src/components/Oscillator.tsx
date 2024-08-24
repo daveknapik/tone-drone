@@ -119,22 +119,27 @@ function Oscillator({
         step={0.01}
         handleChange={(e) => setPan(parseFloat(e.target.value))}
       />
-      <OptionsSelector<OscillatorType>
-        handleChange={(e) => setWaveform(e.target.value)}
-        value={waveform}
-        options={["sine", "square", "triangle", "sawtooth"]}
-      />
-      <Sequencer
-        currentBeat={currentBeat}
-        handleStepClick={handleStepClick}
-        pan={pan}
-        panner={panner}
-        sequence={sequence}
-        sequenceIndex={sequenceIndex}
-        synth={synth}
-        volume={volume}
-        waveform={waveform}
-      />
+      <div className="justify-between mt-1">
+        <OptionsSelector<OscillatorType>
+          handleChange={(e) => setWaveform(e.target.value)}
+          justifyBetween={true}
+          options={["sine", "square", "triangle", "sawtooth"]}
+          value={waveform}
+        />
+      </div>
+      <div className="text-center mt-2">
+        <Sequencer
+          currentBeat={currentBeat}
+          handleStepClick={handleStepClick}
+          pan={pan}
+          panner={panner}
+          sequence={sequence}
+          sequenceIndex={sequenceIndex}
+          synth={synth}
+          volume={volume}
+          waveform={waveform}
+        />
+      </div>
       <div className="text-center mt-2">
         <Button handleClick={toggleAudio} isActive={isPlaying}>
           {isPlaying ? "Stop" : "Start"}
