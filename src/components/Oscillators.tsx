@@ -5,7 +5,6 @@ import { useState, MutableRefObject, Fragment, useEffect, useRef } from "react";
 
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Heading from "./Heading";
-// import SequenceManager from "./SequenceManager.tsx";
 import Oscillator from "./Oscillator";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
@@ -66,6 +65,20 @@ function Oscillators({
       loop.dispose();
     };
   }, [synths, sequences]);
+
+  useEffect(() => {
+    setSequences((prevSequences) => {
+      const newSequences = prevSequences.map((sequence) => {
+        if (sequence.frequency < minFreq) {
+          return { ...sequence, frequency: minFreq };
+        } else if (sequence.frequency > maxFreq) {
+          return { ...sequence, frequency: maxFreq };
+        }
+        return sequence;
+      });
+      return newSequences;
+    });
+  }, [minFreq, maxFreq, setSequences]);
 
   const handleStepClick = (sequenceIndex: number, stepIndex: number) => {
     const newSequences = sequences.map((sequence, i) => {
