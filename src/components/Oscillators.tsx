@@ -1,7 +1,15 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
 
-import { useState, MutableRefObject, Fragment, useEffect, useRef } from "react";
+import {
+  useCallback,
+  useState,
+  MutableRefObject,
+  Fragment,
+  useEffect,
+  useRef,
+} from "react";
+import { useDebounceCallback } from "usehooks-ts";
 
 import BpmControl from "./BpmControl";
 import FrequencyRangeControl from "./FrequencyRangeControl";
@@ -100,19 +108,24 @@ function Oscillators({
     setSequences(newSequences);
   };
 
-  const updateSequenceFrequency = (
-    sequenceIndex: number,
-    frequency: number
-  ) => {
-    const newSequences = sequences.map((sequence, i) => {
-      if (i === sequenceIndex) {
-        return { ...sequence, frequency };
-      }
-      return sequence;
-    });
+  const updateSequenceFrequency = useCallback(
+    (sequenceIndex: number, frequency: number) => {
+      const newSequences = sequences.map((sequence, i) => {
+        if (i === sequenceIndex) {
+          return { ...sequence, frequency };
+        }
+        return sequence;
+      });
 
-    setSequences(newSequences);
-  };
+      setSequences(newSequences);
+    },
+    [sequences, setSequences]
+  );
+
+  const updateSequenceFrequencyDebounced = useDebounceCallback(
+    updateSequenceFrequency,
+    500
+  );
 
   const createOscillator = (): OscillatorWithChannel => {
     const oscillator = new Tone.Oscillator(minFreq, "sine");
@@ -219,7 +232,7 @@ function Oscillators({
               sequence={sequences[i]}
               sequenceIndex={i}
               synth={synths[i].synth}
-              updateSequenceFrequency={updateSequenceFrequency}
+              updateSequenceFrequency={updateSequenceFrequencyDebounced}
             />
           ))}
         </div>

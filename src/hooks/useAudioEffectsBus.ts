@@ -1,4 +1,4 @@
-/* 
+/*
   Creates an audio effects bus (Tone.Channel)
   and chains the audio effects passed in as an array to it, and then to the Tone.Destination.
   This is useful for receivings audio sources (e.g., oscillators) at an effects bus
