@@ -63,7 +63,12 @@ function Oscillators({
       // Sound the active notes on each synth
       sequences.forEach((sequence, i) => {
         if (sequence.steps[beat.current].isActive) {
-          synths[i].synth.triggerAttackRelease(sequence.frequency, "8n", time);
+          synths[i].synth.triggerAttackRelease(
+            sequence.frequency,
+            "8n",
+            time,
+            1
+          );
         }
       });
       beat.current = (beat.current + 1) % stepCount;
