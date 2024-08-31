@@ -1,5 +1,6 @@
 import DroneSynthLite from "./components/DroneSynthLite";
 import ThemeControls from "./components/ThemeControls";
+import PowerButton from "./components/PowerButton";
 import { AudioContextProvider } from "./context/audio";
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
       <div className="text-pink-900 dark:text-sky-300">
         <div className="flex space-x-2 my-5 ml-5">
           <ThemeControls />
+          <PowerButton />
         </div>
         <div className="m-4">
           <DroneSynthLite />

@@ -4,6 +4,7 @@ import { createContext, useState } from "react";
 
 interface AudioContextInterface {
   handleBrowserAudioStart: () => Promise<void>;
+  isAudioEnabled: boolean;
 }
 
 const AudioContext = createContext<AudioContextInterface | null>(null);
@@ -24,7 +25,7 @@ function AudioContextProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AudioContext.Provider value={{ handleBrowserAudioStart }}>
+    <AudioContext.Provider value={{ handleBrowserAudioStart, isAudioEnabled }}>
       {children}
     </AudioContext.Provider>
   );
