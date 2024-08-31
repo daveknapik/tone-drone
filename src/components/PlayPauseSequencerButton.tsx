@@ -1,6 +1,6 @@
 import { useAudioContext } from "../hooks/useAudioContext";
 
-function PowerButton() {
+function PlayPauseSequencerButton() {
   const { handleBrowserAudioStart, isTransportRunning, toggleTransport } =
     useAudioContext();
 
@@ -21,4 +21,4 @@ function PowerButton() {
   );
 }
 
-export default PowerButton;
+export default PlayPauseSequencerButton;
