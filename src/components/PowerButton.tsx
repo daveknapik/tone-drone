@@ -1,18 +1,23 @@
 import { useAudioContext } from "../hooks/useAudioContext";
 
 function PowerButton() {
-  const { handleBrowserAudioStart, isAudioEnabled } = useAudioContext();
+  const { handleBrowserAudioStart, isTransportRunning, toggleTransport } =
+    useAudioContext();
+
+  const toggleSequencerPlay = () => {
+    void handleBrowserAudioStart();
+    toggleTransport();
+  };
+
   return (
-    !isAudioEnabled && (
-      <button
-        className="border-2 rounded-md border-pink-500 dark:border-sky-300 px-2 py-1"
-        onClick={() => {
-          void handleBrowserAudioStart();
-        }}
-      >
-        Start It
-      </button>
-    )
+    <button
+      className="border-2 rounded-md border-pink-500 dark:border-sky-300 px-2 py-1"
+      onClick={() => {
+        toggleSequencerPlay();
+      }}
+    >
+      {isTransportRunning ? "Pause" : "Play"}
+    </button>
   );
 }
 
