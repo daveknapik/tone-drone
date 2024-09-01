@@ -1,6 +1,12 @@
 import { useAudioContext } from "../hooks/useAudioContext";
+import { useKeyDown } from "../hooks/useKeyDown";
+import Button from "./Button";
 
 function PlayPauseSequencerButton() {
+  useKeyDown(() => {
+    toggleSequencerPlay();
+  }, [" "]);
+
   const { handleBrowserAudioStart, isTransportRunning, toggleTransport } =
     useAudioContext();
 
@@ -10,14 +16,9 @@ function PlayPauseSequencerButton() {
   };
 
   return (
-    <button
-      className="border-2 rounded-md border-pink-500 dark:border-sky-300 px-2 py-1"
-      onClick={() => {
-        toggleSequencerPlay();
-      }}
-    >
-      {isTransportRunning ? "Pause" : "Play"}
-    </button>
+    <Button handleClick={toggleSequencerPlay} isActive={isTransportRunning}>
+      {isTransportRunning ? "Pause Sequences" : "Play Sequences"}
+    </Button>
   );
 }
 
