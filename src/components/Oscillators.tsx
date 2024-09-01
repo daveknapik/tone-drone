@@ -25,6 +25,8 @@ import { useSequences } from "../hooks/useSequences";
 import { useSynths } from "../hooks/useSynths";
 import { SynthWithPanner } from "../types/SynthWithPanner";
 
+import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
+
 interface OscillatorsProps {
   bus: MutableRefObject<Tone.Channel>;
   oscillatorCount?: number;
@@ -216,12 +218,14 @@ function Oscillators({
         )}
       >
         <div className="flex items-start justify-between">
-          <div>
+          <div className="space-y-3">
             <FrequencyRangeControl handleFormSubmit={updateFrequencyRange} />
             <BpmControl />
+            <PlayPauseSequencerButton />
           </div>
           <button onClick={addOscillator}>+</button>
         </div>
+        <hr className="mt-8 border-pink-500 dark:border-sky-300 " />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">
           {oscillators.map((oscillator, i) => (
             <Oscillator
