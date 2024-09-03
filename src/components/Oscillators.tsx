@@ -219,7 +219,11 @@ function Oscillators({
       >
         <div className="flex items-start justify-between">
           <div className="space-y-3">
-            <FrequencyRangeControl handleFormSubmit={updateFrequencyRange} />
+            <FrequencyRangeControl
+              handleFormSubmit={updateFrequencyRange}
+              maxFreq={maxFreq}
+              minFreq={minFreq}
+            />
             <BpmControl />
             <PlayPauseSequencerButton />
           </div>
