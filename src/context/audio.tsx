@@ -32,7 +32,6 @@ function AudioContextProvider({ children }: { children: React.ReactNode }) {
     } else {
       Tone.getTransport().start();
     }
-    console.log("isTransportRunning", isTransportRunning);
 
     setIsTransportRunning(!isTransportRunning);
   };
