@@ -96,24 +96,29 @@ function Oscillators({
     });
   }, [minFreq, maxFreq, setSequences]);
 
-  const handleStepClick = (sequenceIndex: number, stepIndex: number) => {
-    const newSequences = sequences.map((sequence, i) => {
-      if (i === sequenceIndex) {
-        return {
-          ...sequence,
-          steps: sequence.steps.map((step, j) => {
-            if (j === stepIndex) {
-              return { ...step, isActive: !step.isActive };
-            }
-            return { ...step };
-          }),
-        };
-      }
-      return sequence;
-    });
+  const handleStepClick = useCallback(
+    (sequenceIndex: number, stepIndex: number) => {
+      setSequences((prevSequences) => {
+        const newSequences = prevSequences.map((sequence, i) => {
+          if (i === sequenceIndex) {
+            return {
+              ...sequence,
+              steps: sequence.steps.map((step, j) => {
+                if (j === stepIndex) {
+                  return { ...step, isActive: !step.isActive };
+                }
+                return { ...step };
+              }),
+            };
+          }
+          return sequence;
+        });
 
-    setSequences(newSequences);
-  };
+        return newSequences;
+      });
+    },
+    [setSequences]
+  );
 
   const updateSequenceFrequency = useCallback(
     (sequenceIndex: number, frequency: number) => {
