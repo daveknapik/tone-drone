@@ -1,22 +1,21 @@
-import type { Step } from "../types/Step";
 import { clsx } from "clsx";
 
 interface StepProps {
   handleClick: () => void;
   isCurrentBeat: boolean;
-  step: Step;
+  step: boolean;
 }
 
-function Step({ handleClick, isCurrentBeat, step: { isActive } }: StepProps) {
+function Step({ handleClick, isCurrentBeat, step }: StepProps) {
   return (
     <div>
       <button
         className={clsx(
           "w-8 h-8 rounded-full border-2 border-white",
-          isActive && "bg-green-500",
-          !isActive && "bg-gray-500",
+          step && "bg-green-500",
+          !step && "bg-gray-500",
           isCurrentBeat && "bg-pink-500",
-          isCurrentBeat && isActive && "bg-yellow-300"
+          isCurrentBeat && step && "bg-yellow-300"
         )}
         onClick={handleClick}
       />

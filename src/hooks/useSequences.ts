@@ -16,9 +16,7 @@ export function useSequences(
       };
 
       for (let j = 0; j < stepCount; j++) {
-        sequence.steps.push({
-          isActive: false,
-        });
+        sequence.steps.push(false);
       }
 
       sequences.push(sequence);

@@ -47,6 +47,11 @@ function Oscillators({
   const [synths, setSynths] = useSynths(oscillatorCount);
   const [sequences, setSequences] = useSequences(oscillatorCount, stepCount);
 
+  const beat: MutableRefObject<number> = useRef<number>(0);
+  const [currentBeat, setCurrentBeat] = useState(0);
+  const loopRef = useRef<Tone.Loop | null>(null);
+  const callbackRef = useRef<(time: number) => void>();
+
   useConnectChannelsToBus(
     [
       ...oscillators.map((osc) => osc.channel),
@@ -55,33 +60,55 @@ function Oscillators({
     bus.current
   );
 
-  const beat: MutableRefObject<number> = useRef<number>(0);
-  const [currentBeat, setCurrentBeat] = useState(0);
+  const getActiveSteps = useCallback(() => {
+    return sequences
+      .map((sequence, i) => ({
+        frequency: sequence.frequency,
+        isActive: sequence.steps[beat.current],
+        synthIndex: i,
+      }))
+      .filter(({ isActive }) => isActive);
+  }, [sequences]);
 
+  // set up the loop on first render
   useEffect(() => {
-    const loop = new Tone.Loop((time) => {
+    if (!loopRef.current) {
+      loopRef.current = new Tone.Loop((time) => {
+        if (callbackRef.current) {
+          callbackRef.current(time);
+        }
+      }, "16n").start(0);
+    }
+
+    return () => {
+      if (loopRef.current) {
+        loopRef.current.stop();
+        loopRef.current.dispose();
+        loopRef.current = null;
+      }
+    };
+  }, []);
+
+  // set current beat and redefine the loop's callback when steps change
+  useEffect(() => {
+    callbackRef.current = (time) => {
       setCurrentBeat(beat.current);
 
       // Sound the active notes on each synth
-      sequences.forEach((sequence, i) => {
-        if (sequence.steps[beat.current].isActive) {
-          synths[i].synth.triggerAttackRelease(
-            sequence.frequency,
-            "8n",
-            time,
-            1
-          );
-        }
+      getActiveSteps().forEach(({ frequency, synthIndex }) => {
+        synths[synthIndex].synth.triggerAttackRelease(
+          frequency,
+          "16n",
+          time,
+          1.5
+        );
       });
+
       beat.current = (beat.current + 1) % stepCount;
-    }, "8n").start(0);
-
-    return () => {
-      loop.stop();
-      loop.dispose();
     };
-  }, [sequences, stepCount, synths]);
+  }, [getActiveSteps, stepCount, synths]);
 
+  // update the frequency of the out of range oscillators when min or max freq changes
   useEffect(() => {
     setSequences((prevSequences) => {
       const newSequences = prevSequences.map((sequence) => {
@@ -99,21 +126,11 @@ function Oscillators({
   const handleStepClick = useCallback(
     (sequenceIndex: number, stepIndex: number) => {
       setSequences((prevSequences) => {
-        const newSequences = prevSequences.map((sequence, i) => {
-          if (i === sequenceIndex) {
-            return {
-              ...sequence,
-              steps: sequence.steps.map((step, j) => {
-                if (j === stepIndex) {
-                  return { ...step, isActive: !step.isActive };
-                }
-                return { ...step };
-              }),
-            };
-          }
-          return sequence;
-        });
-
+        const newSequences = [...prevSequences];
+        const sequence = newSequences[sequenceIndex];
+        const newSteps = [...sequence.steps];
+        newSteps[stepIndex] = !newSteps[stepIndex];
+        newSequences[sequenceIndex] = { ...sequence, steps: newSteps };
         return newSequences;
       });
     },
@@ -178,9 +195,7 @@ function Oscillators({
     };
 
     for (let i = 0; i < stepCount; i++) {
-      sequence.steps.push({
-        isActive: false,
-      });
+      sequence.steps.push(false);
     }
 
     setSequences((prevSequences: Sequence[]) => [...prevSequences, sequence]);
