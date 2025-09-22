@@ -72,13 +72,11 @@ function Oscillators({
 
   // set up the loop on first render
   useEffect(() => {
-    if (!loopRef.current) {
-      loopRef.current = new Tone.Loop((time) => {
-        if (callbackRef.current) {
-          callbackRef.current(time);
-        }
-      }, "16n").start(0);
-    }
+    loopRef.current ??= new Tone.Loop((time) => {
+      if (callbackRef.current) {
+        callbackRef.current(time);
+      }
+    }, "16n").start(0);
 
     return () => {
       if (loopRef.current) {

@@ -62,7 +62,7 @@ function Slider({
         htmlFor={id}
         className={labelText ? "w-18 md:w-24 basis-1/4" : "basis-2/8"}
       >
-        {labelText ? labelText : inputName.charAt(0).toUpperCase()}
+        {labelText ?? inputName.charAt(0).toUpperCase()}
       </label>
       <input
         className="w-36 md:w-48 basis-5/8"
