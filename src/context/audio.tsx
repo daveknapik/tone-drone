@@ -49,5 +49,5 @@ function AudioContextProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export { AudioContextProvider };
+export { AudioContextProvider, AudioContextProvider as AudioProvider };
 export default AudioContext;
