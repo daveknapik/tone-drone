@@ -2,10 +2,10 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { MutableRefObject, useState } from "react";
+import { useState } from "react";
 
 interface FreeverbProps {
-  freeverb: MutableRefObject<Tone.Freeverb>;
+  freeverb: React.RefObject<Tone.Freeverb>;
 }
 
 function Freeverb({ freeverb }: FreeverbProps) {

@@ -2,10 +2,10 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { MutableRefObject, useState } from "react";
+import { useState } from "react";
 
 interface ChebyshevProps {
-  chebyshev: MutableRefObject<Tone.Chebyshev>;
+  chebyshev: React.RefObject<Tone.Chebyshev>;
 }
 
 function Chebyshev({ chebyshev }: ChebyshevProps) {

@@ -2,10 +2,10 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { MutableRefObject, useState } from "react";
+import { useState } from "react";
 
 interface DelayProps {
-  delay: MutableRefObject<Tone.FeedbackDelay>;
+  delay: React.RefObject<Tone.FeedbackDelay>;
   label?: string;
   maxTime?: number;
   minFeedback?: number;

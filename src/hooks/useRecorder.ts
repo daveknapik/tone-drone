@@ -1,10 +1,8 @@
 import * as Tone from "tone";
-import { useEffect, useRef, MutableRefObject } from "react";
+import { useEffect, useRef } from "react";
 
 export function useRecorder() {
-  const recorder = useRef<Tone.Recorder>(
-    null
-  ) as MutableRefObject<Tone.Recorder>;
+  const recorder = useRef<Tone.Recorder | null>(null);
 
   useEffect(() => {
     if (MediaRecorder.isTypeSupported("audio/webm")) {
@@ -20,7 +18,7 @@ export function useRecorder() {
     }
 
     return () => {
-      recorder.current.dispose();
+      recorder.current?.dispose();
     };
   }, []);
 

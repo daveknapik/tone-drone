@@ -4,10 +4,10 @@ import { clsx } from "clsx";
 import Heading from "./Heading";
 import Timer from "./Timer";
 
-import { useState, MutableRefObject, Fragment } from "react";
+import { useState, Fragment } from "react";
 
 interface RecorderProps {
-  recorder: MutableRefObject<Tone.Recorder | null>;
+  recorder: React.RefObject<Tone.Recorder | null>;
 }
 
 function Recorder({ recorder }: RecorderProps) {

@@ -2,11 +2,11 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { MutableRefObject, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import OptionsSelector from "./OptionsSelector";
 
 interface AutoFilterProps {
-  filter: MutableRefObject<Tone.AutoFilter>;
+  filter: React.RefObject<Tone.AutoFilter>;
 }
 
 function AutoFilter({ filter }: AutoFilterProps) {

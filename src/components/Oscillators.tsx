@@ -4,7 +4,6 @@ import { clsx } from "clsx";
 import {
   useCallback,
   useState,
-  MutableRefObject,
   Fragment,
   useEffect,
   useRef,
@@ -28,7 +27,7 @@ import { SynthWithPanner } from "../types/SynthWithPanner";
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 
 interface OscillatorsProps {
-  bus: MutableRefObject<Tone.Channel>;
+  bus: React.RefObject<Tone.Channel>;
   oscillatorCount?: number;
   stepCount?: number;
 }
@@ -47,7 +46,7 @@ function Oscillators({
   const [synths, setSynths] = useSynths(oscillatorCount);
   const [sequences, setSequences] = useSequences(oscillatorCount, stepCount);
 
-  const beat: MutableRefObject<number> = useRef<number>(0);
+  const beat = useRef(0);
   const [currentBeat, setCurrentBeat] = useState(0);
   const loopRef = useRef<Tone.Loop | null>(null);
   const callbackRef = useRef<((time: number) => void) | undefined>(undefined);

@@ -2,10 +2,10 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { MutableRefObject, useState } from "react";
+import { useState } from "react";
 
 interface ReverbProps {
-  reverb: MutableRefObject<Tone.Reverb>;
+  reverb: React.RefObject<Tone.Reverb>;
 }
 
 function Reverb({ reverb }: ReverbProps) {
