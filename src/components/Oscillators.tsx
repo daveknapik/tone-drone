@@ -50,7 +50,7 @@ function Oscillators({
   const beat: MutableRefObject<number> = useRef<number>(0);
   const [currentBeat, setCurrentBeat] = useState(0);
   const loopRef = useRef<Tone.Loop | null>(null);
-  const callbackRef = useRef<(time: number) => void>();
+  const callbackRef = useRef<((time: number) => void) | undefined>(undefined);
 
   useConnectChannelsToBus(
     [

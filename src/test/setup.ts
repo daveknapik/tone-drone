@@ -9,7 +9,7 @@ afterEach(() => {
 
 // Mock Web Audio API
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-(global as any).AudioContext = vi.fn().mockImplementation(() => ({
+(globalThis as any).AudioContext = vi.fn().mockImplementation(() => ({
   createOscillator: vi.fn(),
   createGain: vi.fn(),
   createBiquadFilter: vi.fn(),
