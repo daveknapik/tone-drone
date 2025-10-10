@@ -201,7 +201,7 @@ Include:
 
 - Keep the audio graph clean and organized
 - Avoid excessive gain staging (watch for clipping)
-- Test with headphones and external monitors
+- Test with headphones and speakers
 - Consider CPU usage on lower-end devices
 
 ## Questions?

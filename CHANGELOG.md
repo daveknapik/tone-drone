@@ -84,7 +84,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Keyboard shortcuts (Q/W/A/S/Z/X for oscillators, Space for play/pause)
 - Audio recording functionality with WAV export
 - Dark/light theme toggle with localStorage persistence
-- BPM control (40-300 BPM)
 - Adjustable frequency ranges for oscillators
 - Visual beat indicator for step sequencer
 - Responsive design for desktop and mobile
@@ -136,19 +135,11 @@ If upgrading from an older version:
 ### v0.3.0 (Future)
 
 - [ ] Preset system for saving/loading complete synth states
-- [ ] More reverb options (Freeverb, Convolution)
-- [ ] Additional effects (Chorus, Phaser, Distortion)
 - [ ] Waveform visualization
-- [ ] Spectrum analyzer
-- [ ] Improved mobile touch controls
-- [ ] Undo/redo for sequencer patterns
 - [ ] Pattern randomization and generation
-- [ ] Export patterns as MIDI
 
 ### v0.4.0 (Future)
 
-- [ ] MIDI controller support
-- [ ] More oscillators (expandable up to 16)
 - [ ] Advanced routing options
 - [ ] Modulation matrix
 - [ ] LFO routing to any parameter
@@ -161,10 +152,6 @@ If upgrading from an older version:
 - [ ] Stable API for presets
 - [ ] Comprehensive test coverage
 - [ ] Performance optimizations with AudioWorklet
-- [ ] Accessibility improvements
-- [ ] Multi-language support
-- [ ] Cloud preset sharing (optional)
-- [ ] Collaboration features (optional)
 
 ## Contributing
 
