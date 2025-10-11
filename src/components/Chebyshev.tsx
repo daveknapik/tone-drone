@@ -2,15 +2,40 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, useRef, useEffect } from "react";
+import { ChebyshevHandle, ChebyshevParams } from "../types/ChebyshevParams";
 
 interface ChebyshevProps {
   chebyshev: React.RefObject<Tone.Chebyshev>;
+  ref?: React.Ref<ChebyshevHandle>;
 }
 
-function Chebyshev({ chebyshev }: ChebyshevProps) {
+function Chebyshev({ chebyshev, ref }: ChebyshevProps) {
   const [order, setOrder] = useState(1);
   const [wet, setWet] = useState(0);
+
+  // Keep a ref with current state values for imperative access
+  const paramsRef = useRef<ChebyshevParams>({
+    order,
+    wet,
+  });
+
+  // Update ref whenever state changes
+  useEffect(() => {
+    paramsRef.current = {
+      order,
+      wet,
+    };
+  }, [order, wet]);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    getParams: (): ChebyshevParams => paramsRef.current,
+    setParams: (params: ChebyshevParams) => {
+      setOrder(params.order);
+      setWet(params.wet);
+    },
+  }));
 
   chebyshev.current.set({
     order,
