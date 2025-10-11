@@ -5,10 +5,11 @@ import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 import { Sequence } from "../types/Sequence";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, useRef, useEffect } from "react";
 
 import { useAudioContext } from "../hooks/useAudioContext";
 import { useKeyDown } from "../hooks/useKeyDown";
+import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
 
 interface OscillatorProps {
   channel: Tone.Channel;
@@ -23,6 +24,7 @@ interface OscillatorProps {
   sequenceIndex: number;
   synth: Tone.Synth;
   updateSequenceFrequency: (sequenceIndex: number, frequency: number) => void;
+  ref?: React.Ref<OscillatorHandle>;
 }
 
 function Oscillator({
@@ -38,6 +40,7 @@ function Oscillator({
   sequenceIndex,
   synth,
   updateSequenceFrequency,
+  ref,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
@@ -48,6 +51,35 @@ function Oscillator({
   const [pan, setPan] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Keep a ref with current state values for imperative access
+  const paramsRef = useRef<OscillatorParams>({
+    frequency,
+    waveform,
+    volume,
+    pan,
+  });
+
+  // Update ref whenever state changes
+  useEffect(() => {
+    paramsRef.current = {
+      frequency,
+      waveform,
+      volume,
+      pan,
+    };
+  }, [frequency, waveform, volume, pan]);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    getParams: (): OscillatorParams => paramsRef.current,
+    setParams: (params: OscillatorParams) => {
+      setFrequency(params.frequency);
+      setWaveform(params.waveform);
+      setVolume(params.volume);
+      setPan(params.pan);
+    },
+  }));
 
   const { handleBrowserAudioStart } = useAudioContext();
 
