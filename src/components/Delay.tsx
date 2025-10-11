@@ -2,13 +2,15 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, useRef, useEffect } from "react";
+import { DelayHandle, DelayParams } from "../types/DelayParams";
 
 interface DelayProps {
   delay: React.RefObject<Tone.FeedbackDelay>;
   label?: string;
   maxTime?: number;
   minFeedback?: number;
+  ref?: React.Ref<DelayHandle>;
 }
 
 function Delay({
@@ -16,10 +18,37 @@ function Delay({
   label = "Delay",
   maxTime = 10,
   minFeedback = 0,
+  ref,
 }: DelayProps) {
   const [time, setTime] = useState(1);
   const [feedback, setFeedback] = useState(0.95);
   const [wet, setWet] = useState(0);
+
+  // Keep a ref with current state values for imperative access
+  const paramsRef = useRef<DelayParams>({
+    time,
+    feedback,
+    wet,
+  });
+
+  // Update ref whenever state changes
+  useEffect(() => {
+    paramsRef.current = {
+      time,
+      feedback,
+      wet,
+    };
+  }, [time, feedback, wet]);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    getParams: (): DelayParams => paramsRef.current,
+    setParams: (params: DelayParams) => {
+      setTime(params.time);
+      setFeedback(params.feedback);
+      setWet(params.wet);
+    },
+  }));
 
   delay.current.set({
     delayTime: time,

@@ -2,18 +2,49 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useImperativeHandle, useRef } from "react";
 import OptionsSelector from "./OptionsSelector";
+import { FilterHandle, FilterParams } from "../types/FilterParams";
 
 interface FilterProps {
   filter: React.RefObject<Tone.Filter>;
+  ref?: React.Ref<FilterHandle>;
 }
 
-function AutoFilter({ filter }: FilterProps) {
+function AutoFilter({ filter, ref }: FilterProps) {
   const [frequency, setFrequency] = useState(300);
   const [rolloff, setRolloff] = useState<Tone.FilterRollOff>(-12);
   const [Q, setQ] = useState(1);
   const [type, setType] = useState<BiquadFilterType>("highpass");
+
+  // Keep a ref with current state values for imperative access
+  const paramsRef = useRef<FilterParams>({
+    frequency,
+    rolloff,
+    Q,
+    type,
+  });
+
+  // Update ref whenever state changes
+  useEffect(() => {
+    paramsRef.current = {
+      frequency,
+      rolloff,
+      Q,
+      type,
+    };
+  }, [frequency, rolloff, Q, type]);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    getParams: (): FilterParams => paramsRef.current,
+    setParams: (params: FilterParams) => {
+      setFrequency(params.frequency);
+      setRolloff(params.rolloff);
+      setQ(params.Q);
+      setType(params.type);
+    },
+  }));
 
   filter.current.set({
     frequency,
