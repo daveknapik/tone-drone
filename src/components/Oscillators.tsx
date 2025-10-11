@@ -7,6 +7,7 @@ import {
   Fragment,
   useEffect,
   useRef,
+  useImperativeHandle,
 } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 
@@ -23,6 +24,8 @@ import { useOscillators } from "../hooks/useOscillators";
 import { useSequences } from "../hooks/useSequences";
 import { useSynths } from "../hooks/useSynths";
 import { SynthWithPanner } from "../types/SynthWithPanner";
+import { OscillatorsHandle, OscillatorsState } from "../types/OscillatorsParams";
+import { OscillatorHandle } from "../types/OscillatorParams";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 
@@ -30,12 +33,14 @@ interface OscillatorsProps {
   bus: React.RefObject<Tone.Channel>;
   oscillatorCount?: number;
   stepCount?: number;
+  ref?: React.Ref<OscillatorsHandle>;
 }
 
 function Oscillators({
   bus,
   oscillatorCount = 6,
   stepCount = 16,
+  ref,
 }: OscillatorsProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
@@ -50,6 +55,41 @@ function Oscillators({
   const [currentBeat, setCurrentBeat] = useState(0);
   const loopRef = useRef<Tone.Loop | null>(null);
   const callbackRef = useRef<((time: number) => void) | undefined>(undefined);
+
+  // Create refs for each oscillator component
+  const oscillatorRefs = useRef<(OscillatorHandle | null)[]>([]);
+
+  // Expose state to parent via ref
+  useImperativeHandle(ref, () => ({
+    getState: (): OscillatorsState => {
+      // Get params from each oscillator child component
+      const oscillatorParams = oscillatorRefs.current.map((oscRef) =>
+        oscRef?.getParams() ?? {
+          frequency: 440,
+          waveform: "sine",
+          volume: -5,
+          pan: 0,
+        }
+      );
+
+      return {
+        minFreq,
+        maxFreq,
+        oscillators: oscillatorParams,
+        sequences,
+      };
+    },
+    setState: (state: OscillatorsState) => {
+      setMinFreq(state.minFreq);
+      setMaxFreq(state.maxFreq);
+      setSequences(state.sequences);
+
+      // Set params on each oscillator child component
+      state.oscillators.forEach((oscParams, index) => {
+        oscillatorRefs.current[index]?.setParams(oscParams);
+      });
+    },
+  }));
 
   useConnectChannelsToBus(
     [
@@ -263,6 +303,9 @@ function Oscillators({
               sequenceIndex={i}
               synth={synths[i].synth}
               updateSequenceFrequency={updateSequenceFrequencyDebounced}
+              ref={(el) => {
+                oscillatorRefs.current[i] = el;
+              }}
             />
           ))}
         </div>
