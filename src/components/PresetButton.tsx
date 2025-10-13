@@ -45,7 +45,8 @@ function PresetButton({
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
-      return () => document.removeEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isOpen]);
 
@@ -104,7 +105,7 @@ function PresetButton({
               onClick={() => handleAction(onNew)}
               className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors"
             >
-              🆕 New Preset
+              New Preset
             </button>
             <button
               onClick={() => handleAction(onSave)}
@@ -116,13 +117,13 @@ function PresetButton({
               )}
               disabled={!currentPreset}
             >
-              💾 Save
+              Save
             </button>
             <button
               onClick={() => handleAction(onSaveAs)}
               className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors"
             >
-              💾 Save As...
+              Save As...
             </button>
             <button
               onClick={() => handleAction(onShare)}
@@ -134,14 +135,14 @@ function PresetButton({
               )}
               disabled={!currentPreset}
             >
-              📤 Share Current Preset
+              Share Current Preset
             </button>
           </div>
 
           {/* Factory Presets */}
           <div className="p-2 border-b-2 border-pink-500 dark:border-sky-300">
             <div className="px-3 py-1 text-sm font-semibold text-gray-600 dark:text-gray-400">
-              🏭 Factory Presets
+              Factory Presets
             </div>
             {factoryPresets.map((preset) => (
               <button
@@ -165,7 +166,7 @@ function PresetButton({
           {/* User Presets */}
           <div className="p-2 border-b-2 border-pink-500 dark:border-sky-300">
             <div className="px-3 py-1 text-sm font-semibold text-gray-600 dark:text-gray-400">
-              💾 My Presets ({userPresets.length})
+              My Presets ({userPresets.length})
             </div>
             {recentUserPresets.length > 0 ? (
               recentUserPresets.map((preset) => (
@@ -209,7 +210,7 @@ function PresetButton({
               onClick={() => handleAction(onBrowseAll)}
               className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors font-medium"
             >
-              📖 Browse All Presets...
+              Browse All Presets...
             </button>
           </div>
         </div>
