@@ -79,7 +79,7 @@ function PresetButton({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={clsx(
-          "px-4 py-2 rounded border-2 font-medium transition-colors",
+          "px-2 py-1 rounded-md border-2 transition-colors",
           "border-pink-500 dark:border-sky-300",
           "hover:bg-pink-100 dark:hover:bg-sky-900",
           "focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-sky-300"
