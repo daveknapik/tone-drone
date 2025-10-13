@@ -108,7 +108,12 @@ function PresetButton({
             </button>
             <button
               onClick={() => handleAction(onSave)}
-              className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors"
+              className={clsx(
+                "w-full text-left px-3 py-2 rounded transition-colors",
+                currentPreset
+                  ? "hover:bg-pink-100 dark:hover:bg-sky-900"
+                  : "opacity-40 cursor-not-allowed"
+              )}
               disabled={!currentPreset}
             >
               💾 Save
@@ -121,7 +126,12 @@ function PresetButton({
             </button>
             <button
               onClick={() => handleAction(onShare)}
-              className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors"
+              className={clsx(
+                "w-full text-left px-3 py-2 rounded transition-colors",
+                currentPreset
+                  ? "hover:bg-pink-100 dark:hover:bg-sky-900"
+                  : "opacity-40 cursor-not-allowed"
+              )}
               disabled={!currentPreset}
             >
               📤 Share Current Preset
