@@ -62,7 +62,9 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
     const a = document.createElement("a");
     a.href = url;
     // Create filename from preset name
-    const filename = `${preset.metadata.name.toLowerCase().replace(/\s+/g, "-")}.json`;
+    const filename = `${preset.metadata.name
+      .toLowerCase()
+      .replace(/\s+/g, "-")}.json`;
     a.download = filename;
     document.body.appendChild(a);
     a.click();
@@ -127,11 +129,13 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
                   "transition-colors"
                 )}
               >
-                {copySuccess ? "✓ Copied to Clipboard!" : "Copy URL to Clipboard"}
+                {copySuccess
+                  ? "✓ Copied to Clipboard!"
+                  : "Copy URL to Clipboard"}
               </button>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Anyone with this link can load this preset instantly by visiting the
-                URL or pasting it into the Import section.
+                Anyone with this link can load this preset instantly by visiting
+                the URL or pasting it into the Import section.
               </p>
             </div>
           </div>
@@ -142,7 +146,7 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
           {/* Export JSON Section */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              📄 Export as JSON File
+              Export as JSON File
             </h3>
             <div className="space-y-3">
               <button
@@ -158,7 +162,8 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
               </button>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 For backup or sharing with advanced users. The JSON file can be
-                imported via the &quot;Import from File&quot; button in the Preset Manager.
+                imported via the &quot;Import from File&quot; button in the
+                Preset Manager.
               </p>
             </div>
           </div>

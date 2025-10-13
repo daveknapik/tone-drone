@@ -49,9 +49,13 @@ function PresetBrowserModal({
   );
 
   const filteredFactoryPresets = factoryPresets.filter((preset) => {
-    const nameMatch = preset.metadata.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const nameMatch = preset.metadata.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     const descMatch = preset.metadata.description
-      ? preset.metadata.description.toLowerCase().includes(searchQuery.toLowerCase())
+      ? preset.metadata.description
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
       : false;
     return nameMatch || descMatch;
   });
@@ -125,7 +129,7 @@ function PresetBrowserModal({
           {/* Factory Presets */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              🏭 Factory Presets ({filteredFactoryPresets.length})
+              Factory Presets ({filteredFactoryPresets.length})
             </h3>
             <div className="space-y-2">
               {filteredFactoryPresets.map((preset) => (
@@ -141,7 +145,9 @@ function PresetBrowserModal({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-semibold">{preset.metadata.name}</h4>
+                        <h4 className="font-semibold">
+                          {preset.metadata.name}
+                        </h4>
                         {currentPreset?.metadata.id === preset.metadata.id && (
                           <span className="text-pink-500 dark:text-sky-300">
                             ✓ Current
@@ -175,7 +181,7 @@ function PresetBrowserModal({
           {/* User Presets */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              💾 My Presets ({filteredUserPresets.length})
+              My Presets ({filteredUserPresets.length})
             </h3>
             {filteredUserPresets.length > 0 ? (
               <div className="space-y-2">
@@ -236,7 +242,8 @@ function PresetBrowserModal({
               </div>
             ) : (
               <p className="text-gray-500 dark:text-gray-400 italic">
-                No user presets saved yet. Use &quot;Save As...&quot; to create one!
+                No user presets saved yet. Use &quot;Save As...&quot; to create
+                one!
               </p>
             )}
           </div>
@@ -244,7 +251,7 @@ function PresetBrowserModal({
           {/* Import Section */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-              📥 Import Preset
+              Import Preset
             </h3>
             <div className="space-y-3">
               <textarea
