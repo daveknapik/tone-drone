@@ -79,7 +79,7 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
         className={clsx(
           "bg-white dark:bg-gray-800 rounded-lg shadow-2xl",
           "border-2 border-pink-500 dark:border-sky-300",
-          "max-w-2xl w-full"
+          "max-w-2xl w-full max-h-[90vh] flex flex-col"
         )}
         onClick={(e) => e.stopPropagation()}
       >
@@ -98,7 +98,7 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto">
           {/* Shareable URL Section */}
           <div>
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
