@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "factory-gentle-waves",
+    "name": "Gentle Waves",
+    "created": "2025-01-01T00:00:00.000Z",
+    "description": "Slow oscillating tones with auto-filter modulation"
+  },
+  "state": {
+    "oscillators": {
+      "minFreq": 220,
+      "maxFreq": 330,
+      "oscillators": [
+        { "frequency": 220, "waveform": "sine", "volume": -10, "pan": -0.4 },
+        { "frequency": 275, "waveform": "sine", "volume": -10, "pan": 0.4 },
+        { "frequency": 330, "waveform": "triangle", "volume": -12, "pan": 0 },
+        { "frequency": 247.5, "waveform": "sine", "volume": -14, "pan": -0.2 },
+        { "frequency": 302.5, "waveform": "sine", "volume": -14, "pan": 0.2 },
+        { "frequency": 262.5, "waveform": "triangle", "volume": -16, "pan": 0 }
+      ],
+      "sequences": [
+        {
+          "frequency": 220,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 275,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 330,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 247.5,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 302.5,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 262.5,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        }
+      ]
+    },
+    "polysynths": {
+      "polysynths": [
+        {
+          "frequency": 666,
+          "waveform": "sine",
+          "volume": -5,
+          "attack": 0.5,
+          "decay": 0.7,
+          "sustain": 1,
+          "release": 3
+        }
+      ]
+    },
+    "effects": {
+      "autoFilter": {
+        "baseFrequency": 500,
+        "depth": 0.9,
+        "frequency": 0.25,
+        "rolloff": -12,
+        "Q": 3,
+        "wet": 0.5,
+        "type": "bandpass",
+        "oscillatorType": "sine"
+      },
+      "bitCrusher": {
+        "bits": 8,
+        "wet": 0
+      },
+      "chebyshev": {
+        "order": 3,
+        "wet": 0.1
+      },
+      "microlooper": {
+        "time": 0.25,
+        "feedback": 0.5,
+        "wet": 0.15
+      },
+      "afterFilter": {
+        "frequency": 800,
+        "rolloff": -12,
+        "Q": 1,
+        "type": "lowpass"
+      },
+      "delay": {
+        "time": 0.75,
+        "feedback": 0.4,
+        "wet": 0.2
+      }
+    },
+    "effectsBusSend": -10
+  }
+}

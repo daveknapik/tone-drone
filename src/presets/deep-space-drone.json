@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "factory-deep-space-drone",
+    "name": "Deep Space Drone",
+    "created": "2025-01-01T00:00:00.000Z",
+    "description": "Low frequency ambient wash with delay and filtering"
+  },
+  "state": {
+    "oscillators": {
+      "minFreq": 55,
+      "maxFreq": 110,
+      "oscillators": [
+        { "frequency": 55, "waveform": "sine", "volume": -8, "pan": -0.3 },
+        { "frequency": 82.5, "waveform": "sine", "volume": -10, "pan": 0.3 },
+        { "frequency": 110, "waveform": "triangle", "volume": -12, "pan": 0 },
+        { "frequency": 73.33, "waveform": "sine", "volume": -15, "pan": -0.5 },
+        { "frequency": 91.67, "waveform": "sine", "volume": -15, "pan": 0.5 },
+        { "frequency": 68.75, "waveform": "triangle", "volume": -18, "pan": 0 }
+      ],
+      "sequences": [
+        {
+          "frequency": 55,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 82.5,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 110,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 73.33,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 91.67,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 68.75,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        }
+      ]
+    },
+    "polysynths": {
+      "polysynths": [
+        {
+          "frequency": 666,
+          "waveform": "sine",
+          "volume": -5,
+          "attack": 0.5,
+          "decay": 0.7,
+          "sustain": 1,
+          "release": 3
+        }
+      ]
+    },
+    "effects": {
+      "autoFilter": {
+        "baseFrequency": 80,
+        "depth": 0.8,
+        "frequency": 0.1,
+        "rolloff": -24,
+        "Q": 2,
+        "wet": 0.3,
+        "type": "lowpass",
+        "oscillatorType": "sine"
+      },
+      "bitCrusher": {
+        "bits": 8,
+        "wet": 0
+      },
+      "chebyshev": {
+        "order": 1,
+        "wet": 0
+      },
+      "microlooper": {
+        "time": 0.5,
+        "feedback": 0.7,
+        "wet": 0.2
+      },
+      "afterFilter": {
+        "frequency": 150,
+        "rolloff": -12,
+        "Q": 1,
+        "type": "lowpass"
+      },
+      "delay": {
+        "time": 2,
+        "feedback": 0.6,
+        "wet": 0.4
+      }
+    },
+    "effectsBusSend": -8
+  }
+}

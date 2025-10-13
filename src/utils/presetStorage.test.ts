@@ -48,6 +48,19 @@ describe("presetStorage", () => {
         },
       ],
     },
+    polysynths: {
+      polysynths: [
+        {
+          frequency: 666,
+          waveform: "sine",
+          volume: -5,
+          attack: 0.5,
+          decay: 0.7,
+          sustain: 1,
+          release: 3,
+        },
+      ],
+    },
     effects: {
       autoFilter: {
         baseFrequency: 200,

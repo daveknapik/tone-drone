@@ -4,15 +4,17 @@ import Button from "./Button";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, useRef, useEffect } from "react";
 
 import { useAudioContext } from "../hooks/useAudioContext";
+import { PolySynthHandle, PolySynthParams } from "../types/PolySynthParams";
 
 interface PolysynthProps {
   polySynth: Tone.PolySynth;
+  ref?: React.Ref<PolySynthHandle>;
 }
 
-function PolySynth({ polySynth }: PolysynthProps) {
+function PolySynth({ polySynth, ref }: PolysynthProps) {
   const [frequency, setFrequency] = useState(666);
   const [waveform, setWaveform] = useState<OscillatorType>("sine");
   const [volume, setVolume] = useState(-5);
@@ -22,6 +24,44 @@ function PolySynth({ polySynth }: PolysynthProps) {
   const [release, setRelease] = useState(3);
 
   const { handleBrowserAudioStart } = useAudioContext();
+
+  // Keep a ref with current state values for imperative access
+  const paramsRef = useRef<PolySynthParams>({
+    frequency,
+    waveform,
+    volume,
+    attack,
+    decay,
+    sustain,
+    release,
+  });
+
+  // Update ref whenever state changes
+  useEffect(() => {
+    paramsRef.current = {
+      frequency,
+      waveform,
+      volume,
+      attack,
+      decay,
+      sustain,
+      release,
+    };
+  }, [frequency, waveform, volume, attack, decay, sustain, release]);
+
+  // Expose methods to parent via ref
+  useImperativeHandle(ref, () => ({
+    getParams: (): PolySynthParams => paramsRef.current,
+    setParams: (params: PolySynthParams) => {
+      setFrequency(params.frequency);
+      setWaveform(params.waveform);
+      setVolume(params.volume);
+      setAttack(params.attack);
+      setDecay(params.decay);
+      setSustain(params.sustain);
+      setRelease(params.release);
+    },
+  }));
 
   polySynth.volume.setTargetAtTime(volume, 0, 0.01);
 

@@ -75,3 +75,4 @@ Located in `src/types/`:
 - ESLint configured for React + TypeScript with comprehensive rules
 - Tailwind CSS for styling with custom pink/sky color scheme
 - Base path set to `/tone-drone/` for GitHub Pages deployment
+- Always run linters as a final step.

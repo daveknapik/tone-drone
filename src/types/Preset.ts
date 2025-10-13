@@ -4,6 +4,7 @@ import { ChebyshevParams } from "./ChebyshevParams";
 import { DelayParams } from "./DelayParams";
 import { FilterParams } from "./FilterParams";
 import { Sequence } from "./Sequence";
+import { PolySynthsState } from "./PolySynthParams";
 
 /**
  * Parameters for a single oscillator instance
@@ -32,6 +33,9 @@ export interface PresetState {
   // Global oscillator configuration
   oscillators: OscillatorsState;
 
+  // Polysynth configuration
+  polysynths: PolySynthsState;
+
   // Effect parameters
   effects: {
     autoFilter: AutoFilterParams;
@@ -52,6 +56,7 @@ export interface PresetState {
 export interface PresetMetadata {
   id: string;
   name: string;
+  description?: string; // Optional description for factory presets
   created: string; // ISO date string
   modified?: string; // ISO date string
 }

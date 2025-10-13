@@ -2,15 +2,24 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, useRef, useEffect } from "react";
 
 interface EffectsBusSendControlProps {
   bus: React.RefObject<Tone.Channel>;
+  ref?: React.Ref<{ value: number }>;
 }
 
-function EffectsBusSendControl({ bus }: EffectsBusSendControlProps) {
+function EffectsBusSendControl({ bus, ref }: EffectsBusSendControlProps) {
   const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
     useState(-15);
+
+  const valueRef = useRef({ value: mainAudioEffectsBusVolume });
+
+  useEffect(() => {
+    valueRef.current.value = mainAudioEffectsBusVolume;
+  }, [mainAudioEffectsBusVolume]);
+
+  useImperativeHandle(ref, () => valueRef.current);
 
   bus.current?.volume.setTargetAtTime(mainAudioEffectsBusVolume, 0, 0.01);
 

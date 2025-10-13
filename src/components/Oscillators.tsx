@@ -20,6 +20,10 @@ import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { Sequence } from "../types/Sequence";
 
 import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
+import {
+  DEFAULT_OSCILLATOR_PARAMS,
+  DEFAULT_SEQUENCE,
+} from "../utils/presetDefaults";
 import { useOscillators } from "../hooks/useOscillators";
 import { useSequences } from "../hooks/useSequences";
 import { useSynths } from "../hooks/useSynths";
@@ -64,12 +68,7 @@ function Oscillators({
     getState: (): OscillatorsState => {
       // Get params from each oscillator child component
       const oscillatorParams = oscillatorRefs.current.map((oscRef) =>
-        oscRef?.getParams() ?? {
-          frequency: 440,
-          waveform: "sine",
-          volume: -5,
-          pan: 0,
-        }
+        oscRef?.getParams() ?? DEFAULT_OSCILLATOR_PARAMS
       );
 
       return {
@@ -227,13 +226,9 @@ function Oscillators({
 
     // Create new sequence with steps and add to sequences
     const sequence: Sequence = {
-      frequency: 440,
-      steps: [],
+      ...DEFAULT_SEQUENCE,
+      steps: Array(stepCount).fill(false) as boolean[],
     };
-
-    for (let i = 0; i < stepCount; i++) {
-      sequence.steps.push(false);
-    }
 
     setSequences((prevSequences: Sequence[]) => [...prevSequences, sequence]);
   };
@@ -288,26 +283,31 @@ function Oscillators({
         </div>
         <hr className="mt-8 border-pink-500 dark:border-sky-300 " />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">
-          {oscillators.map((oscillator, i) => (
-            <Oscillator
-              channel={oscillator.channel}
-              currentBeat={currentBeat}
-              handleStepClick={handleStepClick}
-              key={i}
-              maxFreq={maxFreq}
-              minFreq={minFreq}
-              oscillator={oscillator.oscillator}
-              panner={synths[i].panner}
-              playPauseKey={playKeys[i]}
-              sequence={sequences[i]}
-              sequenceIndex={i}
-              synth={synths[i].synth}
-              updateSequenceFrequency={updateSequenceFrequencyDebounced}
-              ref={(el) => {
-                oscillatorRefs.current[i] = el;
-              }}
-            />
-          ))}
+          {oscillators.map((oscillator, i) => {
+            // Safety check: only render if we have corresponding sequence and synth
+            if (!sequences[i] || !synths[i]) return null;
+
+            return (
+              <Oscillator
+                channel={oscillator.channel}
+                currentBeat={currentBeat}
+                handleStepClick={handleStepClick}
+                key={i}
+                maxFreq={maxFreq}
+                minFreq={minFreq}
+                oscillator={oscillator.oscillator}
+                panner={synths[i].panner}
+                playPauseKey={playKeys[i]}
+                sequence={sequences[i]}
+                sequenceIndex={i}
+                synth={synths[i].synth}
+                updateSequenceFrequency={updateSequenceFrequencyDebounced}
+                ref={(el) => {
+                  oscillatorRefs.current[i] = el;
+                }}
+              />
+            );
+          })}
         </div>
       </div>
     </Fragment>

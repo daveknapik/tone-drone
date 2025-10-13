@@ -22,9 +22,33 @@ import { useRecorder } from "../hooks/useRecorder.ts";
 
 import { usePolysynths } from "../hooks/usePolysynths";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useImperativeHandle } from "react";
 
-function DroneSynthLite() {
+import type { OscillatorsHandle } from "../types/OscillatorsParams";
+import type { AutoFilterHandle } from "../types/AutoFilterParams";
+import type { BitCrusherHandle } from "../types/BitCrusherParams";
+import type { ChebyshevHandle } from "../types/ChebyshevParams";
+import type { DelayHandle } from "../types/DelayParams";
+import type { FilterHandle } from "../types/FilterParams";
+import type { PolySynthsHandle } from "./Polysynths";
+
+export interface DroneSynthLiteHandle {
+  oscillatorsRef: React.RefObject<OscillatorsHandle | null>;
+  polysynthsRef: React.RefObject<PolySynthsHandle | null>;
+  autoFilterRef: React.RefObject<AutoFilterHandle | null>;
+  bitCrusherRef: React.RefObject<BitCrusherHandle | null>;
+  chebyshevRef: React.RefObject<ChebyshevHandle | null>;
+  microlooperRef: React.RefObject<DelayHandle | null>;
+  afterFilterRef: React.RefObject<FilterHandle | null>;
+  delayRef: React.RefObject<DelayHandle | null>;
+  effectsBusSendRef: React.RefObject<{ value: number } | null>;
+}
+
+interface DroneSynthLiteProps {
+  ref?: React.Ref<DroneSynthLiteHandle>;
+}
+
+function DroneSynthLite({ ref }: DroneSynthLiteProps) {
   const recorder = useRecorder();
 
   const beforeFilter = useAutoFilter();
@@ -60,27 +84,52 @@ function DroneSynthLite() {
     polysynth.connect(mainAudioEffectsBus.current);
   });
 
+  // Create refs for all components that need to be accessed by presets
+  const oscillatorsRef = useRef<OscillatorsHandle>(null);
+  const polysynthsRef = useRef<PolySynthsHandle>(null);
+  const autoFilterRef = useRef<AutoFilterHandle>(null);
+  const bitCrusherRef = useRef<BitCrusherHandle>(null);
+  const chebyshevRef = useRef<ChebyshevHandle>(null);
+  const microlooperRef = useRef<DelayHandle>(null);
+  const afterFilterRef = useRef<FilterHandle>(null);
+  const delayRef = useRef<DelayHandle>(null);
+  const effectsBusSendRef = useRef<{ value: number } | null>(null);
+
+  // Expose refs to parent component
+  useImperativeHandle(ref, () => ({
+    oscillatorsRef,
+    polysynthsRef,
+    autoFilterRef,
+    bitCrusherRef,
+    chebyshevRef,
+    microlooperRef,
+    afterFilterRef,
+    delayRef,
+    effectsBusSendRef,
+  }));
+
   return (
     <div className="dark:text-sky-300">
       <div className="border-2 rounded border-pink-500 dark:border-sky-300 pt-2 px-3">
         <Recorder recorder={recorder} />
 
         <Effects>
-          <AutoFilter filter={beforeFilter} />
-          <BitCrusher bitCrusher={bitCrusher} />
-          <Chebyshev chebyshev={chebyshev} />
+          <AutoFilter filter={beforeFilter} ref={autoFilterRef} />
+          <BitCrusher bitCrusher={bitCrusher} ref={bitCrusherRef} />
+          <Chebyshev chebyshev={chebyshev} ref={chebyshevRef} />
           <Delay
             delay={microlooper}
             label="Microlooper"
             maxTime={1}
             minFeedback={0.6}
+            ref={microlooperRef}
           />
-          <Filter filter={afterFilter} />
-          <Delay delay={delay} />
-          <EffectsBusSendControl bus={mainAudioEffectsBus} />
+          <Filter filter={afterFilter} ref={afterFilterRef} />
+          <Delay delay={delay} ref={delayRef} />
+          <EffectsBusSendControl bus={mainAudioEffectsBus} ref={effectsBusSendRef} />
         </Effects>
-        <PolySynths polysynths={polysynths} />
-        <Oscillators bus={mainAudioEffectsBus} />
+        <PolySynths polysynths={polysynths} ref={polysynthsRef} />
+        <Oscillators bus={mainAudioEffectsBus} ref={oscillatorsRef} />
       </div>
     </div>
   );

@@ -3,16 +3,50 @@ import { clsx } from "clsx";
 
 import Heading from "./Heading";
 
-import { useState, Fragment } from "react";
+import { useState, Fragment, useRef, useImperativeHandle } from "react";
 
 import PolySynth from "./Polysynth";
+import { DEFAULT_POLYSYNTH_PARAMS } from "../utils/presetDefaults";
+import {
+  PolySynthHandle,
+  PolySynthsState,
+} from "../types/PolySynthParams";
+
+export interface PolySynthsHandle {
+  getState: () => PolySynthsState;
+  setState: (state: PolySynthsState) => void;
+}
 
 interface PolySynthsProps {
   polysynths: Tone.PolySynth[];
+  ref?: React.Ref<PolySynthsHandle>;
 }
 
-function PolySynths({ polysynths }: PolySynthsProps) {
+function PolySynths({ polysynths, ref }: PolySynthsProps) {
   const [expandPolysynths, setExpandPolysynths] = useState(false);
+
+  // Create refs for each polysynth component
+  const polysynthRefs = useRef<(PolySynthHandle | null)[]>([]);
+
+  // Expose state to parent via ref
+  useImperativeHandle(ref, () => ({
+    getState: (): PolySynthsState => {
+      // Get params from each polysynth child component
+      const polysynthParams = polysynthRefs.current.map((psRef) =>
+        psRef?.getParams() ?? DEFAULT_POLYSYNTH_PARAMS
+      );
+
+      return {
+        polysynths: polysynthParams,
+      };
+    },
+    setState: (state: PolySynthsState) => {
+      // Set params on each polysynth child component
+      state.polysynths.forEach((psParams, index) => {
+        polysynthRefs.current[index]?.setParams(psParams);
+      });
+    },
+  }));
 
   const toggleExpandPolysynths = (): void => {
     setExpandPolysynths((prev) => !prev);
@@ -34,7 +68,13 @@ function PolySynths({ polysynths }: PolySynthsProps) {
         )}
       >
         {polysynths.map((polysynth, i) => (
-          <PolySynth key={i} polySynth={polysynth} />
+          <PolySynth
+            key={i}
+            polySynth={polysynth}
+            ref={(el) => {
+              polysynthRefs.current[i] = el;
+            }}
+          />
         ))}
       </div>
     </Fragment>

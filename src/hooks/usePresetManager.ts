@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { Preset, PresetListItem } from "../types/Preset";
 import type { OscillatorsHandle } from "../types/OscillatorsParams";
+import type { PolySynthsHandle } from "../components/Polysynths";
 import type { AutoFilterHandle } from "../types/AutoFilterParams";
 import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
@@ -20,14 +21,15 @@ import { extractPresetFromUrl } from "../utils/presetUrl";
  * Refs to all components that expose state via imperative handles
  */
 export interface PresetComponentRefs {
-  oscillators: React.RefObject<OscillatorsHandle>;
-  autoFilter: React.RefObject<AutoFilterHandle>;
-  bitCrusher: React.RefObject<BitCrusherHandle>;
-  chebyshev: React.RefObject<ChebyshevHandle>;
-  microlooper: React.RefObject<DelayHandle>;
-  afterFilter: React.RefObject<FilterHandle>;
-  delay: React.RefObject<DelayHandle>;
-  effectsBusSendRef: React.RefObject<{ value: number }>;
+  oscillators: React.RefObject<OscillatorsHandle | null>;
+  polysynths: React.RefObject<PolySynthsHandle | null>;
+  autoFilter: React.RefObject<AutoFilterHandle | null>;
+  bitCrusher: React.RefObject<BitCrusherHandle | null>;
+  chebyshev: React.RefObject<ChebyshevHandle | null>;
+  microlooper: React.RefObject<DelayHandle | null>;
+  afterFilter: React.RefObject<FilterHandle | null>;
+  delay: React.RefObject<DelayHandle | null>;
+  effectsBusSendRef: React.RefObject<{ value: number } | null>;
 }
 
 /**
@@ -65,6 +67,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
    */
   const captureCurrentState = useCallback(() => {
     const oscillatorsState = refs.oscillators.current?.getState();
+    const polysynthsState = refs.polysynths.current?.getState();
     const autoFilterParams = refs.autoFilter.current?.getParams();
     const bitCrusherParams = refs.bitCrusher.current?.getParams();
     const chebyshevParams = refs.chebyshev.current?.getParams();
@@ -75,6 +78,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
 
     if (
       !oscillatorsState ||
+      !polysynthsState ||
       !autoFilterParams ||
       !bitCrusherParams ||
       !chebyshevParams ||
@@ -87,6 +91,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
 
     return {
       oscillators: oscillatorsState,
+      polysynths: polysynthsState,
       effects: {
         autoFilter: autoFilterParams,
         bitCrusher: bitCrusherParams,
@@ -108,6 +113,9 @@ export function usePresetManager(refs: PresetComponentRefs) {
 
       // Apply oscillators state
       refs.oscillators.current?.setState(state.oscillators);
+
+      // Apply polysynths state (migration ensures this always exists)
+      refs.polysynths.current?.setState(state.polysynths);
 
       // Apply effects state
       refs.autoFilter.current?.setParams(state.effects.autoFilter);
@@ -197,6 +205,17 @@ export function usePresetManager(refs: PresetComponentRefs) {
     // Optionally reset to default state here
   }, []);
 
+  /**
+   * Load and set a factory preset (doesn't save to storage)
+   */
+  const loadFactoryPreset = useCallback(
+    (preset: Preset) => {
+      applyPreset(preset);
+      setCurrentPreset(preset);
+    },
+    [applyPreset]
+  );
+
   return {
     // State
     currentPreset,
@@ -206,6 +225,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
     savePreset,
     updateCurrentPreset,
     loadPreset,
+    loadFactoryPreset,
     deletePreset,
     newPreset,
     captureCurrentState,
