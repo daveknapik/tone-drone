@@ -1,9 +1,10 @@
 import type { Preset } from "../types/Preset";
+import { DEFAULT_POLYSYNTHS_STATE } from "./presetDefaults";
 
 /**
  * Current preset version
  */
-export const CURRENT_PRESET_VERSION = 1;
+export const CURRENT_PRESET_VERSION = 2;
 
 /**
  * Migrate a preset from an older version to the current version
@@ -26,9 +27,8 @@ export function migratePreset(preset: Preset): Preset {
  */
 function runMigration(preset: Preset, fromVersion: number): Preset {
   switch (fromVersion) {
-    // Example: migration from version 1 to version 2
-    // case 1:
-    //   return migrateV1ToV2(preset);
+    case 1:
+      return migrateV1ToV2(preset);
 
     // Example: migration from version 2 to version 3
     // case 2:
@@ -41,26 +41,20 @@ function runMigration(preset: Preset, fromVersion: number): Preset {
 }
 
 /**
- * Example migration function from v1 to v2
- * Uncomment and modify when version 2 is created
+ * Migration from version 1 to version 2
+ * Adds polysynths support to presets that were created before this feature existed
  */
-// function migrateV1ToV2(preset: Preset): Preset {
-//   return {
-//     ...preset,
-//     version: 2,
-//     // Add new fields or transform existing ones
-//     state: {
-//       ...preset.state,
-//       // Example: add new effect
-//       effects: {
-//         ...preset.state.effects,
-//         newEffect: {
-//           // default parameters
-//         },
-//       },
-//     },
-//   };
-// }
+function migrateV1ToV2(preset: Preset): Preset {
+  return {
+    ...preset,
+    version: 2,
+    state: {
+      ...preset.state,
+      // Add polysynths with default values if missing
+      polysynths: preset.state.polysynths ?? DEFAULT_POLYSYNTHS_STATE,
+    },
+  };
+}
 
 /**
  * Check if a preset needs migration

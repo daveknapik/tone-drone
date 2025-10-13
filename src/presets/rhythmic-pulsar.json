@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "factory-rhythmic-pulsar",
+    "name": "Rhythmic Pulsar",
+    "created": "2025-01-01T00:00:00.000Z",
+    "description": "Sequenced rhythmic patterns with bit crushing"
+  },
+  "state": {
+    "oscillators": {
+      "minFreq": 110,
+      "maxFreq": 220,
+      "oscillators": [
+        { "frequency": 110, "waveform": "square", "volume": -8, "pan": -0.3 },
+        { "frequency": 146.67, "waveform": "square", "volume": -10, "pan": 0.3 },
+        { "frequency": 183.33, "waveform": "sawtooth", "volume": -12, "pan": 0 },
+        { "frequency": 128.33, "waveform": "square", "volume": -12, "pan": -0.5 },
+        { "frequency": 201.67, "waveform": "triangle", "volume": -15, "pan": 0.5 },
+        { "frequency": 165, "waveform": "sawtooth", "volume": -18, "pan": 0 }
+      ],
+      "sequences": [
+        {
+          "frequency": 110,
+          "steps": [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false]
+        },
+        {
+          "frequency": 146.67,
+          "steps": [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false]
+        },
+        {
+          "frequency": 183.33,
+          "steps": [false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true]
+        },
+        {
+          "frequency": 128.33,
+          "steps": [true, false, false, true, false, false, true, false, false, true, false, false, true, false, false, false]
+        },
+        {
+          "frequency": 201.67,
+          "steps": [false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true]
+        },
+        {
+          "frequency": 165,
+          "steps": [false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false]
+        }
+      ]
+    },
+    "polysynths": {
+      "polysynths": [
+        {
+          "frequency": 666,
+          "waveform": "sine",
+          "volume": -5,
+          "attack": 0.5,
+          "decay": 0.7,
+          "sustain": 1,
+          "release": 3
+        }
+      ]
+    },
+    "effects": {
+      "autoFilter": {
+        "baseFrequency": 400,
+        "depth": 0.6,
+        "frequency": 2,
+        "rolloff": -24,
+        "Q": 5,
+        "wet": 0.3,
+        "type": "highpass",
+        "oscillatorType": "square"
+      },
+      "bitCrusher": {
+        "bits": 4,
+        "wet": 0.4
+      },
+      "chebyshev": {
+        "order": 10,
+        "wet": 0.2
+      },
+      "microlooper": {
+        "time": 0.125,
+        "feedback": 0.8,
+        "wet": 0.3
+      },
+      "afterFilter": {
+        "frequency": 600,
+        "rolloff": -24,
+        "Q": 2,
+        "type": "bandpass"
+      },
+      "delay": {
+        "time": 0.5,
+        "feedback": 0.5,
+        "wet": 0.25
+      }
+    },
+    "effectsBusSend": -6
+  }
+}

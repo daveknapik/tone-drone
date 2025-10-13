@@ -23,6 +23,19 @@ describe("presetUrl", () => {
         },
       ],
     },
+    polysynths: {
+      polysynths: [
+        {
+          frequency: 666,
+          waveform: "sine",
+          volume: -5,
+          attack: 0.5,
+          decay: 0.7,
+          sustain: 1,
+          release: 3,
+        },
+      ],
+    },
     effects: {
       autoFilter: {
         baseFrequency: 200,
@@ -168,7 +181,7 @@ describe("presetUrl", () => {
       // Mock window.location
       const originalLocation = window.location;
       delete (window as { location?: Location }).location;
-      window.location = {
+      (window as { location: Location }).location = {
         ...originalLocation,
         href: `https://example.com/tone-drone/?preset=${encoded}`,
       } as Location;
@@ -177,7 +190,7 @@ describe("presetUrl", () => {
       expect(extracted).toEqual(preset);
 
       // Restore window.location
-      window.location = originalLocation;
+      (window as { location: Location }).location = originalLocation;
     });
   });
 

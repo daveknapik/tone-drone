@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "factory-init",
+    "name": "Init",
+    "created": "2025-01-01T00:00:00.000Z",
+    "description": "Default starting point with all effects dry"
+  },
+  "state": {
+    "oscillators": {
+      "minFreq": 440,
+      "maxFreq": 454,
+      "oscillators": [
+        { "frequency": 440, "waveform": "sine", "volume": -5, "pan": 0 },
+        { "frequency": 440, "waveform": "sine", "volume": -5, "pan": 0 },
+        { "frequency": 440, "waveform": "sine", "volume": -5, "pan": 0 },
+        { "frequency": 440, "waveform": "sine", "volume": -5, "pan": 0 },
+        { "frequency": 440, "waveform": "sine", "volume": -5, "pan": 0 },
+        { "frequency": 440, "waveform": "sine", "volume": -5, "pan": 0 }
+      ],
+      "sequences": [
+        {
+          "frequency": 440,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 440,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 440,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 440,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 440,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        },
+        {
+          "frequency": 440,
+          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+        }
+      ]
+    },
+    "polysynths": {
+      "polysynths": [
+        {
+          "frequency": 666,
+          "waveform": "sine",
+          "volume": -5,
+          "attack": 0.5,
+          "decay": 0.7,
+          "sustain": 1,
+          "release": 3
+        }
+      ]
+    },
+    "effects": {
+      "autoFilter": {
+        "baseFrequency": 300,
+        "depth": 1,
+        "frequency": 4,
+        "rolloff": -12,
+        "Q": 1,
+        "wet": 0,
+        "type": "highpass",
+        "oscillatorType": "sine"
+      },
+      "bitCrusher": {
+        "bits": 5,
+        "wet": 0
+      },
+      "chebyshev": {
+        "order": 1,
+        "wet": 0
+      },
+      "microlooper": {
+        "time": 1,
+        "feedback": 0.95,
+        "wet": 0
+      },
+      "afterFilter": {
+        "frequency": 300,
+        "rolloff": -12,
+        "Q": 1,
+        "type": "highpass"
+      },
+      "delay": {
+        "time": 1,
+        "feedback": 0.95,
+        "wet": 0
+      }
+    },
+    "effectsBusSend": -15
+  }
+}
