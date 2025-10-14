@@ -6,6 +6,17 @@ export function useKeyDown(
 ): void {
   const onKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // Ignore shortcuts when user is typing in an input field
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (isTyping) {
+        return;
+      }
+
       const targetKeyPressed = keys.some((key) => e.key === key);
 
       if (targetKeyPressed) {
