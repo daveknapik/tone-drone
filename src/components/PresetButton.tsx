@@ -166,7 +166,9 @@ function PresetButton({
           {/* User Presets */}
           <div className="p-2 border-b-2 border-pink-500 dark:border-sky-300">
             <div className="px-3 py-1 text-sm font-semibold text-gray-600 dark:text-gray-400">
-              My Presets ({userPresets.length})
+              {userPresets.length > 5
+                ? `Recent User Presets (${userPresets.length} total)`
+                : `My Presets (${userPresets.length})`}
             </div>
             {recentUserPresets.length > 0 ? (
               recentUserPresets.map((preset) => (
