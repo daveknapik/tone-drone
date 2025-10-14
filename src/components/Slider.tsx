@@ -9,6 +9,7 @@ interface SliderProps {
   step?: number;
   value: number;
   logarithmic?: boolean;
+  testId?: string;
 }
 
 function Slider({
@@ -20,6 +21,7 @@ function Slider({
   step,
   value,
   logarithmic = false,
+  testId,
 }: SliderProps) {
   const id = useId();
 
@@ -74,6 +76,7 @@ function Slider({
         step={step}
         type="range"
         value={sliderValue}
+        data-testid={testId}
       />
       <div className="w-6 md:w-8 basis-1/8">{value}</div>
     </div>

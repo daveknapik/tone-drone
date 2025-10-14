@@ -5,6 +5,7 @@ interface ButtonProps {
   className?: string;
   handleClick: (e: React.MouseEvent<HTMLElement>) => void;
   isActive?: boolean;
+  testId?: string;
 }
 
 function Button({
@@ -12,6 +13,7 @@ function Button({
   className,
   handleClick,
   isActive = false,
+  testId,
 }: PropsWithChildren<ButtonProps>) {
   return (
     <button
@@ -22,6 +24,7 @@ function Button({
         isActive && "bg-violet-500",
         className
       )}
+      data-testid={testId}
     >
       {children}
     </button>

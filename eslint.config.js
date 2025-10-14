@@ -14,6 +14,7 @@ export default tseslint.config(
   },
   {
     files: ["**/*.{ts,tsx}"],
+    ignores: ["e2e/**", "playwright.config.ts"],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked,
@@ -46,6 +47,36 @@ export default tseslint.config(
       react: {
         version: "detect",
       },
+    },
+  },
+  // E2E tests configuration
+  {
+    files: ["e2e/**/*.ts", "playwright.config.ts"],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+    ],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        project: "./tsconfig.e2e.json",
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      // Disable React-specific rules for e2e tests
+      "react-refresh/only-export-components": "off",
+      // Allow async functions without await (common in Playwright)
+      "@typescript-eslint/require-await": "off",
+      // Allow any type in test utilities
+      "@typescript-eslint/no-explicit-any": "warn",
+      // Playwright's expect is dynamically typed
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      // process.env is common in config files
+      "@typescript-eslint/no-unsafe-assignment": "off",
     },
   }
 );

@@ -21,6 +21,7 @@ function BpmControl() {
       labelText="bpm"
       step={0.01}
       handleChange={(e) => updateBpm(parseFloat(e.target.value))}
+      testId="bpm-slider"
     />
   );
 }

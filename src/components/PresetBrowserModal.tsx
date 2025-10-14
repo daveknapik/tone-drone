@@ -90,7 +90,7 @@ function PresetBrowserModal({
     >
       <div
         className={clsx(
-          "bg-white dark:bg-gray-800 rounded-lg shadow-2xl",
+          "bg-pink-200 dark:bg-gray-800 rounded-lg shadow-2xl",
           "border-2 border-pink-500 dark:border-sky-300",
           "max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
         )}
@@ -139,7 +139,7 @@ function PresetBrowserModal({
                     "p-4 rounded border-2 transition-colors",
                     "border-pink-300 dark:border-sky-700",
                     "hover:border-pink-500 dark:hover:border-sky-300",
-                    "bg-pink-50 dark:bg-gray-700"
+                    "bg-pink-100 dark:bg-gray-700"
                   )}
                 >
                   <div className="flex items-start justify-between">
@@ -165,7 +165,7 @@ function PresetBrowserModal({
                       className={clsx(
                         "px-4 py-2 rounded border-2",
                         "border-pink-500 dark:border-sky-300",
-                        "bg-white dark:bg-gray-800",
+                        "bg-pink-200 dark:bg-gray-800",
                         "hover:bg-pink-100 dark:hover:bg-sky-900",
                         "transition-colors font-medium"
                       )}
@@ -191,7 +191,8 @@ function PresetBrowserModal({
                     className={clsx(
                       "p-4 rounded border-2 transition-colors",
                       "border-pink-300 dark:border-sky-700",
-                      "hover:border-pink-500 dark:hover:border-sky-300"
+                      "hover:border-pink-500 dark:hover:border-sky-300",
+                      "bg-pink-100 dark:bg-gray-700"
                     )}
                   >
                     <div className="flex items-start justify-between">
@@ -228,7 +229,7 @@ function PresetBrowserModal({
                           className={clsx(
                             "px-4 py-2 rounded border-2",
                             "border-pink-500 dark:border-sky-300",
-                            "bg-white dark:bg-gray-800",
+                            "bg-pink-200 dark:bg-gray-800",
                             "hover:bg-pink-100 dark:hover:bg-sky-900",
                             "transition-colors font-medium"
                           )}
