@@ -79,7 +79,7 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
     >
       <div
         className={clsx(
-          "bg-white dark:bg-gray-800 rounded-lg shadow-2xl",
+          "bg-pink-200 dark:bg-gray-800 rounded-lg shadow-2xl",
           "border-2 border-pink-500 dark:border-sky-300",
           "max-w-2xl w-full max-h-[90vh] flex flex-col"
         )}
@@ -128,6 +128,7 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
                     : "hover:bg-pink-100 dark:hover:bg-sky-900",
                   "transition-colors"
                 )}
+                data-testid="share-copy-url"
               >
                 {copySuccess
                   ? "✓ Copied to Clipboard!"
@@ -157,6 +158,7 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
                   "hover:bg-pink-100 dark:hover:bg-sky-900",
                   "transition-colors"
                 )}
+                data-testid="share-download-json"
               >
                 Download &quot;{preset.metadata.name}.json&quot;
               </button>

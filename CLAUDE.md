@@ -25,6 +25,90 @@ npm run preview
 npm run deploy
 ```
 
+## Testing
+
+The project has two types of tests:
+
+### Unit Tests (Vitest + React Testing Library)
+```bash
+# Run unit tests in watch mode
+npm run test
+
+# Run unit tests once
+npm run test:run
+
+# Run unit tests with UI
+npm run test:ui
+```
+
+Unit tests are located alongside components (`*.test.ts` or `*.test.tsx` files) and cover:
+- Individual component rendering and behavior
+- Utility functions (preset serialization, storage, URL handling)
+- Hook logic
+
+### E2E Tests (Playwright)
+```bash
+# Run e2e tests in headless mode
+npm run test:e2e
+
+# Run e2e tests with Playwright UI (interactive)
+npm run test:e2e:ui
+
+# Run e2e tests in debug mode
+npm run test:e2e:debug
+
+# Run e2e tests in headed mode (see browser)
+npm run test:e2e:headed
+
+# Run e2e tests in Chromium only
+npm run test:e2e:chromium
+
+# View test report
+npm run test:e2e:report
+```
+
+E2E tests are located in `e2e/tests/` and cover:
+- **Preset Management** (`preset.spec.ts`): Save/load/delete presets, factory preset protection, sharing
+- **Theme Toggle** (`theme.spec.ts`): Dark/light mode switching, persistence
+- **Transport Controls** (`transport.spec.ts`): Play/pause, BPM control, keyboard shortcuts
+- **Recording** (`recording.spec.ts`): Start/stop recording, download functionality
+
+#### E2E Test Architecture
+
+Tests follow Playwright best practices:
+- **Page Object Model (POM)**: Page objects in `e2e/pages/` encapsulate UI interactions
+- **Test Fixtures**: Custom fixtures in `e2e/fixtures/` provide test setup (localStorage clearing, audio context initialization)
+- **Data Attributes**: Components use `data-testid` attributes for stable, maintainable selectors
+- **Test Isolation**: Each test starts with clean localStorage and initialized audio context
+
+Key page objects:
+- `BasePage`: Common functionality for all pages
+- `PresetPage`: Preset management interactions
+- `ThemePage`: Theme toggle interactions
+- `TransportPage`: Play/pause and BPM controls
+- `RecorderPage`: Recording functionality
+
+#### Adding New E2E Tests
+
+1. Add `data-testid` attributes to new UI elements
+2. Create or extend page objects in `e2e/pages/`
+3. Write tests in `e2e/tests/` using the page objects
+4. Follow the AAA pattern (Arrange, Act, Assert)
+
+Example:
+```typescript
+test('should do something', async ({ page }) => {
+  // Arrange
+  const presetPage = new PresetPage(page);
+
+  // Act
+  await presetPage.loadFactoryPreset('factory-init');
+
+  // Assert
+  await presetPage.expectPresetButtonText('Init');
+});
+```
+
 ## Architecture Overview
 
 ### Core Audio Architecture
@@ -75,4 +159,32 @@ Located in `src/types/`:
 - ESLint configured for React + TypeScript with comprehensive rules
 - Tailwind CSS for styling with custom pink/sky color scheme
 - Base path set to `/tone-drone/` for GitHub Pages deployment
-- Always run linters as a final step.
+- Always run linters as a final step
+
+### Linting Configuration
+The project has separate linting configurations:
+- **Source code** (`src/`): Full React + TypeScript rules via `tsconfig.json`
+- **E2E tests** (`e2e/`, `playwright.config.ts`): Separate config via `tsconfig.e2e.json` with relaxed rules for test code
+
+E2E tests are fully linted but with adjusted rules to accommodate Playwright patterns:
+- Playwright's `expect` is dynamically typed
+- `process.env` access is common in config files
+- Async functions without await are common in test utilities
+
+Run `npm run lint` to lint both source code and e2e tests.
+
+## Preset System
+
+The app includes a comprehensive preset management system:
+- **Factory Presets**: Read-only presets shipped with the app (Init, Deep Space Drone, Gentle Waves, Rhythmic Pulsar)
+- **User Presets**: Custom presets created by users, stored in localStorage
+- **Preset Operations**: New, Save, Save As, Load, Delete, Share
+- **Import/Export**: Presets can be shared via URL or JSON file
+- **State Tracking**: Modified indicator shows unsaved changes
+
+Preset state includes:
+- Oscillator settings (frequency, waveform, volume, pan)
+- Sequencer patterns (16 steps per oscillator)
+- All audio effect parameters
+- Effects bus send level
+- Polysynth settings
