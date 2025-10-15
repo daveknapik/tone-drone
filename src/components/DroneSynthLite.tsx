@@ -31,6 +31,7 @@ import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
 import type { PolySynthsHandle } from "./Polysynths";
+import type { EffectsBusSendHandle } from "./EffectsBusSendControl";
 
 export interface DroneSynthLiteHandle {
   oscillatorsRef: React.RefObject<OscillatorsHandle | null>;
@@ -41,14 +42,15 @@ export interface DroneSynthLiteHandle {
   microlooperRef: React.RefObject<DelayHandle | null>;
   afterFilterRef: React.RefObject<FilterHandle | null>;
   delayRef: React.RefObject<DelayHandle | null>;
-  effectsBusSendRef: React.RefObject<{ value: number } | null>;
+  effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
 }
 
 interface DroneSynthLiteProps {
   ref?: React.Ref<DroneSynthLiteHandle>;
+  onParameterChange?: () => void;
 }
 
-function DroneSynthLite({ ref }: DroneSynthLiteProps) {
+function DroneSynthLite({ ref, onParameterChange }: DroneSynthLiteProps) {
   const recorder = useRecorder();
 
   const beforeFilter = useAutoFilter();
@@ -93,7 +95,7 @@ function DroneSynthLite({ ref }: DroneSynthLiteProps) {
   const microlooperRef = useRef<DelayHandle>(null);
   const afterFilterRef = useRef<FilterHandle>(null);
   const delayRef = useRef<DelayHandle>(null);
-  const effectsBusSendRef = useRef<{ value: number } | null>(null);
+  const effectsBusSendRef = useRef<EffectsBusSendHandle | null>(null);
 
   // Expose refs to parent component
   useImperativeHandle(ref, () => ({
@@ -114,22 +116,23 @@ function DroneSynthLite({ ref }: DroneSynthLiteProps) {
         <Recorder recorder={recorder} />
 
         <Effects>
-          <AutoFilter filter={beforeFilter} ref={autoFilterRef} />
-          <BitCrusher bitCrusher={bitCrusher} ref={bitCrusherRef} />
-          <Chebyshev chebyshev={chebyshev} ref={chebyshevRef} />
+          <AutoFilter filter={beforeFilter} ref={autoFilterRef} onParameterChange={onParameterChange} />
+          <BitCrusher bitCrusher={bitCrusher} ref={bitCrusherRef} onParameterChange={onParameterChange} />
+          <Chebyshev chebyshev={chebyshev} ref={chebyshevRef} onParameterChange={onParameterChange} />
           <Delay
             delay={microlooper}
             label="Microlooper"
             maxTime={1}
             minFeedback={0.6}
             ref={microlooperRef}
+            onParameterChange={onParameterChange}
           />
-          <Filter filter={afterFilter} ref={afterFilterRef} />
-          <Delay delay={delay} ref={delayRef} />
-          <EffectsBusSendControl bus={mainAudioEffectsBus} ref={effectsBusSendRef} />
+          <Filter filter={afterFilter} ref={afterFilterRef} onParameterChange={onParameterChange} />
+          <Delay delay={delay} ref={delayRef} onParameterChange={onParameterChange} />
+          <EffectsBusSendControl bus={mainAudioEffectsBus} ref={effectsBusSendRef} onParameterChange={onParameterChange} />
         </Effects>
-        <PolySynths polysynths={polysynths} ref={polysynthsRef} />
-        <Oscillators bus={mainAudioEffectsBus} ref={oscillatorsRef} />
+        <PolySynths polysynths={polysynths} ref={polysynthsRef} onParameterChange={onParameterChange} />
+        <Oscillators bus={mainAudioEffectsBus} ref={oscillatorsRef} onParameterChange={onParameterChange} />
       </div>
     </div>
   );

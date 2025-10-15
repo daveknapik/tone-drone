@@ -7,6 +7,7 @@ import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
+import type { EffectsBusSendHandle } from "../components/EffectsBusSendControl";
 
 import {
   savePreset as savePresetToStorage,
@@ -29,7 +30,7 @@ export interface PresetComponentRefs {
   microlooper: React.RefObject<DelayHandle | null>;
   afterFilter: React.RefObject<FilterHandle | null>;
   delay: React.RefObject<DelayHandle | null>;
-  effectsBusSendRef: React.RefObject<{ value: number } | null>;
+  effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
 }
 
 /**
@@ -127,7 +128,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
 
       // Apply effects bus send
       if (refs.effectsBusSendRef.current) {
-        refs.effectsBusSendRef.current.value = state.effectsBusSend;
+        refs.effectsBusSendRef.current.setValue(state.effectsBusSend);
       }
     },
     [refs]

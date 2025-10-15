@@ -132,6 +132,14 @@ export function validatePreset(preset: Preset): boolean {
     return false;
   }
 
+  // Validate polysynths
+  if (
+    typeof preset.state.polysynths !== "object" ||
+    preset.state.polysynths === null
+  ) {
+    return false;
+  }
+
   // Validate effectsBusSend
   if (typeof preset.state.effectsBusSend !== "number") {
     return false;

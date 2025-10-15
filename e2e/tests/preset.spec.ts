@@ -60,6 +60,87 @@ test.describe("Preset Management", () => {
       presetPage.getByTestId("preset-delete-factory-init")
     ).not.toBeVisible();
   });
+
+  test("should apply effects bus send value when loading preset", async ({ page }) => {
+    // Load a preset that has a specific bus send value
+    await presetPage.loadFactoryPreset("factory-deep-space-drone");
+
+    // Get the effects bus send slider input
+    const busSlider = page.getByLabel(/effects send/i);
+
+    // Deep Space Drone preset has bus send of -8
+    // The slider uses logarithmic scale, so we need to transform the expected value
+    const toLogarithmic = (value: number): number => {
+      const sign = Math.sign(value);
+      return sign * Math.log(Math.abs(value) + 1);
+    };
+
+    const expectedSliderValue = toLogarithmic(-8);
+
+    // Get the actual slider value
+    const actualSliderValue = await busSlider.inputValue();
+
+    // The slider value should match the logarithmic transformation
+    // Use precision of 2 to account for the 2-decimal-place rounding in Slider.tsx:45
+    expect(parseFloat(actualSliderValue)).toBeCloseTo(expectedSliderValue, 2);
+  });
+
+  test("should show modified indicator when BPM changes", async ({ page }) => {
+    // Load a preset
+    await presetPage.loadFactoryPreset("factory-init");
+
+    // Verify no modified indicator initially
+    await presetPage.expectNoModifiedIndicator();
+
+    // Change BPM
+    const bpmSlider = page.getByLabel(/bpm/i);
+    await bpmSlider.fill("140");
+
+    // Modified indicator should appear
+    await presetPage.expectModifiedIndicator();
+  });
+
+  test("should show modified indicator when sequence steps change", async ({ page }) => {
+    // Load a preset
+    await presetPage.loadFactoryPreset("factory-init");
+
+    // Find sequencer step buttons (round colored buttons in a grid)
+    // They have specific bg-gray-500 or bg-green-500 classes
+    const sequencerStep = page.locator('button.bg-gray-500, button.bg-green-500').first();
+
+    // Ensure button is visible (oscillators section should be expanded by default)
+    await sequencerStep.waitFor({ state: "visible", timeout: 5000 });
+
+    // Click a sequencer step to modify the sequence
+    await sequencerStep.click();
+
+    // Modified indicator should appear
+    await presetPage.expectModifiedIndicator();
+  });
+
+  test("should show modified indicator when effects parameters change", async ({ page }) => {
+    // Load a preset
+    await presetPage.loadFactoryPreset("factory-init");
+
+    // Get the filter frequency slider
+    const filterFreqSliders = page.getByLabel(/^Frequency$/i);
+    const filterFreqSlider = filterFreqSliders.first();
+
+    // Ensure effects section is expanded by checking if slider is visible
+    // If not visible, click the heading to expand
+    const isVisible = await filterFreqSlider.isVisible();
+    if (!isVisible) {
+      const effectsHeading = page.getByText("Effects", { exact: true });
+      await effectsHeading.click();
+      await filterFreqSlider.waitFor({ state: "visible" });
+    }
+
+    // Change filter frequency
+    await filterFreqSlider.fill("500");
+
+    // Modified indicator should appear
+    await presetPage.expectModifiedIndicator();
+  });
 });
 
 test.describe("Preset Browser", () => {

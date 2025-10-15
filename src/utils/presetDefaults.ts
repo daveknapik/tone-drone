@@ -4,7 +4,8 @@ import type { ChebyshevParams} from "../types/ChebyshevParams";
 import type { DelayParams } from "../types/DelayParams";
 import type { FilterParams } from "../types/FilterParams";
 import type { PolySynthParams, PolySynthsState } from "../types/PolySynthParams";
-import type { OscillatorParams, OscillatorsState } from "../types/Preset";
+import type { OscillatorParams } from "../types/OscillatorParams";
+import type { OscillatorsState } from "../types/OscillatorsParams";
 import type { Sequence } from "../types/Sequence";
 import type { PresetState } from "../types/Preset";
 
@@ -36,11 +37,11 @@ export const DEFAULT_SEQUENCE: Sequence = {
 export const DEFAULT_OSCILLATORS_STATE: OscillatorsState = {
   minFreq: 440,
   maxFreq: 454,
-  oscillators: Array(6).fill(null).map(() => ({ ...DEFAULT_OSCILLATOR_PARAMS })),
+  oscillators: Array(6).fill(null).map(() => ({ ...DEFAULT_OSCILLATOR_PARAMS })) as OscillatorParams[],
   sequences: Array(6).fill(null).map(() => ({
     ...DEFAULT_SEQUENCE,
     steps: [...DEFAULT_SEQUENCE.steps],
-  })),
+  })) as Sequence[],
 };
 
 // ============================================================================
