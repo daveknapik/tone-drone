@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useImperativeHandle } from "react";
 import PresetButton from "./PresetButton";
 import PresetBrowserModal from "./PresetBrowserModal";
 import ShareModal from "./ShareModal";
@@ -8,11 +8,16 @@ import { extractPresetFromUrl } from "../utils/presetUrl";
 import { deserializePreset } from "../utils/presetSerializer";
 import type { DroneSynthLiteHandle } from "./DroneSynthLite";
 
-interface PresetManagerProps {
-  droneSynthRef: React.RefObject<DroneSynthLiteHandle | null>;
+export interface PresetManagerHandle {
+  markAsModified: () => void;
 }
 
-function PresetManager({ droneSynthRef }: PresetManagerProps) {
+interface PresetManagerProps {
+  droneSynthRef: React.RefObject<DroneSynthLiteHandle | null>;
+  ref?: React.Ref<PresetManagerHandle>;
+}
+
+function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
   const [isBrowserOpen, setIsBrowserOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isModified, setIsModified] = useState(false);
@@ -31,6 +36,11 @@ function PresetManager({ droneSynthRef }: PresetManagerProps) {
   };
 
   const presetManager = usePresetManager(refs);
+
+  // Expose markAsModified to parent via ref
+  useImperativeHandle(ref, () => ({
+    markAsModified: () => setIsModified(true),
+  }));
 
   const handleNew = useCallback(() => {
     if (confirm("Create new preset? Any unsaved changes will be lost.")) {

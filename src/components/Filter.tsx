@@ -9,9 +9,10 @@ import { FilterHandle, FilterParams } from "../types/FilterParams";
 interface FilterProps {
   filter: React.RefObject<Tone.Filter>;
   ref?: React.Ref<FilterHandle>;
+  onParameterChange?: () => void;
 }
 
-function AutoFilter({ filter, ref }: FilterProps) {
+function Filter({ filter, ref, onParameterChange }: FilterProps) {
   const [frequency, setFrequency] = useState(300);
   const [rolloff, setRolloff] = useState<Tone.FilterRollOff>(-12);
   const [Q, setQ] = useState(1);
@@ -67,7 +68,10 @@ function AutoFilter({ filter, ref }: FilterProps) {
         value={frequency}
         labelText="Frequency"
         step={1}
-        handleChange={(e) => setFrequency(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setFrequency(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
 
       <Slider
@@ -77,19 +81,26 @@ function AutoFilter({ filter, ref }: FilterProps) {
         value={Q}
         labelText="Q"
         step={0.01}
-        handleChange={(e) => setQ(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setQ(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
 
       <div className="mt-3">
         <OptionsSelector<BiquadFilterType>
-          handleChange={(e) => setType(e.target.value as BiquadFilterType)}
+          handleChange={(e) => {
+            setType(e.target.value as BiquadFilterType);
+            onParameterChange?.();
+          }}
           value={type}
           options={["highpass", "lowpass", "bandpass", "notch"]}
         />
         <OptionsSelector<Tone.FilterRollOff>
-          handleChange={(e) =>
-            setRolloff(parseFloat(e.target.value) as Tone.FilterRollOff)
-          }
+          handleChange={(e) => {
+            setRolloff(parseFloat(e.target.value) as Tone.FilterRollOff);
+            onParameterChange?.();
+          }}
           value={rolloff}
           options={[-12, -24, -48, -96]}
         />
@@ -98,4 +109,4 @@ function AutoFilter({ filter, ref }: FilterProps) {
   );
 }
 
-export default AutoFilter;
+export default Filter;

@@ -29,7 +29,7 @@ import { useSequences } from "../hooks/useSequences";
 import { useSynths } from "../hooks/useSynths";
 import { SynthWithPanner } from "../types/SynthWithPanner";
 import { OscillatorsHandle, OscillatorsState } from "../types/OscillatorsParams";
-import { OscillatorHandle } from "../types/OscillatorParams";
+import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 
@@ -38,6 +38,7 @@ interface OscillatorsProps {
   oscillatorCount?: number;
   stepCount?: number;
   ref?: React.Ref<OscillatorsHandle>;
+  onParameterChange?: () => void;
 }
 
 function Oscillators({
@@ -45,6 +46,7 @@ function Oscillators({
   oscillatorCount = 6,
   stepCount = 16,
   ref,
+  onParameterChange,
 }: OscillatorsProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
@@ -67,8 +69,8 @@ function Oscillators({
   useImperativeHandle(ref, () => ({
     getState: (): OscillatorsState => {
       // Get params from each oscillator child component
-      const oscillatorParams = oscillatorRefs.current.map((oscRef) =>
-        oscRef?.getParams() ?? DEFAULT_OSCILLATOR_PARAMS
+      const oscillatorParams: OscillatorParams[] = oscillatorRefs.current.map(
+        (oscRef) => oscRef?.getParams() ?? DEFAULT_OSCILLATOR_PARAMS
       );
 
       return {
@@ -169,8 +171,9 @@ function Oscillators({
         newSequences[sequenceIndex] = { ...sequence, steps: newSteps };
         return newSequences;
       });
+      onParameterChange?.();
     },
-    [setSequences]
+    [setSequences, onParameterChange]
   );
 
   const updateSequenceFrequency = useCallback(
@@ -183,8 +186,9 @@ function Oscillators({
       });
 
       setSequences(newSequences);
+      onParameterChange?.();
     },
-    [sequences, setSequences]
+    [sequences, setSequences, onParameterChange]
   );
 
   const updateSequenceFrequencyDebounced = useDebounceCallback(
@@ -276,7 +280,7 @@ function Oscillators({
               maxFreq={maxFreq}
               minFreq={minFreq}
             />
-            <BpmControl />
+            <BpmControl onParameterChange={onParameterChange} />
             <PlayPauseSequencerButton />
           </div>
           <button onClick={addOscillator}>+</button>
@@ -305,6 +309,7 @@ function Oscillators({
                 ref={(el) => {
                   oscillatorRefs.current[i] = el;
                 }}
+                onParameterChange={onParameterChange}
               />
             );
           })}

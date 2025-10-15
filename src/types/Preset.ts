@@ -5,16 +5,7 @@ import { DelayParams } from "./DelayParams";
 import { FilterParams } from "./FilterParams";
 import { Sequence } from "./Sequence";
 import { PolySynthsState } from "./PolySynthParams";
-
-/**
- * Parameters for a single oscillator instance
- */
-export interface OscillatorParams {
-  frequency: number;
-  waveform: string; // "sine" | "square" | "triangle" | "sawtooth"
-  volume: number;
-  pan: number;
-}
+import { OscillatorParams } from "./OscillatorParams";
 
 /**
  * Global oscillator settings and all oscillator instances

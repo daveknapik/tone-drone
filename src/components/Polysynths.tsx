@@ -20,9 +20,10 @@ export interface PolySynthsHandle {
 interface PolySynthsProps {
   polysynths: Tone.PolySynth[];
   ref?: React.Ref<PolySynthsHandle>;
+  onParameterChange?: () => void;
 }
 
-function PolySynths({ polysynths, ref }: PolySynthsProps) {
+function PolySynths({ polysynths, ref, onParameterChange }: PolySynthsProps) {
   const [expandPolysynths, setExpandPolysynths] = useState(false);
 
   // Create refs for each polysynth component
@@ -74,6 +75,7 @@ function PolySynths({ polysynths, ref }: PolySynthsProps) {
             ref={(el) => {
               polysynthRefs.current[i] = el;
             }}
+            onParameterChange={onParameterChange}
           />
         ))}
       </div>

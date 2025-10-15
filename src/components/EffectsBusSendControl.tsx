@@ -2,24 +2,31 @@ import * as Tone from "tone";
 
 import Slider from "./Slider";
 
-import { useState, useImperativeHandle, useRef, useEffect } from "react";
+import { useState, useImperativeHandle } from "react";
+
+export interface EffectsBusSendHandle {
+  value: number;
+  setValue: (v: number) => void;
+}
 
 interface EffectsBusSendControlProps {
   bus: React.RefObject<Tone.Channel>;
-  ref?: React.Ref<{ value: number }>;
+  ref?: React.Ref<EffectsBusSendHandle>;
+  onParameterChange?: () => void;
 }
 
-function EffectsBusSendControl({ bus, ref }: EffectsBusSendControlProps) {
+function EffectsBusSendControl({ bus, ref, onParameterChange }: EffectsBusSendControlProps) {
   const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
     useState(-15);
 
-  const valueRef = useRef({ value: mainAudioEffectsBusVolume });
-
-  useEffect(() => {
-    valueRef.current.value = mainAudioEffectsBusVolume;
-  }, [mainAudioEffectsBusVolume]);
-
-  useImperativeHandle(ref, () => valueRef.current);
+  useImperativeHandle(
+    ref,
+    () => ({
+      value: mainAudioEffectsBusVolume,
+      setValue: (v: number) => setMainAudioEffectsBusVolume(v),
+    }),
+    [mainAudioEffectsBusVolume]
+  );
 
   bus.current?.volume.setTargetAtTime(mainAudioEffectsBusVolume, 0, 0.01);
 
@@ -33,9 +40,10 @@ function EffectsBusSendControl({ bus, ref }: EffectsBusSendControlProps) {
         step={0.01}
         logarithmic={true}
         value={mainAudioEffectsBusVolume}
-        handleChange={(e) =>
-          setMainAudioEffectsBusVolume(parseFloat(e.target.value))
-        }
+        handleChange={(e) => {
+          setMainAudioEffectsBusVolume(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
     </div>
   );

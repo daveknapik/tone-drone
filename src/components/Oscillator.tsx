@@ -25,6 +25,7 @@ interface OscillatorProps {
   synth: Tone.Synth;
   updateSequenceFrequency: (sequenceIndex: number, frequency: number) => void;
   ref?: React.Ref<OscillatorHandle>;
+  onParameterChange?: () => void;
 }
 
 function Oscillator({
@@ -41,6 +42,7 @@ function Oscillator({
   synth,
   updateSequenceFrequency,
   ref,
+  onParameterChange,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
@@ -140,7 +142,10 @@ function Oscillator({
         value={volume}
         step={0.01}
         logarithmic={true}
-        handleChange={(e) => setVolume(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setVolume(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="pan"
@@ -149,11 +154,17 @@ function Oscillator({
         max={1}
         value={pan}
         step={0.01}
-        handleChange={(e) => setPan(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setPan(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <div className="justify-between mt-1">
         <OptionsSelector<OscillatorType>
-          handleChange={(e) => setWaveform(e.target.value)}
+          handleChange={(e) => {
+            setWaveform(e.target.value);
+            onParameterChange?.();
+          }}
           justifyBetween={true}
           options={["sine", "square", "triangle", "sawtooth"]}
           value={waveform}

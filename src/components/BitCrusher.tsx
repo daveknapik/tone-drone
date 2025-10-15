@@ -8,9 +8,10 @@ import { BitCrusherHandle, BitCrusherParams } from "../types/BitCrusherParams";
 interface BitCrusherProps {
   bitCrusher: React.RefObject<Tone.BitCrusher>;
   ref?: React.Ref<BitCrusherHandle>;
+  onParameterChange?: () => void;
 }
 
-function BitCrusher({ bitCrusher, ref }: BitCrusherProps) {
+function BitCrusher({ bitCrusher, ref, onParameterChange }: BitCrusherProps) {
   const [bits, setBits] = useState(5);
   const [wet, setWet] = useState(0);
 
@@ -51,7 +52,10 @@ function BitCrusher({ bitCrusher, ref }: BitCrusherProps) {
         max={8}
         value={bits}
         labelText="Bits"
-        handleChange={(e) => setBits(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setBits(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="wet"
@@ -60,7 +64,10 @@ function BitCrusher({ bitCrusher, ref }: BitCrusherProps) {
         value={wet}
         step={0.01}
         labelText="Dry / Wet"
-        handleChange={(e) => setWet(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setWet(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
     </div>
   );

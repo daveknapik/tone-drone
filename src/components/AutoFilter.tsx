@@ -9,9 +9,10 @@ import { AutoFilterHandle, AutoFilterParams } from "../types/AutoFilterParams";
 interface AutoFilterProps {
   filter: React.RefObject<Tone.AutoFilter>;
   ref?: React.Ref<AutoFilterHandle>;
+  onParameterChange?: () => void;
 }
 
-function AutoFilter({ filter, ref }: AutoFilterProps) {
+function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
   const [baseFrequency, setBaseFrequency] = useState(300);
   const [depth, setDepth] = useState(1);
   const [frequency, setFrequency] = useState(4);
@@ -86,7 +87,10 @@ function AutoFilter({ filter, ref }: AutoFilterProps) {
         value={baseFrequency}
         labelText="Base Freq"
         step={1}
-        handleChange={(e) => setBaseFrequency(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setBaseFrequency(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="frequency"
@@ -95,7 +99,10 @@ function AutoFilter({ filter, ref }: AutoFilterProps) {
         value={frequency}
         labelText="Speed"
         step={0.01}
-        handleChange={(e) => setFrequency(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setFrequency(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="q"
@@ -104,7 +111,10 @@ function AutoFilter({ filter, ref }: AutoFilterProps) {
         value={Q}
         labelText="Q"
         step={0.01}
-        handleChange={(e) => setQ(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setQ(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="depth"
@@ -113,7 +123,10 @@ function AutoFilter({ filter, ref }: AutoFilterProps) {
         value={depth}
         labelText="Depth"
         step={0.01}
-        handleChange={(e) => setDepth(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setDepth(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="wet"
@@ -122,25 +135,33 @@ function AutoFilter({ filter, ref }: AutoFilterProps) {
         value={wet}
         labelText="Dry / Wet"
         step={0.01}
-        handleChange={(e) => setWet(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setWet(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <div className="mt-3">
         <OptionsSelector<BiquadFilterType>
-          handleChange={(e) => setType(e.target.value as BiquadFilterType)}
+          handleChange={(e) => {
+            setType(e.target.value as BiquadFilterType);
+            onParameterChange?.();
+          }}
           value={type}
           options={["highpass", "lowpass", "bandpass", "notch"]}
         />
         <OptionsSelector<Tone.FilterRollOff>
-          handleChange={(e) =>
-            setRolloff(parseFloat(e.target.value) as Tone.FilterRollOff)
-          }
+          handleChange={(e) => {
+            setRolloff(parseFloat(e.target.value) as Tone.FilterRollOff);
+            onParameterChange?.();
+          }}
           value={rolloff}
           options={[-12, -24, -48, -96]}
         />
         <OptionsSelector<OscillatorType>
-          handleChange={(e) =>
-            setOscillatorType(e.target.value as OscillatorType)
-          }
+          handleChange={(e) => {
+            setOscillatorType(e.target.value as OscillatorType);
+            onParameterChange?.();
+          }}
           value={oscillatorType}
           options={["sine", "square", "triangle", "sawtooth"]}
         />

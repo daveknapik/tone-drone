@@ -11,6 +11,7 @@ interface DelayProps {
   maxTime?: number;
   minFeedback?: number;
   ref?: React.Ref<DelayHandle>;
+  onParameterChange?: () => void;
 }
 
 function Delay({
@@ -19,6 +20,7 @@ function Delay({
   maxTime = 10,
   minFeedback = 0,
   ref,
+  onParameterChange,
 }: DelayProps) {
   const [time, setTime] = useState(1);
   const [feedback, setFeedback] = useState(0.95);
@@ -66,7 +68,10 @@ function Delay({
         value={time}
         labelText="Time"
         step={0.01}
-        handleChange={(e) => setTime(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setTime(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="feedback"
@@ -75,7 +80,10 @@ function Delay({
         value={feedback}
         labelText="Feedback"
         step={0.01}
-        handleChange={(e) => setFeedback(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setFeedback(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="wet"
@@ -84,7 +92,10 @@ function Delay({
         value={wet}
         step={0.01}
         labelText="Dry / Wet"
-        handleChange={(e) => setWet(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setWet(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
     </div>
   );

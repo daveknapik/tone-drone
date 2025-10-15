@@ -12,9 +12,10 @@ import { PolySynthHandle, PolySynthParams } from "../types/PolySynthParams";
 interface PolysynthProps {
   polySynth: Tone.PolySynth;
   ref?: React.Ref<PolySynthHandle>;
+  onParameterChange?: () => void;
 }
 
-function PolySynth({ polySynth, ref }: PolysynthProps) {
+function PolySynth({ polySynth, ref, onParameterChange }: PolysynthProps) {
   const [frequency, setFrequency] = useState(666);
   const [waveform, setWaveform] = useState<OscillatorType>("sine");
   const [volume, setVolume] = useState(-5);
@@ -93,7 +94,10 @@ function PolySynth({ polySynth, ref }: PolysynthProps) {
         step={0.01}
         logarithmic={true}
         value={volume}
-        handleChange={(e) => setVolume(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setVolume(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="frequency"
@@ -101,7 +105,10 @@ function PolySynth({ polySynth, ref }: PolysynthProps) {
         min={30}
         max={7000}
         value={frequency}
-        handleChange={(e) => setFrequency(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setFrequency(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="attack"
@@ -110,7 +117,10 @@ function PolySynth({ polySynth, ref }: PolysynthProps) {
         max={2}
         step={0.01}
         value={attack}
-        handleChange={(e) => setAttack(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setAttack(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="decay"
@@ -119,7 +129,10 @@ function PolySynth({ polySynth, ref }: PolysynthProps) {
         max={1}
         step={0.01}
         value={decay}
-        handleChange={(e) => setDecay(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setDecay(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="sustain"
@@ -128,7 +141,10 @@ function PolySynth({ polySynth, ref }: PolysynthProps) {
         max={1}
         step={0.01}
         value={sustain}
-        handleChange={(e) => setSustain(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setSustain(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <Slider
         inputName="release"
@@ -137,10 +153,16 @@ function PolySynth({ polySynth, ref }: PolysynthProps) {
         max={15}
         step={0.01}
         value={release}
-        handleChange={(e) => setRelease(parseFloat(e.target.value))}
+        handleChange={(e) => {
+          setRelease(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
       />
       <OptionsSelector<OscillatorType>
-        handleChange={(e) => setWaveform(e.target.value as OscillatorType)}
+        handleChange={(e) => {
+          setWaveform(e.target.value as OscillatorType);
+          onParameterChange?.();
+        }}
         value={waveform}
         options={["sine", "square", "triangle", "sawtooth"]}
       />

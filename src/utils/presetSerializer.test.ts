@@ -84,7 +84,7 @@ describe("presetSerializer", () => {
       const name = "Test Preset";
       const preset = createPreset(name, mockPresetState);
 
-      expect(preset.version).toBe(1);
+      expect(preset.version).toBe(2);
       expect(preset.metadata.name).toBe(name);
       expect(preset.metadata.id).toBeTruthy();
       expect(preset.metadata.created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -186,6 +186,24 @@ describe("presetSerializer", () => {
       const invalid = {
         ...preset,
         state: { ...preset.state, effects: undefined },
+      } as unknown as Preset;
+      expect(validatePreset(invalid)).toBe(false);
+    });
+
+    it("should return false for preset with missing polysynths", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const invalid = {
+        ...preset,
+        state: { ...preset.state, polysynths: undefined },
+      } as unknown as Preset;
+      expect(validatePreset(invalid)).toBe(false);
+    });
+
+    it("should return false for preset with null polysynths", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const invalid = {
+        ...preset,
+        state: { ...preset.state, polysynths: null },
       } as unknown as Preset;
       expect(validatePreset(invalid)).toBe(false);
     });
