@@ -118,8 +118,8 @@ function PresetBrowserModal({
             className={clsx(
               "w-full px-4 py-2 rounded border-2",
               "border-pink-500 dark:border-sky-300",
-              "bg-white dark:bg-gray-700",
-              "focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-sky-300"
+              "bg-pink-100 dark:bg-gray-700",
+              "focus:outline-none focus:ring-pink-500 dark:focus:ring-sky-300"
             )}
           />
         </div>
@@ -262,8 +262,8 @@ function PresetBrowserModal({
                 className={clsx(
                   "w-full px-4 py-2 rounded border-2 h-24 resize-none",
                   "border-pink-500 dark:border-sky-300",
-                  "bg-white dark:bg-gray-700",
-                  "focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-sky-300"
+                  "bg-pink-100 dark:bg-gray-700",
+                  "focus:outline-none focus:ring-pink-500 dark:focus:ring-sky-300"
                 )}
               />
               <div className="flex gap-2">
