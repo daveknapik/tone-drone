@@ -15,7 +15,11 @@ interface EffectsBusSendControlProps {
   onParameterChange?: () => void;
 }
 
-function EffectsBusSendControl({ bus, ref, onParameterChange }: EffectsBusSendControlProps) {
+function EffectsBusSendControl({
+  bus,
+  ref,
+  onParameterChange,
+}: EffectsBusSendControlProps) {
   const [mainAudioEffectsBusVolume, setMainAudioEffectsBusVolume] =
     useState(-15);
 
@@ -23,7 +27,10 @@ function EffectsBusSendControl({ bus, ref, onParameterChange }: EffectsBusSendCo
     ref,
     () => ({
       value: mainAudioEffectsBusVolume,
-      setValue: (v: number) => setMainAudioEffectsBusVolume(v),
+      setValue: (v: number) => {
+        if (v === mainAudioEffectsBusVolume) return;
+        setMainAudioEffectsBusVolume(v);
+      },
     }),
     [mainAudioEffectsBusVolume]
   );
