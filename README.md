@@ -141,6 +141,40 @@ tone-drone/
 └── README.md           # This file
 ```
 
+### CI/CD Pipeline
+
+This project uses GitHub Actions for automated testing and deployment:
+
+#### Node Version Management
+
+The project uses Node.js v24.7.0 (specified in `.nvmrc`). The CI/CD pipeline automatically uses this version to ensure consistency between local development and CI environments.
+
+#### Workflows
+
+**Pull Request Testing** (`.github/workflows/test.yml`)
+
+- Runs on all pull requests to `main`
+- Executes linter, unit tests, and e2e tests
+- Must pass before merging
+
+**Build and Deploy** (`.github/workflows/deploy.yml`)
+
+- Runs on every push to `main`
+- Executes full test suite (linter, unit tests, e2e tests)
+- Builds the project
+- Deploys to GitHub Pages using official GitHub Actions if tests pass
+- Uses `actions/upload-pages-artifact` and `actions/deploy-pages`
+
+#### Local Deployment (Manual)
+
+While CI/CD handles automatic deployment, you can still deploy manually:
+
+```bash
+npm run deploy
+```
+
+Note: The `npm run deploy` script uses the `gh-pages` npm package for manual local deployments. The recommended approach is to use the automated GitHub Actions workflow.
+
 ## Documentation
 
 - [Architecture Guide](docs/ARCHITECTURE.md) - Technical deep dive into audio architecture
