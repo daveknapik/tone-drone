@@ -24,6 +24,16 @@ jobs:
       - name: Install Playwright system dependencies
         run: npx playwright install-deps
 
+      - name: Install additional webkit dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-ocaml-dev pulseaudio xvfb
+
+      - name: Start PulseAudio with dummy sink
+        run: |
+          pulseaudio --start --load="module-null-sink sink_name=DummySink" --exit-idle-time=-1
+          pactl set-default-sink DummySink
+
       - name: Install Playwright browsers
         run: npx playwright install
 
@@ -34,4 +44,4 @@ jobs:
         run: npm run test:run
 
       - name: Run e2e tests
-        run: npm run test:e2e
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" npm run test:e2e
