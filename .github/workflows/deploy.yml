@@ -30,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+      - name: Install Playwright browsers (chromium and firefox only)
+        run: npx playwright install --with-deps chromium firefox
 
       - name: Run linter
         run: npm run lint
