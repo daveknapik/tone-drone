@@ -27,19 +27,22 @@ jobs:
       - name: Install additional webkit dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-ocaml-dev pulseaudio xvfb
+          sudo apt-get install -y gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-ocaml-dev xvfb
 
-      - name: Configure ALSA to use PulseAudio
+      - name: Load ALSA dummy driver
         run: |
+          sudo modprobe snd-dummy
           mkdir -p ~/.config/alsa
-          echo "pcm.!default { type pulse }" > ~/.config/alsa/asoundrc
-          echo "ctl.!default { type pulse }" >> ~/.config/alsa/asoundrc
-
-      - name: Start PulseAudio with dummy sink
-        run: |
-          pulseaudio --start --load="module-null-sink sink_name=DummySink" --exit-idle-time=-1
-          pactl set-default-sink DummySink
-          sleep 2
+          cat > ~/.config/alsa/asoundrc << EOF
+          pcm.!default {
+            type hw
+            card Dummy
+          }
+          ctl.!default {
+            type hw
+            card Dummy
+          }
+          EOF
 
       - name: Install Playwright browsers
         run: npx playwright install
