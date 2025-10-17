@@ -59,7 +59,14 @@ export default defineConfig({
 
     {
       name: "webkit",
-      use: { ...devices["Desktop Safari"] },
+      use: {
+        ...devices["Desktop Safari"],
+        // Increase timeout for webkit in CI (Web Audio API initialization can be slow)
+        ...(process.env.CI && {
+          actionTimeout: 60000, // 60 seconds
+          navigationTimeout: 60000,
+        }),
+      },
     },
 
     // Test against mobile viewports (optional, uncomment if needed)

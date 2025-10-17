@@ -44,4 +44,7 @@ jobs:
         run: npm run test:run
 
       - name: Run e2e tests
+        env:
+          PULSE_SERVER: unix:/tmp/pulse-server
+          DEBUG: pw:browser
         run: xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" npm run test:e2e
