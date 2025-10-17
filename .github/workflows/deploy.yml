@@ -33,23 +33,6 @@ jobs:
       - name: Install Playwright system dependencies
         run: npx playwright install-deps
 
-      - name: Install additional webkit dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-ocaml-dev xvfb
-
-      - name: Configure ALSA null device
-        run: |
-          mkdir -p ~/.config/alsa
-          cat > ~/.config/alsa/asoundrc << EOF
-          pcm.!default {
-            type null
-          }
-          ctl.!default {
-            type null
-          }
-          EOF
-
       - name: Install Playwright browsers
         run: npx playwright install
 
@@ -60,10 +43,7 @@ jobs:
         run: npm run test:run
 
       - name: Run e2e tests
-        env:
-          PULSE_SERVER: unix:/tmp/pulse-server
-          DEBUG: pw:browser
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" npm run test:e2e
+        run: npm run test:e2e
 
       - name: Build project
         run: npm run build
