@@ -38,18 +38,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-ocaml-dev xvfb
 
-      - name: Load ALSA dummy driver
+      - name: Configure ALSA null device
         run: |
-          sudo modprobe snd-dummy
           mkdir -p ~/.config/alsa
           cat > ~/.config/alsa/asoundrc << EOF
           pcm.!default {
-            type hw
-            card Dummy
+            type null
           }
           ctl.!default {
-            type hw
-            card Dummy
+            type null
           }
           EOF
 
