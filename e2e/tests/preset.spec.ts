@@ -18,17 +18,17 @@ test.describe("Preset Management", () => {
 
     // Check that all factory presets are visible
     await presetPage.expectFactoryPresetExists("factory-init");
-    await presetPage.expectFactoryPresetExists("factory-deep-space-drone");
-    await presetPage.expectFactoryPresetExists("factory-gentle-waves");
+    await presetPage.expectFactoryPresetExists("factory-the-ending-world");
+    await presetPage.expectFactoryPresetExists("factory-melody-memory");
     await presetPage.expectFactoryPresetExists("factory-rhythmic-pulsar");
   });
 
   test("should load a factory preset", async () => {
     // Load a factory preset
-    await presetPage.loadFactoryPreset("factory-deep-space-drone");
+    await presetPage.loadFactoryPreset("factory-the-ending-world");
 
     // Verify the preset button shows the loaded preset name
-    await presetPage.expectPresetButtonText("Deep Space Drone");
+    await presetPage.expectPresetButtonText("The Ending World");
     await presetPage.expectNoModifiedIndicator();
   });
 
@@ -63,12 +63,12 @@ test.describe("Preset Management", () => {
 
   test("should apply effects bus send value when loading preset", async ({ page }) => {
     // Load a preset that has a specific bus send value
-    await presetPage.loadFactoryPreset("factory-deep-space-drone");
+    await presetPage.loadFactoryPreset("factory-the-ending-world");
 
     // Get the effects bus send slider input
     const busSlider = page.getByLabel(/effects send/i);
 
-    // Deep Space Drone preset has bus send of -8
+    // The Ending World preset has bus send of -8
     // The slider uses logarithmic scale, so we need to transform the expected value
     const toLogarithmic = (value: number): number => {
       const sign = Math.sign(value);

@@ -176,7 +176,6 @@ Located in `src/types/`:
 - Do not use forwardRef, it was deprecated in React 19. https://react.dev/blog/2024/12/05/react-19#ref-as-a-prop
 - Tailwind CSS for styling with custom pink/sky color scheme
 - Base path set to `/tone-drone/` for GitHub Pages deployment
-- Always run linters as a final step
 
 ### Linting Configuration
 
