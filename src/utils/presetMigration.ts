@@ -1,10 +1,10 @@
 import type { Preset } from "../types/Preset";
-import { DEFAULT_POLYSYNTHS_STATE } from "./presetDefaults";
+import { DEFAULT_POLYSYNTHS_STATE, DEFAULT_BPM } from "./presetDefaults";
 
 /**
  * Current preset version
  */
-export const CURRENT_PRESET_VERSION = 2;
+export const CURRENT_PRESET_VERSION = 3;
 
 /**
  * Migrate a preset from an older version to the current version
@@ -30,9 +30,8 @@ function runMigration(preset: Preset, fromVersion: number): Preset {
     case 1:
       return migrateV1ToV2(preset);
 
-    // Example: migration from version 2 to version 3
-    // case 2:
-    //   return migrateV2ToV3(preset);
+    case 2:
+      return migrateV2ToV3(preset);
 
     default:
       // No migration needed for this version
@@ -52,6 +51,22 @@ function migrateV1ToV2(preset: Preset): Preset {
       ...preset.state,
       // Add polysynths with default values if missing
       polysynths: preset.state.polysynths ?? DEFAULT_POLYSYNTHS_STATE,
+    },
+  };
+}
+
+/**
+ * Migration from version 2 to version 3
+ * Adds BPM support to presets that were created before this feature existed
+ */
+function migrateV2ToV3(preset: Preset): Preset {
+  return {
+    ...preset,
+    version: 3,
+    state: {
+      ...preset.state,
+      // Add BPM with default value if missing
+      bpm: preset.state.bpm ?? DEFAULT_BPM,
     },
   };
 }

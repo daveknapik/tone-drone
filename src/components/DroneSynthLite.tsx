@@ -32,6 +32,7 @@ import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
 import type { PolySynthsHandle } from "./Polysynths";
 import type { EffectsBusSendHandle } from "./EffectsBusSendControl";
+import type { BpmControlHandle } from "../types/BpmParams";
 
 export interface DroneSynthLiteHandle {
   oscillatorsRef: React.RefObject<OscillatorsHandle | null>;
@@ -43,6 +44,7 @@ export interface DroneSynthLiteHandle {
   afterFilterRef: React.RefObject<FilterHandle | null>;
   delayRef: React.RefObject<DelayHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
+  bpmControlRef: React.RefObject<BpmControlHandle | null>;
 }
 
 interface DroneSynthLiteProps {
@@ -96,6 +98,7 @@ function DroneSynthLite({ ref, onParameterChange }: DroneSynthLiteProps) {
   const afterFilterRef = useRef<FilterHandle>(null);
   const delayRef = useRef<DelayHandle>(null);
   const effectsBusSendRef = useRef<EffectsBusSendHandle | null>(null);
+  const bpmControlRef = useRef<BpmControlHandle | null>(null);
 
   // Expose refs to parent component
   useImperativeHandle(ref, () => ({
@@ -108,6 +111,7 @@ function DroneSynthLite({ ref, onParameterChange }: DroneSynthLiteProps) {
     afterFilterRef,
     delayRef,
     effectsBusSendRef,
+    bpmControlRef,
   }));
 
   return (
@@ -132,7 +136,7 @@ function DroneSynthLite({ ref, onParameterChange }: DroneSynthLiteProps) {
           <EffectsBusSendControl bus={mainAudioEffectsBus} ref={effectsBusSendRef} onParameterChange={onParameterChange} />
         </Effects>
         <PolySynths polysynths={polysynths} ref={polysynthsRef} onParameterChange={onParameterChange} />
-        <Oscillators bus={mainAudioEffectsBus} ref={oscillatorsRef} onParameterChange={onParameterChange} />
+        <Oscillators bus={mainAudioEffectsBus} ref={oscillatorsRef} onParameterChange={onParameterChange} bpmControlRef={bpmControlRef} />
       </div>
     </div>
   );

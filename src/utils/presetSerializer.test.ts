@@ -77,6 +77,7 @@ describe("presetSerializer", () => {
       },
     },
     effectsBusSend: 0.5,
+    bpm: 120,
   };
 
   describe("createPreset", () => {
@@ -84,7 +85,7 @@ describe("presetSerializer", () => {
       const name = "Test Preset";
       const preset = createPreset(name, mockPresetState);
 
-      expect(preset.version).toBe(2);
+      expect(preset.version).toBe(3);
       expect(preset.metadata.name).toBe(name);
       expect(preset.metadata.id).toBeTruthy();
       expect(preset.metadata.created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -126,6 +127,36 @@ describe("presetSerializer", () => {
       const deserialized = deserializePreset(serialized);
 
       expect(deserialized).toEqual(preset);
+    });
+
+    it("should deserialize and migrate a v2 preset without BPM", () => {
+      // Create a v2 preset without BPM
+      const v2Preset = {
+        version: 2,
+        metadata: {
+          id: "test-v2",
+          name: "Test V2",
+          created: "2024-01-01T00:00:00.000Z",
+        },
+        state: {
+          oscillators: mockPresetState.oscillators,
+          polysynths: mockPresetState.polysynths,
+          effects: mockPresetState.effects,
+          effectsBusSend: mockPresetState.effectsBusSend,
+          // No BPM field - should be added by migration
+        },
+      };
+
+      const serialized = JSON.stringify(v2Preset);
+      const deserialized = deserializePreset(serialized);
+
+      // Should be migrated to v3
+      expect(deserialized.version).toBe(3);
+      // Should have BPM added with default value
+      expect(deserialized.state.bpm).toBe(120);
+      // Other state should be preserved
+      expect(deserialized.state.oscillators).toEqual(mockPresetState.oscillators);
+      expect(deserialized.state.polysynths).toEqual(mockPresetState.polysynths);
     });
 
     it("should throw error for invalid JSON", () => {
@@ -206,6 +237,69 @@ describe("presetSerializer", () => {
         state: { ...preset.state, polysynths: null },
       } as unknown as Preset;
       expect(validatePreset(invalid)).toBe(false);
+    });
+
+    it("should return false for preset with missing bpm", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const invalid = {
+        ...preset,
+        state: { ...preset.state, bpm: undefined },
+      } as unknown as Preset;
+      expect(validatePreset(invalid)).toBe(false);
+    });
+
+    it("should return false for preset with non-number bpm", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const invalid = {
+        ...preset,
+        state: { ...preset.state, bpm: "120" },
+      } as unknown as Preset;
+      expect(validatePreset(invalid)).toBe(false);
+    });
+
+    it("should return false for preset with negative bpm", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const invalid = {
+        ...preset,
+        state: { ...preset.state, bpm: -10 },
+      } as unknown as Preset;
+      expect(validatePreset(invalid)).toBe(false);
+    });
+
+    it("should return false for preset with bpm > 999", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const invalid = {
+        ...preset,
+        state: { ...preset.state, bpm: 1000 },
+      } as unknown as Preset;
+      expect(validatePreset(invalid)).toBe(false);
+    });
+
+    it("should return true for preset with bpm = 0", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const valid = {
+        ...preset,
+        state: { ...preset.state, bpm: 0 },
+      };
+      expect(validatePreset(valid)).toBe(true);
+    });
+
+    it("should return true for preset with bpm = 999", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const valid = {
+        ...preset,
+        state: { ...preset.state, bpm: 999 },
+      };
+      expect(validatePreset(valid)).toBe(true);
+    });
+
+    it("should return true for preset with valid bpm in middle of range", () => {
+      const preset = createPreset("Test Preset", mockPresetState);
+      const valid = {
+        ...preset,
+        state: { ...preset.state, bpm: 140 },
+      };
+      expect(validatePreset(valid)).toBe(true);
     });
   });
 });

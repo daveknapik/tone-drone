@@ -73,6 +73,7 @@ describe("presetUrl", () => {
       },
     },
     effectsBusSend: 0.5,
+    bpm: 120,
   };
 
   describe("encodePresetToUrl", () => {

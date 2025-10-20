@@ -30,6 +30,7 @@ import { useSynths } from "../hooks/useSynths";
 import { SynthWithPanner } from "../types/SynthWithPanner";
 import { OscillatorsHandle, OscillatorsState } from "../types/OscillatorsParams";
 import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
+import { BpmControlHandle } from "../types/BpmParams";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 
@@ -39,6 +40,7 @@ interface OscillatorsProps {
   stepCount?: number;
   ref?: React.Ref<OscillatorsHandle>;
   onParameterChange?: () => void;
+  bpmControlRef?: React.RefObject<BpmControlHandle | null>;
 }
 
 function Oscillators({
@@ -47,6 +49,7 @@ function Oscillators({
   stepCount = 16,
   ref,
   onParameterChange,
+  bpmControlRef,
 }: OscillatorsProps) {
   const [minFreq, setMinFreq] = useState(440);
   const [maxFreq, setMaxFreq] = useState(454);
@@ -280,7 +283,7 @@ function Oscillators({
               maxFreq={maxFreq}
               minFreq={minFreq}
             />
-            <BpmControl onParameterChange={onParameterChange} />
+            <BpmControl onParameterChange={onParameterChange} ref={bpmControlRef} />
             <PlayPauseSequencerButton />
           </div>
           <button onClick={addOscillator}>+</button>

@@ -7,6 +7,7 @@ import { FACTORY_PRESETS, isFactoryPreset } from "../utils/factoryPresets";
 import { extractPresetFromUrl } from "../utils/presetUrl";
 import { deserializePreset } from "../utils/presetSerializer";
 import type { DroneSynthLiteHandle } from "./DroneSynthLite";
+import type { Preset } from "../types/Preset";
 
 export interface PresetManagerHandle {
   markAsModified: () => void;
@@ -21,6 +22,7 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
   const [isBrowserOpen, setIsBrowserOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isModified, setIsModified] = useState(false);
+  const [presetToShare, setPresetToShare] = useState<Preset | null>(null);
 
   // Get refs from DroneSynthLite
   const refs = {
@@ -33,6 +35,7 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
     afterFilter: droneSynthRef.current?.afterFilterRef ?? { current: null },
     delay: droneSynthRef.current?.delayRef ?? { current: null },
     effectsBusSendRef: droneSynthRef.current?.effectsBusSendRef ?? { current: null },
+    bpmControl: droneSynthRef.current?.bpmControlRef ?? { current: null },
   };
 
   const presetManager = usePresetManager(refs);
@@ -107,9 +110,16 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
 
   const handleShare = useCallback(() => {
     if (presetManager.currentPreset) {
+      // Capture current state and create a temporary preset for sharing
+      const currentState = presetManager.captureCurrentState();
+      const tempPreset: Preset = {
+        ...presetManager.currentPreset,
+        state: currentState,
+      };
+      setPresetToShare(tempPreset);
       setIsShareOpen(true);
     }
-  }, [presetManager.currentPreset]);
+  }, [presetManager]);
 
   const handleImportFile = useCallback(
     (file: File) => {
@@ -189,7 +199,7 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
-        preset={presetManager.currentPreset}
+        preset={presetToShare}
       />
     </>
   );

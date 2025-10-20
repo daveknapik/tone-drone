@@ -1,21 +1,37 @@
 import * as Tone from "tone";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, useEffect } from "react";
 
 import Slider from "./Slider";
+import { BpmControlHandle } from "../types/BpmParams";
 
 interface BpmControlProps {
   onParameterChange?: () => void;
+  ref?: React.Ref<BpmControlHandle>;
 }
 
-function BpmControl({ onParameterChange }: BpmControlProps) {
+function BpmControl({ onParameterChange, ref }: BpmControlProps) {
   const [bpm, setBpm] = useState<number>(120);
+
+  // Initialize BPM from Tone.js transport on mount
+  useEffect(() => {
+    const currentBpm = Tone.getTransport().bpm.value;
+    setBpm(currentBpm);
+  }, []);
 
   const updateBpm = (bpm: number): void => {
     Tone.getTransport().bpm.value = bpm;
     setBpm(bpm);
     onParameterChange?.();
   };
+
+  // Expose imperative handle for preset manager
+  useImperativeHandle(ref, () => ({
+    getValue: () => bpm,
+    setValue: (newBpm: number) => {
+      updateBpm(newBpm);
+    },
+  }));
 
   return (
     <Slider

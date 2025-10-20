@@ -196,7 +196,7 @@ Run `npm run lint` to lint both source code and e2e tests.
 
 The app includes a comprehensive preset management system:
 
-- **Factory Presets**: Read-only presets shipped with the app (Init, Deep Space Drone, Gentle Waves, Rhythmic Pulsar)
+- **Factory Presets**: Read-only presets shipped with the app
 - **User Presets**: Custom presets created by users, stored in localStorage
 - **Preset Operations**: New, Save, Save As, Load, Delete, Share
 - **Import/Export**: Presets can be shared via URL or JSON file

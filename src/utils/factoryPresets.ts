@@ -2,8 +2,8 @@ import type { Preset } from "../types/Preset";
 
 // Import factory presets
 import initPreset from "../presets/init.json";
-import deepSpaceDronePreset from "../presets/deep-space-drone.json";
-import gentleWavesPreset from "../presets/gentle-waves.json";
+import theEndingWorldPreset from "../presets/the-ending-world.json";
+import melodyMemoryPreset from "../presets/melody-memory.json";
 import rhythmicPulsarPreset from "../presets/rhythmic-pulsar.json";
 
 /**
@@ -12,8 +12,8 @@ import rhythmicPulsarPreset from "../presets/rhythmic-pulsar.json";
  */
 export const FACTORY_PRESETS: Preset[] = [
   initPreset as Preset,
-  deepSpaceDronePreset as Preset,
-  gentleWavesPreset as Preset,
+  theEndingWorldPreset as Preset,
+  melodyMemoryPreset as Preset,
   rhythmicPulsarPreset as Preset,
 ];
 

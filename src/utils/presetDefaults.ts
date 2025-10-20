@@ -109,6 +109,12 @@ export const DEFAULT_DELAY_PARAMS: DelayParams = {
 export const DEFAULT_EFFECTS_BUS_SEND = -15;
 
 // ============================================================================
+// Transport Defaults
+// ============================================================================
+
+export const DEFAULT_BPM = 120;
+
+// ============================================================================
 // Complete Preset State Default
 // ============================================================================
 
@@ -124,4 +130,5 @@ export const DEFAULT_PRESET_STATE: PresetState = {
     delay: DEFAULT_DELAY_PARAMS,
   },
   effectsBusSend: DEFAULT_EFFECTS_BUS_SEND,
+  bpm: DEFAULT_BPM,
 };

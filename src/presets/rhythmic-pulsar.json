@@ -94,6 +94,7 @@
         "wet": 0.25
       }
     },
-    "effectsBusSend": -6
+    "effectsBusSend": -6,
+    "bpm": 120
   }
 }
