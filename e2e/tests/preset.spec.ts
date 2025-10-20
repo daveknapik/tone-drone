@@ -162,23 +162,26 @@ test.describe("Preset Management", () => {
     const saveAsButton = presetPage.getByTestId("preset-save-as");
     await saveAsButton.click();
 
-    // Wait for preset to be saved and menu to close
-    await page.waitForTimeout(500);
-
     // Verify preset is loaded
     await presetPage.expectPresetButtonText("Test BPM Preset");
 
     // Change BPM to verify we can detect reload
     await bpmSlider.fill("120");
 
+    // Setup dialog handler for unsaved changes confirmation
+    page.once("dialog", async (dialog) => {
+      expect(dialog.type()).toBe("confirm");
+      expect(dialog.message()).toContain("unsaved changes");
+      await dialog.accept(); // Accept the dialog to proceed with loading
+    });
+
     // Reload the preset
     await presetPage.openPresetMenu();
-    const presetItem = page.getByTestId("user-preset-item").filter({ hasText: "Test BPM Preset" });
+    const presetItem = page.getByTestId(/^preset-user-/).filter({ hasText: "Test BPM Preset" });
     await presetItem.click();
 
-    // Verify BPM is restored to 180
-    const bpmValue = await bpmSlider.inputValue();
-    expect(parseFloat(bpmValue)).toBe(180);
+    // Verify BPM is restored to 180 (using Playwright's built-in auto-waiting)
+    await expect(bpmSlider).toHaveValue("180");
   });
 
   test("should load factory presets with correct BPM", async ({ page }) => {
