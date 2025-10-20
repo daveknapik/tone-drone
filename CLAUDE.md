@@ -83,7 +83,7 @@ Tests follow Playwright best practices:
 
 - **Page Object Model (POM)**: Page objects in `e2e/pages/` encapsulate UI interactions
 - **Test Fixtures**: Custom fixtures in `e2e/fixtures/` provide test setup (localStorage clearing, audio context initialization)
-- **Data Attributes**: Components use `data-testid` attributes for stable, maintainable selectors
+- **Locator Strategy**: Follows Playwright's recommended hierarchy (see below)
 - **Test Isolation**: Each test starts with clean localStorage and initialized audio context
 
 Key page objects:
@@ -94,13 +94,120 @@ Key page objects:
 - `TransportPage`: Play/pause and BPM controls
 - `RecorderPage`: Recording functionality
 
+#### Playwright Locator Strategy
+
+Follow this hierarchy when writing tests (Playwright's official recommendation):
+
+**1. User-facing locators (PREFERRED)**
+These mirror how users and screen readers interact with your app:
+
+```typescript
+// ✅ Best: Accessible to everyone, including screen readers
+page.getByRole("button", { name: "Save" })
+page.getByRole("slider", { name: /bpm/i })
+
+// ✅ Good: Form inputs with labels
+page.getByLabel("Email address")
+page.getByPlaceholder("Enter your name")
+
+// ✅ Good: Visible text content
+page.getByText("Welcome back")
+```
+
+**2. Test IDs (STABLE FALLBACK)**
+Use when semantic locators aren't reliable or unique:
+
+```typescript
+// ✅ Appropriate use cases:
+// - Dynamic lists with duplicate names
+page.getByTestId(`preset-user-${id}`)
+// - Multiple similar elements that need unique identification
+page.getByTestId(`oscillator-step-${oscId}-${stepId}`)
+// - i18n/localized text that changes by locale
+page.getByTestId("welcome-message")
+```
+
+**3. CSS/XPath (LAST RESORT)**
+Only when nothing else works:
+
+```typescript
+// ⚠️ Fragile: Breaks when implementation changes
+page.locator(".some-class > div:nth-child(2)")
+page.locator("//div[@class='specific']")
+```
+
+#### When to Use data-testid
+
+**DO use `data-testid` for:**
+- **Dynamic lists** where items may have duplicate visible text (e.g., presets, oscillator steps)
+- **i18n/localized content** where text changes by locale or is highly dynamic
+- **Non-interactive elements** that lack semantic meaning (e.g., status indicators)
+
+**DON'T use `data-testid` for:**
+- **Interactive elements** with clear labels (buttons, links, form inputs)
+- **Elements with unique text** that won't change frequently
+- **Standard semantic HTML** (headings, navigation, forms)
+- **State assertions** - use `aria-*` attributes instead (see below)
+- **When a semantic locator works** - always prefer accessibility-first approaches
+
+#### Test ID Best Practices
+
+**Naming Convention**: Use stable, semantic, kebab-case names:
+
+```typescript
+// ✅ GOOD: Stable, semantic, kebab-case
+data-testid="preset-user-123"
+data-testid="step-5"
+data-testid="share-modal"
+
+// ❌ BAD: Includes visible text (brittle when text changes)
+data-testid="save-button-text"
+data-testid="preset-the-ending-world"
+
+// ❌ BAD: Includes styling intent (couples tests to CSS)
+data-testid="blue-button"
+data-testid="effects-panel-collapsed"  // Don't encode state in test ID
+
+// ❌ BAD: Generic/unclear purpose
+data-testid="button-1"
+data-testid="div-wrapper"
+```
+
+**Scoping**: Prefer scoping test IDs within semantic containers to avoid needing globally unique IDs:
+
+```typescript
+// ✅ GOOD: Scope within a semantic region
+const oscPanel = page.getByRole('region', { name: /oscillator/i });
+await oscPanel.getByTestId('step-3').click();
+
+// Instead of requiring globally unique test IDs
+await page.getByTestId('oscillator-0-step-3').click();
+```
+
+**State Assertions**: Prefer accessibility assertions over test IDs for state checking:
+
+```typescript
+// ✅ GOOD: Assert accessible state
+await expect(button).toHaveAccessibleName(/play/i);
+await expect(panel).toHaveAttribute('aria-expanded', 'true');
+await expect(toggle).toHaveAttribute('aria-label', 'Stop Recording');
+
+// ❌ BAD: Encode state in test IDs
+await expect(page.getByTestId('panel-expanded')).toBeVisible();
+```
+
+**Important Constraints**:
+- **Never use `[data-testid=...]` in CSS** - test IDs are for tests only, not styling
+- **Configuration**: Playwright defaults to `data-testid`. If you change it, update `playwright.config.ts` with `test.use({ testIdAttribute: 'your-attribute' })`
+
 #### Adding New E2E Tests
 
-1. Add `data-testid` attributes to new UI elements
-2. Create or extend page objects in `e2e/pages/`
-3. Write tests in `e2e/tests/` using the page objects
-4. Follow the AAA pattern (Arrange, Act, Assert)
-5. Avoid page.waitForTimeout where possible and favor use of getBy(Role|Text|Label) instead
+1. **Choose the right locator** using the hierarchy above
+2. Add `data-testid` attributes **only when needed** (see guidelines)
+3. Create or extend page objects in `e2e/pages/`
+4. Write tests in `e2e/tests/` using the page objects
+5. Follow the AAA pattern (Arrange, Act, Assert)
+6. Avoid `page.waitForTimeout` - use `getByRole/Text/Label` with built-in waiting
 
 Example:
 

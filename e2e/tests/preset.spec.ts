@@ -36,7 +36,7 @@ test.describe("Preset Management", () => {
     // When no preset is loaded, Save button should be disabled
     await presetPage.openPresetMenu();
 
-    const saveButton = presetPage.getByTestId("preset-save");
+    const saveButton = presetPage.saveButton;
     const isDisabled = await saveButton.isDisabled();
     expect(isDisabled).toBe(true);
   });
@@ -47,7 +47,7 @@ test.describe("Preset Management", () => {
 
     await presetPage.openPresetMenu();
 
-    const saveButton = presetPage.getByTestId("preset-save");
+    const saveButton = presetPage.saveButton;
     const isDisabled = await saveButton.isDisabled();
     expect(isDisabled).toBe(false);
   });
@@ -104,9 +104,8 @@ test.describe("Preset Management", () => {
     // Load a preset
     await presetPage.loadFactoryPreset("factory-init");
 
-    // Find sequencer step buttons (round colored buttons in a grid)
-    // They have specific bg-gray-500 or bg-green-500 classes
-    const sequencerStep = page.locator('button.bg-gray-500, button.bg-green-500').first();
+    // Click first sequencer step (oscillator 0, step 0)
+    const sequencerStep = page.getByTestId("step-0-0");
 
     // Ensure button is visible (oscillators section should be expanded by default)
     await sequencerStep.waitFor({ state: "visible", timeout: 5000 });
@@ -159,7 +158,7 @@ test.describe("Preset Management", () => {
 
     // Save as a new preset
     await presetPage.openPresetMenu();
-    const saveAsButton = presetPage.getByTestId("preset-save-as");
+    const saveAsButton = presetPage.saveAsButton;
     await saveAsButton.click();
 
     // Verify preset is loaded
@@ -206,7 +205,7 @@ test.describe("Preset Browser", () => {
     await presetPage.openPresetBrowser();
 
     // The menu should close
-    await expect(presetPage.getByTestId("preset-new")).not.toBeVisible();
+    await expect(presetPage.newButton).not.toBeVisible();
   });
 });
 
@@ -224,8 +223,8 @@ test.describe("Preset Share", () => {
     // Open share modal
     await presetPage.shareCurrentPreset();
 
-    // Verify share modal is open
-    await expect(page.getByTestId("share-copy-url")).toBeVisible();
+    // Verify share modal is open by checking for the copy button
+    await expect(page.getByRole("button", { name: /copy url to clipboard/i })).toBeVisible();
   });
 
   test("should generate shareable URL", async ({ page }) => {
@@ -236,7 +235,7 @@ test.describe("Preset Share", () => {
     await presetPage.shareCurrentPreset();
 
     // Wait for URL to be generated and displayed
-    const urlElement = page.locator(".font-mono");
+    const urlElement = page.getByTestId("share-url-display");
     await urlElement.waitFor({ state: "visible", timeout: 5000 });
 
     // The URL should be displayed
@@ -262,7 +261,7 @@ test.describe("Preset Share", () => {
     await presetPage.shareCurrentPreset();
 
     // Click copy button
-    const copyButton = page.getByTestId("share-copy-url");
+    const copyButton = page.getByRole("button", { name: /copy url to clipboard/i });
     await copyButton.click();
 
     // Verify success message (button text changes to "✓ Copied to Clipboard!")
@@ -289,7 +288,7 @@ test.describe("Preset Share", () => {
     await presetPage.shareCurrentPreset();
 
     // Get the shareable URL
-    const urlElement = page.locator(".font-mono");
+    const urlElement = page.getByTestId("share-url-display");
     await urlElement.waitFor({ state: "visible", timeout: 5000 });
     const shareUrl = await urlElement.textContent();
 

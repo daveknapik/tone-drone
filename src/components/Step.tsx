@@ -4,9 +4,11 @@ interface StepProps {
   handleClick: () => void;
   isCurrentBeat: boolean;
   step: boolean;
+  oscIndex: number;
+  stepIndex: number;
 }
 
-function Step({ handleClick, isCurrentBeat, step }: StepProps) {
+function Step({ handleClick, isCurrentBeat, step, oscIndex, stepIndex }: StepProps) {
   return (
     <div>
       <button
@@ -18,6 +20,8 @@ function Step({ handleClick, isCurrentBeat, step }: StepProps) {
           isCurrentBeat && step && "bg-yellow-300"
         )}
         onClick={handleClick}
+        data-testid={`step-${oscIndex}-${stepIndex}`}
+        aria-label={`Oscillator ${oscIndex + 1}, Step ${stepIndex + 1}`}
       />
     </div>
   );
