@@ -113,6 +113,7 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
                   "border-pink-300 dark:border-sky-700",
                   "bg-pink-50 dark:bg-gray-700"
                 )}
+                data-testid="share-url-display"
               >
                 {shareUrl}
               </div>
@@ -128,7 +129,6 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
                     : "hover:bg-pink-100 dark:hover:bg-sky-900",
                   "transition-colors"
                 )}
-                data-testid="share-copy-url"
               >
                 {copySuccess
                   ? "✓ Copied to Clipboard!"
@@ -158,7 +158,6 @@ function ShareModal({ isOpen, onClose, preset }: ShareModalProps) {
                   "hover:bg-pink-100 dark:hover:bg-sky-900",
                   "transition-colors"
                 )}
-                data-testid="share-download-json"
               >
                 Download &quot;{preset.metadata.name}.json&quot;
               </button>

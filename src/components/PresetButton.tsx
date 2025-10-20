@@ -86,7 +86,6 @@ function PresetButton({
         )}
         aria-expanded={isOpen}
         aria-haspopup="true"
-        data-testid="preset-button"
       >
         {buttonLabel} ▾
       </button>
@@ -104,7 +103,6 @@ function PresetButton({
             <button
               onClick={() => handleAction(onNew)}
               className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors"
-              data-testid="preset-new"
             >
               New Preset
             </button>
@@ -117,14 +115,12 @@ function PresetButton({
                   : "opacity-40 cursor-not-allowed"
               )}
               disabled={!currentPreset}
-              data-testid="preset-save"
             >
               Save
             </button>
             <button
               onClick={() => handleAction(onSaveAs)}
               className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors"
-              data-testid="preset-save-as"
             >
               Save As...
             </button>
@@ -137,7 +133,6 @@ function PresetButton({
                   : "opacity-40 cursor-not-allowed"
               )}
               disabled={!currentPreset}
-              data-testid="preset-share"
             >
               Share Current Preset
             </button>
@@ -218,7 +213,6 @@ function PresetButton({
             <button
               onClick={() => handleAction(onBrowseAll)}
               className="w-full text-left px-3 py-2 rounded hover:bg-pink-100 dark:hover:bg-sky-900 transition-colors font-medium"
-              data-testid="preset-browse-all"
             >
               Browse All Presets...
             </button>

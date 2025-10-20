@@ -61,8 +61,8 @@ test.describe("Theme Toggle", () => {
   test("should apply dark mode colors to UI elements", async () => {
     await themePage.setDarkMode();
 
-    // Check that dark mode classes are applied
-    const button = themePage.getByTestId("preset-button");
+    // Check that dark mode classes are applied to the theme toggle button
+    const button = themePage.themeToggle;
     await button.waitFor({ state: "visible" });
 
     // The button should have dark mode border color (sky-300)

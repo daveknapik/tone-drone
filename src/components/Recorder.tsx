@@ -52,7 +52,6 @@ function Recorder({ recorder }: RecorderProps) {
               onClick={() => void handleRecord()}
               className="mr-3 border-2 rounded border-pink-500 dark:border-sky-300 px-3"
               aria-label={isRecording ? "Stop Recording" : "Start Recording"}
-              data-testid="recorder-toggle"
             >
               {isRecording ? "Stop" : "Start"}
             </button>
@@ -64,7 +63,6 @@ function Recorder({ recorder }: RecorderProps) {
                   download={`tone-drone-recording${Date.now().toString()}`}
                   href={url}
                   className="mr-3 border-2 rounded border-pink-500 dark:border-sky-300 px-3"
-                  data-testid="recorder-download"
                 >
                   Download
                 </a>

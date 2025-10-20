@@ -38,6 +38,8 @@ function Sequencer({
           isCurrentBeat={currentBeat === i}
           key={i}
           step={sequence.steps[i]}
+          oscIndex={sequenceIndex}
+          stepIndex={i}
         />
       ))}
     </div>
