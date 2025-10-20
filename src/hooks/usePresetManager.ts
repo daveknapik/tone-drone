@@ -160,12 +160,12 @@ export function usePresetManager(refs: PresetComponentRefs) {
       if (refs.bpmControl.current) {
         refs.bpmControl.current.setValue(state.bpm);
       } else {
-        // Retry after a short delay if ref isn't ready
+        // Retry after a short delay if ref isn't ready (longer for Safari/webkit)
         setTimeout(() => {
           if (refs.bpmControl.current) {
             refs.bpmControl.current.setValue(state.bpm);
           }
-        }, 50);
+        }, 200);
       }
     },
     [refs]
