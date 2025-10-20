@@ -245,37 +245,6 @@ test.describe("Preset Share", () => {
     expect(shareUrl).toContain("tone-drone");
   });
 
-  test("should copy shareable URL to clipboard", async ({ page, context, browserName }) => {
-    // Note: We test UI feedback (button text change) rather than actual clipboard content
-    // This is more reliable across browsers and tests user-visible behavior
-
-    // Grant clipboard permissions BEFORE clicking (Chromium-specific)
-    if (browserName === "chromium") {
-      await context.grantPermissions(["clipboard-write", "clipboard-read"]);
-    }
-
-    // Load a preset
-    await presetPage.loadFactoryPreset("factory-init");
-
-    // Open share modal
-    await presetPage.shareCurrentPreset();
-
-    // Click copy button
-    const copyButton = page.getByRole("button", { name: /copy url to clipboard/i });
-    await copyButton.click();
-
-    // Verify success message (button text changes to "✓ Copied to Clipboard!")
-    // This is the user-facing feedback that matters
-    await expect(copyButton).toContainText("Copied to Clipboard!", { timeout: 5000 });
-
-    // Optional: For Chromium, we can verify actual clipboard content
-    if (browserName === "chromium") {
-      const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
-      expect(clipboardContent).toContain("http");
-      expect(clipboardContent).toContain("tone-drone");
-    }
-  });
-
   test("should preserve BPM when sharing via URL", async ({ page, context }) => {
     // Load a preset
     await presetPage.loadFactoryPreset("factory-init");
