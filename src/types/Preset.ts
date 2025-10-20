@@ -39,6 +39,9 @@ export interface PresetState {
 
   // Effects bus send level
   effectsBusSend: number;
+
+  // Tempo in beats per minute
+  bpm: number;
 }
 
 /**

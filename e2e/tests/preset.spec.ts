@@ -141,6 +141,55 @@ test.describe("Preset Management", () => {
     // Modified indicator should appear
     await presetPage.expectModifiedIndicator();
   });
+
+  test("should save and load BPM with user preset", async ({ page }) => {
+    // Load a factory preset to start
+    await presetPage.loadFactoryPreset("factory-init");
+
+    // Change BPM to a custom value
+    const bpmSlider = page.getByLabel(/bpm/i);
+    await bpmSlider.fill("180");
+
+    // Setup dialog handler for browser prompt
+    page.once("dialog", async (dialog) => {
+      expect(dialog.type()).toBe("prompt");
+      expect(dialog.message()).toContain("preset name");
+      await dialog.accept("Test BPM Preset");
+    });
+
+    // Save as a new preset
+    await presetPage.openPresetMenu();
+    const saveAsButton = presetPage.getByTestId("preset-save-as");
+    await saveAsButton.click();
+
+    // Wait for preset to be saved and menu to close
+    await page.waitForTimeout(500);
+
+    // Verify preset is loaded
+    await presetPage.expectPresetButtonText("Test BPM Preset");
+
+    // Change BPM to verify we can detect reload
+    await bpmSlider.fill("120");
+
+    // Reload the preset
+    await presetPage.openPresetMenu();
+    const presetItem = page.getByTestId("user-preset-item").filter({ hasText: "Test BPM Preset" });
+    await presetItem.click();
+
+    // Verify BPM is restored to 180
+    const bpmValue = await bpmSlider.inputValue();
+    expect(parseFloat(bpmValue)).toBe(180);
+  });
+
+  test("should load factory presets with correct BPM", async ({ page }) => {
+    // Load factory preset
+    await presetPage.loadFactoryPreset("factory-init");
+
+    // Verify BPM is 120 (default)
+    const bpmSlider = page.getByLabel(/bpm/i);
+    const bpmValue = await bpmSlider.inputValue();
+    expect(parseFloat(bpmValue)).toBe(120);
+  });
 });
 
 test.describe("Preset Browser", () => {
@@ -223,5 +272,40 @@ test.describe("Preset Share", () => {
       expect(clipboardContent).toContain("http");
       expect(clipboardContent).toContain("tone-drone");
     }
+  });
+
+  test("should preserve BPM when sharing via URL", async ({ page, context }) => {
+    // Load a preset
+    await presetPage.loadFactoryPreset("factory-init");
+
+    // Change BPM to a custom value
+    const bpmSlider = page.getByLabel(/bpm/i);
+    await bpmSlider.fill("165");
+
+    // Open share modal
+    await presetPage.shareCurrentPreset();
+
+    // Get the shareable URL
+    const urlElement = page.locator(".font-mono");
+    await urlElement.waitFor({ state: "visible", timeout: 5000 });
+    const shareUrl = await urlElement.textContent();
+
+    // Close share modal
+    const closeButton = page.getByRole("button", { name: /close/i });
+    await closeButton.click();
+
+    // Navigate to the shared URL in a new page
+    const newPage = await context.newPage();
+    await newPage.goto(shareUrl!);
+
+    // Wait for page to load
+    await newPage.waitForLoadState("networkidle");
+
+    // Verify BPM is preserved
+    const newBpmSlider = newPage.getByLabel(/bpm/i);
+    const newBpmValue = await newBpmSlider.inputValue();
+    expect(parseFloat(newBpmValue)).toBe(165);
+
+    await newPage.close();
   });
 });

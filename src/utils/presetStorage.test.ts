@@ -98,6 +98,7 @@ describe("presetStorage", () => {
       },
     },
     effectsBusSend: 0.5,
+    bpm: 120,
   };
 
   beforeEach(() => {

@@ -8,6 +8,7 @@ import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
 import type { EffectsBusSendHandle } from "../components/EffectsBusSendControl";
+import type { BpmControlHandle } from "../types/BpmParams";
 
 import {
   savePreset as savePresetToStorage,
@@ -17,6 +18,7 @@ import {
 } from "../utils/presetStorage";
 import { createPreset, updatePresetTimestamp } from "../utils/presetSerializer";
 import { extractPresetFromUrl } from "../utils/presetUrl";
+import { DEFAULT_BPM } from "../utils/presetDefaults";
 
 /**
  * Refs to all components that expose state via imperative handles
@@ -31,6 +33,7 @@ export interface PresetComponentRefs {
   afterFilter: React.RefObject<FilterHandle | null>;
   delay: React.RefObject<DelayHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
+  bpmControl: React.RefObject<BpmControlHandle | null>;
 }
 
 /**
@@ -76,6 +79,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
     const afterFilterParams = refs.afterFilter.current?.getParams();
     const delayParams = refs.delay.current?.getParams();
     const effectsBusSend = refs.effectsBusSendRef.current?.value ?? 0;
+    const bpm = refs.bpmControl.current?.getValue() ?? DEFAULT_BPM;
 
     if (
       !oscillatorsState ||
@@ -102,6 +106,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
         delay: delayParams,
       },
       effectsBusSend,
+      bpm,
     };
   }, [refs]);
 
@@ -129,6 +134,11 @@ export function usePresetManager(refs: PresetComponentRefs) {
       // Apply effects bus send
       if (refs.effectsBusSendRef.current) {
         refs.effectsBusSendRef.current.setValue(state.effectsBusSend);
+      }
+
+      // Apply BPM
+      if (refs.bpmControl.current) {
+        refs.bpmControl.current.setValue(state.bpm);
       }
     },
     [refs]

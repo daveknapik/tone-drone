@@ -5,7 +5,7 @@ import { migratePreset, needsMigration } from "./presetMigration";
  * Current preset format version
  * Increment this when making breaking changes to preset structure
  */
-const CURRENT_VERSION = 2;
+const CURRENT_VERSION = 3;
 
 /**
  * Generate a unique ID for a preset
@@ -55,12 +55,18 @@ export function deserializePreset(json: string): Preset {
     );
   }
 
-  // Validate the parsed object
-  if (!validatePreset(parsed as Preset)) {
+  let preset = parsed as Preset;
+
+  // Basic validation before migration (just check structure exists)
+  if (
+    typeof preset !== "object" ||
+    preset === null ||
+    typeof preset.version !== "number" ||
+    typeof preset.metadata !== "object" ||
+    typeof preset.state !== "object"
+  ) {
     throw new Error("Invalid preset structure");
   }
-
-  let preset = parsed as Preset;
 
   // Check version compatibility
   if (preset.version > CURRENT_VERSION) {
@@ -72,6 +78,11 @@ export function deserializePreset(json: string): Preset {
   // Apply migrations if needed
   if (needsMigration(preset)) {
     preset = migratePreset(preset);
+  }
+
+  // Full validation after migration
+  if (!validatePreset(preset)) {
+    throw new Error("Invalid preset structure after migration");
   }
 
   return preset;
@@ -142,6 +153,15 @@ export function validatePreset(preset: Preset): boolean {
 
   // Validate effectsBusSend
   if (typeof preset.state.effectsBusSend !== "number") {
+    return false;
+  }
+
+  // Validate BPM
+  if (
+    typeof preset.state.bpm !== "number" ||
+    preset.state.bpm < 0 ||
+    preset.state.bpm > 999
+  ) {
     return false;
   }
 
