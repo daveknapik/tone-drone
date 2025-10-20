@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Preset, PresetListItem } from "../types/Preset";
 import type { OscillatorsHandle } from "../types/OscillatorsParams";
 import type { PolySynthsHandle } from "../components/Polysynths";
@@ -49,14 +49,34 @@ export function usePresetManager(refs: PresetComponentRefs) {
     refreshPresetList();
   }, []);
 
-  // Check URL for preset on mount
+  // Store URL preset extracted on mount
+  const [pendingUrlPreset, setPendingUrlPreset] = useState<Preset | null>(null);
+  const urlPresetApplied = useRef(false);
+
+  // Extract URL preset once on mount
   useEffect(() => {
     const urlPreset = extractPresetFromUrl();
     if (urlPreset) {
-      applyPreset(urlPreset);
-      setCurrentPreset(urlPreset);
+      setPendingUrlPreset(urlPreset);
     }
   }, []);
+
+  // Apply URL preset when refs are ready
+  useEffect(() => {
+    if (
+      pendingUrlPreset &&
+      !urlPresetApplied.current &&
+      refs.oscillators.current &&
+      refs.polysynths.current &&
+      refs.bpmControl.current &&
+      refs.effectsBusSendRef.current
+    ) {
+      applyPreset(pendingUrlPreset);
+      setCurrentPreset(pendingUrlPreset);
+      urlPresetApplied.current = true;
+      setPendingUrlPreset(null); // Clear pending preset after applying
+    }
+  });
 
   /**
    * Refresh the list of available presets
@@ -136,9 +156,16 @@ export function usePresetManager(refs: PresetComponentRefs) {
         refs.effectsBusSendRef.current.setValue(state.effectsBusSend);
       }
 
-      // Apply BPM
+      // Apply BPM - retry if ref not ready yet
       if (refs.bpmControl.current) {
         refs.bpmControl.current.setValue(state.bpm);
+      } else {
+        // Retry after a short delay if ref isn't ready
+        setTimeout(() => {
+          if (refs.bpmControl.current) {
+            refs.bpmControl.current.setValue(state.bpm);
+          }
+        }, 50);
       }
     },
     [refs]
