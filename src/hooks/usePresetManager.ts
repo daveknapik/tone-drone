@@ -61,7 +61,8 @@ export function usePresetManager(refs: PresetComponentRefs) {
     }
   }, []);
 
-  // Apply URL preset when refs are ready
+  // Apply URL preset when critical refs are ready
+  // This effect runs on every render and will apply the preset once refs are available
   useEffect(() => {
     if (
       pendingUrlPreset &&
@@ -156,16 +157,11 @@ export function usePresetManager(refs: PresetComponentRefs) {
         refs.effectsBusSendRef.current.setValue(state.effectsBusSend);
       }
 
-      // Apply BPM - retry if ref not ready yet
+      // Apply BPM directly if ref is available
+      // For URL presets, the ref-waiting logic above ensures refs are ready before calling applyPreset
+      // For user/factory preset loads, refs should already be initialized
       if (refs.bpmControl.current) {
         refs.bpmControl.current.setValue(state.bpm);
-      } else {
-        // Retry after a short delay if ref isn't ready (longer for Safari/webkit)
-        setTimeout(() => {
-          if (refs.bpmControl.current) {
-            refs.bpmControl.current.setValue(state.bpm);
-          }
-        }, 200);
       }
     },
     [refs]
