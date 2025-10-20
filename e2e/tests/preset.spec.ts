@@ -301,13 +301,15 @@ test.describe("Preset Share", () => {
     const newPage = await context.newPage();
     await newPage.goto(shareUrl!);
 
-    // Wait for page to load
-    await newPage.waitForLoadState("networkidle");
+    // Initialize audio context on new page (mimic test fixture)
+    await newPage.click("body");
 
-    // Verify BPM is preserved
+    // Wait for BPM slider to be visible (DOM-based wait, not networkidle)
     const newBpmSlider = newPage.getByLabel(/bpm/i);
-    const newBpmValue = await newBpmSlider.inputValue();
-    expect(parseFloat(newBpmValue)).toBe(165);
+    await newBpmSlider.waitFor({ state: "visible" });
+
+    // Verify BPM is preserved (using Playwright's auto-retry)
+    await expect(newBpmSlider).toHaveValue("165");
 
     await newPage.close();
   });
