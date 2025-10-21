@@ -20,9 +20,6 @@ npm run lint
 
 # Preview production build
 npm run preview
-
-# Deploy to GitHub Pages
-npm run deploy
 ```
 
 ## Testing

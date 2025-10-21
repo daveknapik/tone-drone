@@ -115,9 +115,6 @@ npm run lint
 
 # Preview production build locally
 npm run preview
-
-# Deploy to GitHub Pages
-npm run deploy
 ```
 
 #### Testing
@@ -239,15 +236,6 @@ The project uses Node.js v24.7.0 (specified in `.nvmrc`). The CI/CD pipeline aut
 - Deploys to GitHub Pages using official GitHub Actions if tests pass
 - Uses `actions/upload-pages-artifact` and `actions/deploy-pages`
 
-#### Local Deployment (Manual)
-
-While CI/CD handles automatic deployment, you can still deploy manually:
-
-```bash
-npm run deploy
-```
-
-Note: The `npm run deploy` script uses the `gh-pages` npm package for manual local deployments. The recommended approach is to use the automated GitHub Actions workflow.
 
 ## Documentation
 
