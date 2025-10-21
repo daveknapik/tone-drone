@@ -236,7 +236,7 @@ test("should do something", async ({ page }) => {
 
 ### Component Structure
 
-- **DroneSynthLite**: Main synthesizer component that orchestrates all audio components
+- **DroneSynth**: Main synthesizer component that orchestrates all audio components
 - **Oscillators**: Contains the step sequencer with 6 oscillators, each with 16 steps
 - **Effects**: Collapsible section containing all audio effect controls
 - **Individual Effect Components**: BitCrusher, Chebyshev, Delay, etc. - each controls its respective Tone.js effect

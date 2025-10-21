@@ -59,7 +59,7 @@ npm run lint
 
 ### Naming Conventions
 
-- Components: PascalCase (e.g., `DroneSynthLite.tsx`)
+- Components: PascalCase (e.g., `DroneSynth.tsx`)
 - Hooks: camelCase with "use" prefix (e.g., `useOscillators.ts`)
 - Types/Interfaces: PascalCase (e.g., `OscillatorWithChannel.ts`)
 - Functions: camelCase (e.g., `updateFrequency`)

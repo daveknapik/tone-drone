@@ -6,7 +6,7 @@ import { usePresetManager } from "../hooks/usePresetManager";
 import { FACTORY_PRESETS, isFactoryPreset } from "../utils/factoryPresets";
 import { extractPresetFromUrl } from "../utils/presetUrl";
 import { deserializePreset } from "../utils/presetSerializer";
-import type { DroneSynthLiteHandle } from "./DroneSynthLite";
+import type { DroneSynthHandle } from "./DroneSynth";
 import type { Preset } from "../types/Preset";
 
 export interface PresetManagerHandle {
@@ -14,7 +14,7 @@ export interface PresetManagerHandle {
 }
 
 interface PresetManagerProps {
-  droneSynthRef: React.RefObject<DroneSynthLiteHandle | null>;
+  droneSynthRef: React.RefObject<DroneSynthHandle | null>;
   ref?: React.Ref<PresetManagerHandle>;
 }
 
@@ -24,7 +24,7 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
   const [isModified, setIsModified] = useState(false);
   const [presetToShare, setPresetToShare] = useState<Preset | null>(null);
 
-  // Get refs from DroneSynthLite
+  // Get refs from DroneSynth
   const refs = {
     oscillators: droneSynthRef.current?.oscillatorsRef ?? { current: null },
     polysynths: droneSynthRef.current?.polysynthsRef ?? { current: null },

@@ -114,7 +114,7 @@ function Effect({ effect, ref }: EffectProps) {
 - [ ] Build PresetControls component
 - [ ] Build PresetBrowser component
 - [ ] Build PresetShareDialog component
-- [ ] Integrate preset system into DroneSynthLite
+- [ ] Integrate preset system into DroneSynth
 - [ ] Write integration tests for full workflow
 
 ## 🔍 Technical Notes

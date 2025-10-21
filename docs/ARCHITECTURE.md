@@ -109,7 +109,7 @@ useEffect(() => {
 ```
 App
 └── AudioContextProvider
-    └── DroneSynthLite
+    └── DroneSynth
         ├── Recorder
         ├── Effects (collapsible)
         │   ├── AutoFilter
@@ -132,7 +132,7 @@ App
 
 ### Component Responsibilities
 
-#### DroneSynthLite
+#### DroneSynth
 
 Main synthesizer component that:
 
@@ -265,8 +265,6 @@ const useAudioEffect = () => {
 - `useChebyshev`: Manages Tone.Chebyshev
 - `useDelay`: Manages Tone.FeedbackDelay
 - `useFilter`: Manages Tone.Filter
-- `useFreeverb`: Manages Tone.Freeverb
-- `useReverb`: Manages Tone.Reverb
 
 #### useRecorder
 
@@ -421,12 +419,11 @@ Output
 ### Planned Features
 
 1. **Modulation Matrix**: Route any modulator to any parameter
-2. **Preset System**: Save and load complete synth states
-3. **MIDI Support**: Control parameters via MIDI controllers
-4. **Advanced Routing**: Flexible audio routing options
-5. **More Effects**: Reverb, chorus, phaser, etc.
-6. **Visualization**: Waveform and spectrum displays
-7. **Undo/Redo**: State history for sequencer patterns
+2. **MIDI Support**: Control parameters via MIDI controllers
+3. **Advanced Routing**: Flexible audio routing options
+4. **More Effects**: Chorus, phaser, etc.
+5. **Visualization**: Waveform and spectrum displays
+6. **Undo/Redo**: State history for sequencer patterns
 
 ### Architecture Changes
 

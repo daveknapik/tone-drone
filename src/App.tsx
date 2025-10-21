@@ -1,11 +1,11 @@
 import { useRef } from "react";
-import DroneSynthLite, { DroneSynthLiteHandle } from "./components/DroneSynthLite";
+import DroneSynth, { DroneSynthHandle } from "./components/DroneSynth";
 import ThemeControls from "./components/ThemeControls";
 import PresetManager, { PresetManagerHandle } from "./components/PresetManager";
 import { AudioContextProvider } from "./context/audio";
 
 function App() {
-  const droneSynthRef = useRef<DroneSynthLiteHandle>(null);
+  const droneSynthRef = useRef<DroneSynthHandle>(null);
   const presetManagerRef = useRef<PresetManagerHandle>(null);
 
   return (
@@ -16,7 +16,7 @@ function App() {
           <PresetManager droneSynthRef={droneSynthRef} ref={presetManagerRef} />
         </div>
         <div className="m-4">
-          <DroneSynthLite
+          <DroneSynth
             ref={droneSynthRef}
             onParameterChange={() => presetManagerRef.current?.markAsModified()}
           />
