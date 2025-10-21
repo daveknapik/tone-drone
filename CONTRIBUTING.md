@@ -28,6 +28,9 @@ npm test
 # Run tests with UI
 npm run test:ui
 
+# Run e2e tests
+npm run test:e2e
+
 # Run linter
 npm run lint
 ```
@@ -106,7 +109,7 @@ useEffect(() => {
 - Mock Tone.js objects when testing components
 - Test edge cases and error conditions
 
-### Running Tests
+#### Running Unit Tests
 
 ```bash
 # Watch mode
@@ -118,6 +121,147 @@ npm run test:run
 # With UI
 npm run test:ui
 ```
+
+### E2E Tests
+
+End-to-end tests verify complete user workflows using Playwright. All E2E tests are located in `e2e/` directory.
+
+#### Test Structure
+
+- **Page Objects** (`e2e/pages/`): Encapsulate UI interactions following the Page Object Model (POM)
+- **Test Fixtures** (`e2e/fixtures/`): Custom fixtures for test setup (localStorage clearing, audio context initialization)
+- **Test Specs** (`e2e/tests/`): Actual test files organized by feature
+
+#### Running E2E Tests
+
+```bash
+# Run all e2e tests in headless mode
+npm run test:e2e
+
+# Run with Playwright UI (interactive mode)
+npm run test:e2e:ui
+
+# Run in debug mode with step-by-step execution
+npm run test:e2e:debug
+
+# Run in headed mode (see browser window)
+npm run test:e2e:headed
+
+# Run only Chromium tests
+npm run test:e2e:chromium
+
+# View HTML test report
+npm run test:e2e:report
+```
+
+#### Writing E2E Tests
+
+**Locator Strategy** (follow this hierarchy from best to worst):
+
+1. **User-facing locators** (PREFERRED - most robust):
+   ```typescript
+   page.getByRole("button", { name: "Save" })
+   page.getByRole("slider", { name: /bpm/i })
+   page.getByLabel("Email address")
+   page.getByPlaceholder("Enter your name")
+   page.getByText("Welcome back")
+   ```
+
+2. **Test IDs** (stable fallback for dynamic content):
+   ```typescript
+   page.getByTestId(`preset-user-${id}`)
+   page.getByTestId(`oscillator-step-${oscId}-${stepId}`)
+   ```
+
+3. **CSS/XPath** (last resort - fragile):
+   ```typescript
+   page.locator(".some-class > div:nth-child(2)")
+   ```
+
+**When to use `data-testid`:**
+- Dynamic lists with duplicate names
+- Elements lacking semantic meaning (status indicators)
+- i18n/localized content that changes by locale
+
+**When NOT to use `data-testid`:**
+- Interactive elements with clear labels (use semantic locators instead)
+- Unique text content
+- Standard semantic HTML elements
+- State assertions (use `aria-*` attributes instead)
+
+**Test ID Naming Convention:**
+```typescript
+// ✅ GOOD: Stable, semantic, kebab-case
+data-testid="preset-user-123"
+data-testid="step-5"
+data-testid="share-modal"
+
+// ❌ BAD: Brittle or unclear
+data-testid="blue-button"           // Don't encode styling
+data-testid="preset-the-ending"     // Couples to visible text
+data-testid="button-1"              // Too generic
+```
+
+#### Page Object Pattern
+
+Create page objects to encapsulate UI interactions:
+
+```typescript
+// e2e/pages/PresetPage.ts
+import { Page } from "@playwright/test";
+import { BasePage } from "./BasePage";
+
+export class PresetPage extends BasePage {
+  constructor(page: Page) {
+    super(page);
+  }
+
+  async savePreset(name: string) {
+    await this.page.getByRole("button", { name: "Save" }).click();
+    await this.page.getByLabel("Preset name").fill(name);
+    await this.page.getByRole("button", { name: "Save" }).click();
+  }
+
+  async loadPreset(id: string) {
+    await this.page.getByTestId(`preset-${id}`).click();
+  }
+}
+```
+
+#### Test Example
+
+```typescript
+import { test, expect } from "@playwright/test";
+import { PresetPage } from "../pages/PresetPage";
+
+test("should save and load preset", async ({ page }) => {
+  // Arrange
+  const presetPage = new PresetPage(page);
+  await page.goto("/");
+
+  // Act
+  await presetPage.savePreset("My Ambient");
+
+  // Assert
+  await expect(page.getByText("My Ambient")).toBeVisible();
+});
+```
+
+#### Test Isolation
+
+Each test starts with:
+- Clean localStorage
+- Initialized audio context
+- Fresh page state
+
+This is handled by fixtures in `e2e/fixtures/`.
+
+#### Current Test Coverage
+
+- **Preset Management** (`preset.spec.ts`): Save/load/delete presets, factory presets, sharing
+- **Theme Toggle** (`theme.spec.ts`): Dark/light mode, persistence
+- **Transport Controls** (`transport.spec.ts`): Play/pause, BPM control, keyboard shortcuts
+- **Recording** (`recording.spec.ts`): Start/stop, download functionality
 
 ## Pull Request Guidelines
 

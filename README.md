@@ -95,10 +95,13 @@ All oscillators and synths route through a shared effects bus. Use the "Effects 
 - **[Tailwind CSS](https://tailwindcss.com/)** (v4.1.14) - Styling
 - **[Vite](https://vitejs.dev/)** (v7.1.9) - Build tool and dev server
 - **[Vitest](https://vitest.dev/)** (v3.2.4) - Unit testing
+- **[Playwright](https://playwright.dev/)** (v1.56.0) - e2e testing
 
 ## Development
 
 ### Available Scripts
+
+#### Development & Building
 
 ```bash
 # Start development server with hot reload
@@ -115,15 +118,43 @@ npm run preview
 
 # Deploy to GitHub Pages
 npm run deploy
+```
 
-# Run tests
+#### Testing
+
+**Unit Tests (Vitest + React Testing Library)**
+
+```bash
+# Run tests in watch mode
 npm test
-
-# Run tests with UI
-npm run test:ui
 
 # Run tests once
 npm run test:run
+
+# Run tests with UI
+npm run test:ui
+```
+
+**E2E Tests (Playwright)**
+
+```bash
+# Run all e2e tests in headless mode
+npm run test:e2e
+
+# Run with Playwright UI (interactive test explorer)
+npm run test:e2e:ui
+
+# Run in debug mode with step-by-step execution
+npm run test:e2e:debug
+
+# Run with headed browser (see the browser window)
+npm run test:e2e:headed
+
+# Run only Chromium tests
+npm run test:e2e:chromium
+
+# View HTML test report
+npm run test:e2e:report
 ```
 
 ### Project Structure
@@ -136,10 +167,53 @@ tone-drone/
 │   ├── hooks/          # Custom hooks for audio objects
 │   ├── types/          # TypeScript type definitions
 │   └── test/           # Test utilities and setup
+├── e2e/
+│   ├── pages/          # Page Object Model classes
+│   ├── fixtures/       # Test fixtures and setup
+│   └── tests/          # E2E test specifications
 ├── docs/               # Additional documentation
 ├── CLAUDE.md           # AI assistant project guidance
 └── README.md           # This file
 ```
+
+### Testing Overview
+
+#### Unit Tests
+
+Unit tests cover individual functions and components. Located alongside source files with `.test.ts` or `.test.tsx` extension.
+
+```bash
+npm run test           # Watch mode
+npm run test:run       # Single run
+npm run test:ui        # Interactive UI
+```
+
+#### E2E Tests
+
+End-to-end tests verify complete user workflows using Playwright. Tests are organized by feature and use a Page Object Model for maintainability.
+
+**Test Categories:**
+- **Preset Management**: Save/load/delete presets, factory presets, sharing via URL
+- **Theme Toggle**: Dark/light mode switching, persistence
+- **Transport Controls**: Play/pause, BPM control, keyboard shortcuts
+- **Recording**: Start/stop recording, audio download
+
+**Key Features:**
+- Uses semantic locators (roles, labels, text) for accessibility
+- Page Object Model pattern for reusable interactions
+- Test isolation with clean localStorage and audio context
+- Multiple browser support (Chromium, Firefox, WebKit)
+
+**Running Tests:**
+```bash
+npm run test:e2e              # All tests, headless
+npm run test:e2e:ui          # Interactive UI explorer
+npm run test:e2e:headed      # See browser window
+npm run test:e2e:debug       # Step-by-step debugging
+npm run test:e2e:report      # View HTML report
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed information on writing E2E tests, locator strategies, and best practices.
 
 ### CI/CD Pipeline
 
