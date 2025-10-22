@@ -65,9 +65,9 @@ The app will open at `http://localhost:5173` (or another port if 5173 is in use)
 ### Keyboard Shortcuts
 
 - **Space**: Play/Pause sequencer
-- **O**: Trigger PolySynth 1 (left/top)
-- **P**: Trigger PolySynth 2 (right/bottom)
-- **Q/W/A/S/Z/X**: Toggle oscillators 1-6 on/off
+- **o**: Trigger PolySynth 1 (left/top)
+- **p**: Trigger PolySynth 2 (right/bottom)
+- **q/w/a/s/z/x**: Toggle oscillators 1-6 on/off
 
 ### Oscillator Controls
 
