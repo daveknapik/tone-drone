@@ -68,8 +68,8 @@ All audio sources (oscillators and synths) connect to a central effects bus mana
 The effects bus provides:
 
 - Linear signal chain through all effects
-- Send/return architecture for wet/dry mixing
 - Centralized audio routing
+- Send level control for the effects chain
 
 ### Audio Object Lifecycle
 
@@ -232,10 +232,16 @@ const useAudioEffect = () => {
 
 #### useSynths
 
-- Creates polyphonic synthesizers for the sequencer
+- Creates monophonic Tone.Synth instances for the step sequencer
 - Pairs each synth with a Tone.Panner
 - Returns array of `SynthWithPanner` objects
-- Used for triggered notes (not continuous drones)
+- Used for triggered notes on each step (not continuous drones)
+
+#### usePolysynths
+
+- Creates polyphonic Tone.PolySynth instances
+- Returns array of `Tone.PolySynth` objects
+- Currently creates 1 polysynth for general use
 
 #### useSequences
 
@@ -249,7 +255,7 @@ const useAudioEffect = () => {
 - Creates a Tone.Channel as the main bus
 - Connects all effects in series
 - Returns ref to the bus channel
-- Manages wet/dry send control
+- Manages effects bus send level
 
 #### useConnectChannelsToBus
 
@@ -342,7 +348,8 @@ Oscillator 3 ──┤
 Oscillator 4 ──┼──→ Effects Bus ──→ Destination
 Oscillator 5 ──┤         ↓               ↓
 Oscillator 6 ──┤    [Effects]       [Recorder]
-Synths ────────┘
+Synths (x6) ───┤ (step sequencer)
+Polysynth (x1) ┘
 ```
 
 ### Detailed Effects Chain
@@ -370,10 +377,11 @@ Output
 ### Connection Management
 
 1. **Oscillators**: Each oscillator connects to its own channel, which connects to the effects bus
-2. **Synths**: Each synth connects to its own panner, which connects to the effects bus
-3. **Effects**: Chained in series through the effects bus channel
-4. **Bus Send**: Controls wet/dry mix for the entire effects chain
-5. **Recorder**: Taps the master output for recording
+2. **Synths**: Each synth (for step sequencer) connects to its own panner, which connects to the effects bus
+3. **Polysynth**: Connects directly to the effects bus
+4. **Effects**: Chained in series through the effects bus channel
+5. **Bus Send**: Controls the level going into the effects chain (all audio routes through the effects bus)
+6. **Recorder**: Taps the master output for recording
 
 ## Performance Considerations
 

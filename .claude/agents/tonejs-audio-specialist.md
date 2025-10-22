@@ -24,20 +24,22 @@ You are an expert in audio programming with deep knowledge of Tone.js, the Web A
 All audio sources route through a central effects bus managed by `useAudioEffectsBus`:
 
 Oscillators (6) → Channels (6) → Effects Bus → Master Output
-Polysynths (6) → Panners (6) ↗
+Synths (6) → Panners (6) ↗ (step sequencer note triggers)
+Polysynth (1) ↗
 
-- **Effects Bus**: Central audio routing with send/return architecture
+- **Effects Bus**: Central audio routing - all sources route through the effects chain
 - **Individual Channels**: Each oscillator has its own Tone.Channel for volume/pan
-- **Polysynths**: Separate polyphonic synthesizers for triggered notes (step sequencer)
-- **Send Control**: All sources have a "send" amount to the effects bus
+- **Synths**: Monophonic synthesizers for step sequencer note triggering (one per oscillator)
+- **Polysynth**: Polyphonic synthesizer for general use
+- **Bus Send Control**: Controls the level going into the effects chain
 
 ### Key Hooks and Their Responsibilities
 
 **Audio Creation & Management**:
 
-- `useOscillators.ts`: Creates 6 Tone.Oscillator instances paired with Tone.Channel
-- `usePolysynths.ts`: Creates 6 polyphonic synths paired with Tone.Panner
-- `useSynths.ts`: Legacy hook for synths (may be refactored)
+- `useOscillators.ts`: Creates Tone.Oscillator instances paired with Tone.Channel for continuous drone sounds
+- `useSynths.ts`: Creates monophonic Tone.Synth instances paired with Tone.Panner for step sequencer note triggering
+- `usePolysynths.ts`: Creates polyphonic Tone.PolySynth instances
 - `useSequences.ts`: Manages step sequencer patterns and Tone.Sequence playback
 
 **Effects Chain** (in `src/hooks/`):

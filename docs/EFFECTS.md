@@ -302,26 +302,25 @@ A dynamic range compressor that automatically controls the overall volume, preve
 
 ## Effects Bus Send
 
-Controls how much signal is routed through the entire effects chain versus going directly to the output.
+Controls the level of signal going into the effects chain. All audio routes through the effects bus, so this acts as a master volume control for the entire synth.
 
 ### Parameter
 
-#### Send Level (0 - 1)
+#### Send Level (-80 dB to 0 dB)
 
-- 0: Completely dry (no effects)
-- 0.5: Equal mix of dry and effects
-- 1: Completely wet (all effects)
+- -80 dB: Silence
+- -15 dB: Optimal default level
+- 0 dB: Maximum volume
 
 ### Use Cases
 
-- Quickly A/B compare dry vs. effected sound
-- Blend processed and unprocessed signals
-- Create subtle texture without overwhelming the source
-- Master bypass for all effects at once
+- Master volume control for the entire synth
+- Quick fadeouts or silence
+- Volume automation and dynamics
 
 ### Tip
 
-Start with the send at 0 and gradually increase while adjusting individual effect wet/dry controls for optimal balance.
+The default of -15 dB provides optimal headroom. Lower values reduce overall volume, higher values approach maximum output. Adjust individual effect wet/dry controls to balance processed and unprocessed sound within the effects chain.
 
 ## Effect Combination Tips
 
@@ -330,27 +329,27 @@ Start with the send at 0 and gradually increase while adjusting individual effec
 - Auto Filter: Low base freq, slow speed, high depth, lowpass
 - Microlooper: 0.1s time, 0.95 feedback, low wet
 - Delay: 2-4s time, 0.4 feedback, 0.3 wet
-- Effects Bus Send: 0.6-0.8
+- Effects Bus Send: -10 to -5 dB (moderate to loud)
 
 ### Lo-Fi Textures
 
 - Bit Crusher: 4-5 bits, 0.5 wet
 - Chebyshev: Order 5-10, 0.3 wet
 - Filter: Lowpass, 2000 Hz, low Q
-- Effects Bus Send: 0.5
+- Effects Bus Send: -15 dB (default level)
 
 ### Rhythmic Movement
 
 - Auto Filter: High speed (2-6 Hz), square wave, bandpass
 - Delay: Sync to tempo, 0.5 feedback
-- Effects Bus Send: 0.7
+- Effects Bus Send: -8 dB (moderately loud)
 
 ### Dark Drones
 
 - Filter: Lowpass, 300-500 Hz, -48 dB rolloff
 - Auto Filter: Very slow speed (0.05 Hz), sine wave, lowpass
 - Delay: Long time (4-8s), low feedback
-- Effects Bus Send: 0.4
+- Effects Bus Send: -20 dB (quieter for subtlety)
 
 ### Harsh Industrial
 
@@ -358,7 +357,7 @@ Start with the send at 0 and gradually increase while adjusting individual effec
 - Chebyshev: High order (50+), 0.6 wet
 - Filter: Bandpass, 1000-2000 Hz, high Q
 - Delay: Short time, high feedback
-- Effects Bus Send: 0.9
+- Effects Bus Send: -3 dB (very loud)
 
 ## Performance Tips
 

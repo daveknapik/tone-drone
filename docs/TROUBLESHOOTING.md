@@ -41,10 +41,10 @@ Common issues and solutions for Tone Drone users.
      - Check individual oscillator volume sliders
      - Expand the Oscillators section to see their states
 
-4. **Effects Bus Send at Zero**
+4. **Effects Bus Send Too Low**
 
-   - **Cause**: Effects bus send is set to 0, routing all audio to silence
-   - **Solution**: Check Effects Bus Send slider is above 0
+   - **Cause**: Effects bus send is set to -80 dB or very low, routing minimal/no audio to output
+   - **Solution**: Check Effects Bus Send slider is set to at least -40 dB (default is -15 dB)
 
 5. **No Active Steps**
    - **Cause**: No steps are activated in the sequencer

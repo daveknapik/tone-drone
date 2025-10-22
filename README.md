@@ -78,7 +78,7 @@ The app will open at `http://localhost:5173` (or another port if 5173 is in use)
 
 ### Effects Bus
 
-All oscillators and synths route through a shared effects bus. Use the "Effects Bus Send" slider to control how much signal goes through the effects chain versus the dry signal.
+All oscillators and synths route through a shared effects bus. Use the "Effects Bus Send" slider to control the level of signal going into the effects chain.
 
 ### Recording
 

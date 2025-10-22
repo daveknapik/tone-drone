@@ -229,7 +229,8 @@ test("should do something", async ({ page }) => {
 - **Effects Bus**: Central audio routing through `useAudioEffectsBus` hook - connects all audio sources through a chain of effects
 - **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, etc.) has its own custom hook in `src/hooks/`
 - **Oscillators**: Created with Tone.Oscillator, each paired with a Tone.Channel for individual volume/pan control
-- **Polysynths**: Separate polyphonic synthesizers for triggered notes, managed via `usePolysynths` hook
+- **Synths**: Monophonic synthesizers for step sequencer note triggering, managed via `useSynths` hook
+- **Polysynth**: Polyphonic synthesizer, managed via `usePolysynths` hook
 
 ### Component Structure
 
@@ -265,9 +266,10 @@ Located in `src/types/`:
 
 ### Key Hooks
 
-- `useOscillators`: Creates and manages Tone.Oscillator instances
+- `useOscillators`: Creates and manages Tone.Oscillator instances for continuous drone sounds
 - `useSequences`: Manages step sequencer patterns and frequencies
-- `useSynths`: Creates polyphonic synthesizers for the sequencer
+- `useSynths`: Creates monophonic Tone.Synth instances for step sequencer note triggering
+- `usePolysynths`: Creates polyphonic synthesizers
 - `useConnectChannelsToBus`: Automatically connects audio channels to the effects bus
 - `useRecorder`: Handles audio recording functionality
 - Effect-specific hooks: `useDelay`, `useFilter`, `useBitCrusher`, etc.
