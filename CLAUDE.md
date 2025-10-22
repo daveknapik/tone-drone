@@ -230,7 +230,7 @@ test("should do something", async ({ page }) => {
 - **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, etc.) has its own custom hook in `src/hooks/`
 - **Oscillators**: Created with Tone.Oscillator, each paired with a Tone.Channel for individual volume/pan control
 - **Synths**: Monophonic synthesizers for step sequencer note triggering, managed via `useSynths` hook
-- **Polysynth**: Polyphonic synthesizer, managed via `usePolysynths` hook
+- **PolySynths**: Two polyphonic synthesizers for melodic elements, managed via `usePolysynths` hook
 
 ### Component Structure
 
@@ -269,7 +269,7 @@ Located in `src/types/`:
 - `useOscillators`: Creates and manages Tone.Oscillator instances for continuous drone sounds
 - `useSequences`: Manages step sequencer patterns and frequencies
 - `useSynths`: Creates monophonic Tone.Synth instances for step sequencer note triggering
-- `usePolysynths`: Creates polyphonic synthesizers
+- `usePolysynths`: Creates polyphonic synthesizers (currently 2 instances for melodic elements)
 - `useConnectChannelsToBus`: Automatically connects audio channels to the effects bus
 - `useRecorder`: Handles audio recording functionality
 - Effect-specific hooks: `useDelay`, `useFilter`, `useBitCrusher`, etc.
@@ -314,4 +314,4 @@ Preset state includes:
 - Sequencer patterns (16 steps per oscillator)
 - All audio effect parameters
 - Effects bus send level
-- Polysynth settings
+- PolySynth settings (2 polysynths with independent parameters)

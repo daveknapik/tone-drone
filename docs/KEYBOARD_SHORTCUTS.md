@@ -15,24 +15,37 @@ Complete guide to keyboard shortcuts available in Tone Drone.
 
 **Usage Tip**: This is the quickest way to start and stop your sequences without reaching for the mouse.
 
-### P - Play PolySynth Note
+### O - Play PolySynth 1 Note
+
+- **Key**: `o`
+- **Action**: Triggers a note on PolySynth 1 (left/top)
+- **Details**:
+  - Plays a single note using PolySynth 1 settings
+  - Default frequency: 666 Hz
+  - Uses the configured waveform and ADSR envelope parameters
+  - Works from anywhere in the application (PolySynths don't need to be expanded)
+
+**Usage Tip**: Use this to add melodic accents or bass notes to your drone soundscapes.
+
+### P - Play PolySynth 2 Note
 
 - **Key**: `p`
-- **Action**: Triggers a note on the polysynth
+- **Action**: Triggers a note on PolySynth 2 (right/bottom)
 - **Details**:
-  - Plays a single note using the current polysynth settings
-  - Uses the configured frequency, waveform, and envelope parameters
-  - Works from anywhere in the application (polysynth doesn't need to be expanded)
+  - Plays a single note using PolySynth 2 settings
+  - Default frequency: 999 Hz (perfect fifth up from 666 Hz)
+  - Uses the configured waveform and ADSR envelope parameters
+  - Works from anywhere in the application (PolySynths don't need to be expanded)
 
-**Usage Tip**: Use this to add melodic accents or percussion hits to your drone soundscapes.
+**Usage Tip**: Use this to add harmonic countermelody or higher-pitched accents to your soundscapes.
 
 ## Oscillator Toggle Keys
 
 Each oscillator can be toggled on/off using dedicated keyboard shortcuts. When an oscillator is toggled off, its volume is set to -Infinity (muted).
 
-### Q - Toggle Oscillator 1
+### q - Toggle Oscillator 1
 
-- **Key**: `Q`
+- **Key**: `q`
 - **Oscillator**: 1 (top-left)
 - **Action**: Starts/stops oscillator 1 drone
 
@@ -199,17 +212,18 @@ Keyboard shortcuts work consistently across platforms:
 Print or save this quick reference:
 
 ```
-┌─────────────────────────────────────┐
-│     TONE DRONE KEYBOARD SHORTCUTS   │
-├─────────────────────────────────────┤
-│  Space  │  Play/Pause Sequencer     │
-│    p    │  Play PolySynth Note      │
-├─────────┼───────────────────────────┤
-│    Q    │  Toggle Oscillator 1      │
-│    W    │  Toggle Oscillator 2      │
-│    A    │  Toggle Oscillator 3      │
-│    S    │  Toggle Oscillator 4      │
-│    Z    │  Toggle Oscillator 5      │
-│    X    │  Toggle Oscillator 6      │
-└─────────┴───────────────────────────┘
+┌──────────────────────────────────────┐
+│     TONE DRONE KEYBOARD SHORTCUTS    │
+├──────────────────────────────────────┤
+│  Space  │  Play/Pause Sequencer      │
+│    o    │  Play PolySynth 1 (666 Hz) │
+│    p    │  Play PolySynth 2 (999 Hz) │
+├─────────┼────────────────────────────┤
+│    Q    │  Toggle Oscillator 1       │
+│    W    │  Toggle Oscillator 2       │
+│    A    │  Toggle Oscillator 3       │
+│    S    │  Toggle Oscillator 4       │
+│    Z    │  Toggle Oscillator 5       │
+│    X    │  Toggle Oscillator 6       │
+└─────────┴────────────────────────────┘
 ```

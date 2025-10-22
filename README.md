@@ -16,11 +16,11 @@ A browser-based drone synthesizer built with Tone.js, React, TypeScript, and Tai
   - Lowpass/Highpass Filter with resonance
   - Delay with feedback and wet/dry mix
   - Dynamic compression
-- **Polyphonic Synthesizers**: A separate synth with an ADSR envelope for triggering notes with panning control
+- **Polyphonic Synthesizers**: Two synths with ADSR envelopes for triggering melodic notes with individual panning control
 - **Adjustable Frequency Ranges**: Set custom min/max frequency boundaries for oscillators
 - **Audio Recording**: Built-in recording functionality to capture your sessions
 - **Dark/Light Theme**: Toggle between themes with persistent local preference
-- **Keyboard Shortcuts**: Quick access keys (Q/W/A/S/Z/X) for oscillator start/stop control
+- **Keyboard Shortcuts**: Quick access keys (q/w/a/s/z/x) for oscillator start/stop control
 - **Responsive Design**: Works on desktop and mobile devices
 
 ## Live Demo
@@ -65,6 +65,8 @@ The app will open at `http://localhost:5173` (or another port if 5173 is in use)
 ### Keyboard Shortcuts
 
 - **Space**: Play/Pause sequencer
+- **O**: Trigger PolySynth 1 (left/top)
+- **P**: Trigger PolySynth 2 (right/bottom)
 - **Q/W/A/S/Z/X**: Toggle oscillators 1-6 on/off
 
 ### Oscillator Controls
@@ -190,18 +192,21 @@ npm run test:ui        # Interactive UI
 End-to-end tests verify complete user workflows using Playwright. Tests are organized by feature and use a Page Object Model for maintainability.
 
 **Test Categories:**
+
 - **Preset Management**: Save/load/delete presets, factory presets, sharing via URL
 - **Theme Toggle**: Dark/light mode switching, persistence
 - **Transport Controls**: Play/pause, BPM control, keyboard shortcuts
 - **Recording**: Start/stop recording, audio download
 
 **Key Features:**
+
 - Uses semantic locators (roles, labels, text) for accessibility
 - Page Object Model pattern for reusable interactions
 - Test isolation with clean localStorage and audio context
 - Multiple browser support (Chromium, Firefox, WebKit)
 
 **Running Tests:**
+
 ```bash
 npm run test:e2e              # All tests, headless
 npm run test:e2e:ui          # Interactive UI explorer
@@ -235,7 +240,6 @@ The project uses Node.js v24.7.0 (specified in `.nvmrc`). The CI/CD pipeline aut
 - Builds the project
 - Deploys to GitHub Pages using official GitHub Actions if tests pass
 - Uses `actions/upload-pages-artifact` and `actions/deploy-pages`
-
 
 ## Documentation
 
