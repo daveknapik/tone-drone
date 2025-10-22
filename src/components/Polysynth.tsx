@@ -7,6 +7,7 @@ import OptionsSelector from "./OptionsSelector";
 import { useState, useImperativeHandle, useRef, useEffect } from "react";
 
 import { useAudioContext } from "../hooks/useAudioContext";
+import { useKeyDown } from "../hooks/useKeyDown";
 import { PolySynthHandle, PolySynthParams } from "../types/PolySynthParams";
 
 interface PolysynthProps {
@@ -70,6 +71,11 @@ function PolySynth({ polySynth, ref, onParameterChange }: PolysynthProps) {
     void handleBrowserAudioStart();
     polySynth.triggerAttackRelease(frequency, release);
   };
+
+  // Keyboard shortcut: 'p' key to play note
+  useKeyDown(() => {
+    playNote();
+  }, ["p"]);
 
   polySynth.set({
     oscillator: { type: waveform },

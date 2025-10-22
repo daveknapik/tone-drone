@@ -15,6 +15,17 @@ Complete guide to keyboard shortcuts available in Tone Drone.
 
 **Usage Tip**: This is the quickest way to start and stop your sequences without reaching for the mouse.
 
+### P - Play PolySynth Note
+
+- **Key**: `P`
+- **Action**: Triggers a note on the polysynth
+- **Details**:
+  - Plays a single note using the current polysynth settings
+  - Uses the configured frequency, waveform, and envelope parameters
+  - Works from anywhere in the application (polysynth doesn't need to be expanded)
+
+**Usage Tip**: Use this to add melodic accents or percussion hits to your drone soundscapes.
+
 ## Oscillator Toggle Keys
 
 Each oscillator can be toggled on/off using dedicated keyboard shortcuts. When an oscillator is toggled off, its volume is set to -Infinity (muted).
@@ -192,6 +203,7 @@ Print or save this quick reference:
 │     TONE DRONE KEYBOARD SHORTCUTS   │
 ├─────────────────────────────────────┤
 │  Space  │  Play/Pause Sequencer     │
+│    P    │  Play PolySynth Note      │
 ├─────────┼───────────────────────────┤
 │    Q    │  Toggle Oscillator 1      │
 │    W    │  Toggle Oscillator 2      │
