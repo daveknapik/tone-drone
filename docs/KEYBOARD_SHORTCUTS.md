@@ -15,7 +15,7 @@ Complete guide to keyboard shortcuts available in Tone Drone.
 
 **Usage Tip**: This is the quickest way to start and stop your sequences without reaching for the mouse.
 
-### O - Play PolySynth 1 Note
+### o - Play PolySynth 1 Note
 
 - **Key**: `o`
 - **Action**: Triggers a note on PolySynth 1 (left/top)
@@ -27,7 +27,7 @@ Complete guide to keyboard shortcuts available in Tone Drone.
 
 **Usage Tip**: Use this to add melodic accents or bass notes to your drone soundscapes.
 
-### P - Play PolySynth 2 Note
+### p - Play PolySynth 2 Note
 
 - **Key**: `p`
 - **Action**: Triggers a note on PolySynth 2 (right/bottom)
@@ -49,33 +49,33 @@ Each oscillator can be toggled on/off using dedicated keyboard shortcuts. When a
 - **Oscillator**: 1 (top-left)
 - **Action**: Starts/stops oscillator 1 drone
 
-### W - Toggle Oscillator 2
+### w - Toggle Oscillator 2
 
-- **Key**: `W`
+- **Key**: `w`
 - **Oscillator**: 2
 - **Action**: Starts/stops oscillator 2 drone
 
-### A - Toggle Oscillator 3
+### a - Toggle Oscillator 3
 
-- **Key**: `A`
+- **Key**: `a`
 - **Oscillator**: 3
 - **Action**: Starts/stops oscillator 3 drone
 
-### S - Toggle Oscillator 4
+### s - Toggle Oscillator 4
 
-- **Key**: `S`
+- **Key**: `s`
 - **Oscillator**: 4
 - **Action**: Starts/stops oscillator 4 drone
 
-### Z - Toggle Oscillator 5
+### z - Toggle Oscillator 5
 
-- **Key**: `Z`
+- **Key**: `z`
 - **Oscillator**: 5
 - **Action**: Starts/stops oscillator 5 drone
 
-### X - Toggle Oscillator 6
+### x - Toggle Oscillator 6
 
-- **Key**: `X`
+- **Key**: `x`
 - **Oscillator**: 6 (bottom-right)
 - **Action**: Starts/stops oscillator 6 drone
 
@@ -84,17 +84,17 @@ Each oscillator can be toggled on/off using dedicated keyboard shortcuts. When a
 The oscillator keys are arranged in two rows, mirroring a typical QWERTY keyboard layout:
 
 ```
-Row 1:  Q  W  (E  R  T  Y)
-Row 2:  A  S  (D  F  G  H)
-Row 3:  Z  X  (C  V  B  N)
+Row 1:  q  w  (e  r  t  y)
+Row 2:  a  s  (d  f  g  h)
+Row 3:  z  x  (c  v  b  n)
 ```
 
 Active keys for oscillators 1-6:
 
 ```
-Q  W     → Oscillators 1, 2
-A  S     → Oscillators 3, 4
-Z  X     → Oscillators 5, 6
+q  w     → Oscillators 1, 2
+a  s     → Oscillators 3, 4
+z  x     → Oscillators 5, 6
 ```
 
 **Design Note**: This left-hand layout allows you to control oscillators with your left hand while using your right hand for mouse/trackpad to adjust parameters.
@@ -124,10 +124,10 @@ All keyboard shortcuts provide visual feedback:
 
 Try these patterns to get comfortable:
 
-- **All On**: Press Q, W, A, S, Z, X in sequence
-- **Alternating**: Toggle Q and S together, then W and Z
-- **Build Up**: Q → W → A → S → Z → X (add one at a time)
-- **Break Down**: X → Z → S → A → W → Q (remove one at a time)
+- **All On**: Press q, w, a, s, z, x in sequence
+- **Alternating**: Toggle q and s together, then w and z
+- **Build Up**: q → w → a → s → z → x (add one at a time)
+- **Break Down**: x → z → s → a → w → q (remove one at a time)
 
 ## Limitations
 
@@ -149,7 +149,7 @@ Some browsers may intercept certain keyboard shortcuts:
 - **Space**: May scroll the page if the page has focus
   - **Solution**: Click anywhere on the synth interface first
 - **Cmd/Ctrl + W**: May close the browser tab
-  - **Solution**: This won't happen since we only use 'W' without modifiers
+  - **Solution**: This won't happen since we only use 'w' without modifiers
 
 ## Future Enhancements
 
@@ -219,11 +219,11 @@ Print or save this quick reference:
 │    o    │  Play PolySynth 1 (666 Hz) │
 │    p    │  Play PolySynth 2 (999 Hz) │
 ├─────────┼────────────────────────────┤
-│    Q    │  Toggle Oscillator 1       │
-│    W    │  Toggle Oscillator 2       │
-│    A    │  Toggle Oscillator 3       │
-│    S    │  Toggle Oscillator 4       │
-│    Z    │  Toggle Oscillator 5       │
-│    X    │  Toggle Oscillator 6       │
+│    q    │  Toggle Oscillator 1       │
+│    w    │  Toggle Oscillator 2       │
+│    a    │  Toggle Oscillator 3       │
+│    s    │  Toggle Oscillator 4       │
+│    z    │  Toggle Oscillator 5       │
+│    x    │  Toggle Oscillator 6       │
 └─────────┴────────────────────────────┘
 ```
