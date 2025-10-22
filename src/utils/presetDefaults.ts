@@ -59,7 +59,10 @@ export const DEFAULT_POLYSYNTH_PARAMS: PolySynthParams = {
 };
 
 export const DEFAULT_POLYSYNTHS_STATE: PolySynthsState = {
-  polysynths: [{ ...DEFAULT_POLYSYNTH_PARAMS }],
+  polysynths: [
+    { ...DEFAULT_POLYSYNTH_PARAMS },
+    { ...DEFAULT_POLYSYNTH_PARAMS, frequency: 999 }, // Perfect fifth up from 666 Hz
+  ],
 };
 
 // ============================================================================

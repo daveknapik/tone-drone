@@ -21,7 +21,7 @@ test.describe("Polysynth Controls", () => {
     // Act: Expand the polysynth section
     await polySynthPage.expandPolySynth();
 
-    // Assert: The Play Note button should be visible
+    // Assert: Both Play Note buttons should be visible
     await polySynthPage.expectExpanded();
   });
 
@@ -33,7 +33,7 @@ test.describe("Polysynth Controls", () => {
     // Act: Collapse the polysynth section
     await polySynthPage.collapsePolySynth();
 
-    // Assert: The Play Note button should be hidden
+    // Assert: Both Play Note buttons should be hidden
     await polySynthPage.expectCollapsed();
   });
 
@@ -52,57 +52,207 @@ test.describe("Polysynth Controls", () => {
     await polySynthPage.expandPolySynth();
     await polySynthPage.expectExpanded();
   });
+
+  test("should display both Play Note buttons when expanded", async () => {
+    // Arrange: Polysynth is collapsed
+
+    // Act: Expand the polysynth section
+    await polySynthPage.expandPolySynth();
+
+    // Assert: Verify exactly 2 Play Note buttons are present and visible
+    await polySynthPage.expectBothPlayNoteButtonsPresent();
+  });
 });
 
-test.describe("Polysynth Play Note Button", () => {
+test.describe("Polysynth Play Note Buttons", () => {
   let polySynthPage: PolySynthPage;
 
   test.beforeEach(async ({ page }) => {
     polySynthPage = new PolySynthPage(page);
   });
 
-  test("should click Play Note button", async () => {
+  test("should click Play Note button on Polysynth 1", async () => {
     // Arrange: Polysynth is collapsed
 
-    // Act: Play a note (this will expand and click the button)
-    await polySynthPage.playNote();
+    // Act: Play a note on Polysynth 1
+    await polySynthPage.playNotePolysynth1();
 
-    // Assert: The Play Note button should still be visible and clickable
-    await polySynthPage.expectPlayNoteButtonVisible();
+    // Assert: Both Play Note buttons should be visible
+    await polySynthPage.expectPlayNoteButtonsVisible();
   });
 
-  test("should keep polysynth expanded after playing a note", async () => {
+  test("should click Play Note button on Polysynth 2", async () => {
     // Arrange: Polysynth is collapsed
 
-    // Act: Play a note
-    await polySynthPage.playNote();
+    // Act: Play a note on Polysynth 2
+    await polySynthPage.playNotePolysynth2();
+
+    // Assert: Both Play Note buttons should be visible
+    await polySynthPage.expectPlayNoteButtonsVisible();
+  });
+
+  test("should keep polysynth expanded after playing a note on Polysynth 1", async () => {
+    // Arrange: Polysynth is collapsed
+
+    // Act: Play a note on Polysynth 1
+    await polySynthPage.playNotePolysynth1();
 
     // Assert: Polysynth should remain expanded
     await polySynthPage.expectExpanded();
   });
 
-  test("should allow clicking Play Note button multiple times", async () => {
+  test("should keep polysynth expanded after playing a note on Polysynth 2", async () => {
+    // Arrange: Polysynth is collapsed
+
+    // Act: Play a note on Polysynth 2
+    await polySynthPage.playNotePolysynth2();
+
+    // Assert: Polysynth should remain expanded
+    await polySynthPage.expectExpanded();
+  });
+
+  test("should allow clicking Play Note button 1 multiple times", async () => {
     // Arrange: Expand polysynth
     await polySynthPage.expandPolySynth();
     await polySynthPage.expectExpanded();
 
-    // Act & Assert: Click multiple times
+    // Act & Assert: Click button 1 multiple times
     for (let i = 0; i < 3; i++) {
-      await polySynthPage.playNoteButton.click();
-      // Verify the button is still accessible after each click
-      await polySynthPage.expectPlayNoteButtonVisible();
+      await polySynthPage.playNoteButton1.click();
+      // Verify the buttons are still accessible after each click
+      await polySynthPage.expectPlayNoteButtonsVisible();
+    }
+  });
+
+  test("should allow clicking Play Note button 2 multiple times", async () => {
+    // Arrange: Expand polysynth
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+
+    // Act & Assert: Click button 2 multiple times
+    for (let i = 0; i < 3; i++) {
+      await polySynthPage.playNoteButton2.click();
+      // Verify the buttons are still accessible after each click
+      await polySynthPage.expectPlayNoteButtonsVisible();
+    }
+  });
+
+  test("should allow clicking both Play Note buttons alternately", async () => {
+    // Arrange: Expand polysynth
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+
+    // Act & Assert: Click buttons alternately
+    for (let i = 0; i < 3; i++) {
+      await polySynthPage.playNoteButton1.click();
+      await polySynthPage.expectPlayNoteButtonsVisible();
+
+      await polySynthPage.playNoteButton2.click();
+      await polySynthPage.expectPlayNoteButtonsVisible();
     }
   });
 });
 
-test.describe("Polysynth Keyboard Shortcut", () => {
+test.describe("Polysynth 1 Keyboard Shortcut ('o' key)", () => {
   let polySynthPage: PolySynthPage;
 
   test.beforeEach(async ({ page }) => {
     polySynthPage = new PolySynthPage(page);
   });
 
-  test("should trigger polysynth with 'p' key when expanded", async () => {
+  test("should trigger polysynth 1 with 'o' key when expanded", async () => {
+    // Arrange: Expand the polysynth section
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+
+    // Act: Press the 'o' key
+    await polySynthPage.pressOKey();
+
+    // Assert: The page should still be in a valid state (no errors)
+    // Note: We can't directly assert that audio was produced, but we can
+    // verify that the UI is still responsive
+    await polySynthPage.expectPlayNoteButtonsVisible();
+  });
+
+  test("should trigger polysynth 1 with 'o' key when collapsed", async () => {
+    // Arrange: Verify polysynth is collapsed
+    await polySynthPage.expectCollapsed();
+
+    // Act: Press the 'o' key (keyboard shortcut should work globally)
+    await polySynthPage.pressOKey();
+
+    // Assert: The polysynth should still be collapsed (keyboard shortcut
+    // triggers audio, not UI changes), and the page should be responsive
+    await polySynthPage.expectCollapsed();
+  });
+
+  test("should allow multiple presses of 'o' key", async () => {
+    // Arrange: Polysynth is collapsed (keyboard shortcuts work globally)
+
+    // Act: Press 'o' key multiple times
+    for (let i = 0; i < 3; i++) {
+      await polySynthPage.pressOKey();
+    }
+
+    // Assert: The page should still be responsive and in a valid state
+    // Verify we can still interact with the polysynth
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+  });
+
+  test("should work with 'o' key even after expanding/collapsing", async () => {
+    // Arrange: Expand the polysynth
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+
+    // Act: Collapse it
+    await polySynthPage.collapsePolySynth();
+    await polySynthPage.expectCollapsed();
+
+    // Act: Press 'o' key while collapsed
+    await polySynthPage.pressOKey();
+
+    // Assert: Polysynth should still be collapsed, page should be responsive
+    await polySynthPage.expectCollapsed();
+
+    // Act: Expand again and press 'o'
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.pressOKey();
+
+    // Assert: Should still be expanded and responsive
+    await polySynthPage.expectExpanded();
+  });
+
+  test("'o' key should not conflict with other interactions", async () => {
+    // Arrange: Expand polysynth
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+
+    // Act: Mix keyboard shortcuts and button clicks
+    await polySynthPage.pressOKey();
+    await polySynthPage.playNoteButton1.click();
+    await polySynthPage.pressOKey();
+
+    // Assert: UI should still be responsive
+    await polySynthPage.expectPlayNoteButtonsVisible();
+
+    // Act: Collapse and use keyboard shortcut
+    await polySynthPage.collapsePolySynth();
+    await polySynthPage.pressOKey();
+
+    // Assert: Should remain collapsed
+    await polySynthPage.expectCollapsed();
+  });
+});
+
+test.describe("Polysynth 2 Keyboard Shortcut ('p' key)", () => {
+  let polySynthPage: PolySynthPage;
+
+  test.beforeEach(async ({ page }) => {
+    polySynthPage = new PolySynthPage(page);
+  });
+
+  test("should trigger polysynth 2 with 'p' key when expanded", async () => {
     // Arrange: Expand the polysynth section
     await polySynthPage.expandPolySynth();
     await polySynthPage.expectExpanded();
@@ -113,10 +263,10 @@ test.describe("Polysynth Keyboard Shortcut", () => {
     // Assert: The page should still be in a valid state (no errors)
     // Note: We can't directly assert that audio was produced, but we can
     // verify that the UI is still responsive
-    await polySynthPage.expectPlayNoteButtonVisible();
+    await polySynthPage.expectPlayNoteButtonsVisible();
   });
 
-  test("should trigger polysynth with 'p' key when collapsed", async () => {
+  test("should trigger polysynth 2 with 'p' key when collapsed", async () => {
     // Arrange: Verify polysynth is collapsed
     await polySynthPage.expectCollapsed();
 
@@ -172,11 +322,11 @@ test.describe("Polysynth Keyboard Shortcut", () => {
 
     // Act: Mix keyboard shortcuts and button clicks
     await polySynthPage.pressPKey();
-    await polySynthPage.playNoteButton.click();
+    await polySynthPage.playNoteButton2.click();
     await polySynthPage.pressPKey();
 
     // Assert: UI should still be responsive
-    await polySynthPage.expectPlayNoteButtonVisible();
+    await polySynthPage.expectPlayNoteButtonsVisible();
 
     // Act: Collapse and use keyboard shortcut
     await polySynthPage.collapsePolySynth();
@@ -184,5 +334,74 @@ test.describe("Polysynth Keyboard Shortcut", () => {
 
     // Assert: Should remain collapsed
     await polySynthPage.expectCollapsed();
+  });
+});
+
+test.describe("Polysynth Keyboard Shortcuts Separation", () => {
+  let polySynthPage: PolySynthPage;
+
+  test.beforeEach(async ({ page }) => {
+    polySynthPage = new PolySynthPage(page);
+  });
+
+  test("should trigger 'o' and 'p' keys independently", async () => {
+    // Arrange: Expand polysynth
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+
+    // Act: Press both keys in sequence
+    await polySynthPage.pressOKey();
+    await polySynthPage.pressPKey();
+    await polySynthPage.pressOKey();
+
+    // Assert: UI should still be responsive
+    await polySynthPage.expectPlayNoteButtonsVisible();
+  });
+
+  test("should handle rapid alternating 'o' and 'p' presses", async () => {
+    // Arrange: Polysynth is collapsed
+
+    // Act: Rapidly press 'o' and 'p' alternately
+    for (let i = 0; i < 5; i++) {
+      await polySynthPage.pressOKey();
+      await polySynthPage.pressPKey();
+    }
+
+    // Assert: Page should still be responsive
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+  });
+
+  test("should work with both keyboard shortcuts when expanded", async () => {
+    // Arrange: Expand the polysynth
+    await polySynthPage.expandPolySynth();
+    await polySynthPage.expectExpanded();
+
+    // Act: Use both keyboard shortcuts with button clicks
+    await polySynthPage.pressOKey();
+    await polySynthPage.playNoteButton1.click();
+    await polySynthPage.pressPKey();
+    await polySynthPage.playNoteButton2.click();
+
+    // Assert: UI should still be responsive with both buttons visible
+    await polySynthPage.expectPlayNoteButtonsVisible();
+  });
+
+  test("should work with both keyboard shortcuts when collapsed", async () => {
+    // Arrange: Verify polysynth is collapsed
+    await polySynthPage.expectCollapsed();
+
+    // Act: Use both keyboard shortcuts while collapsed
+    await polySynthPage.pressOKey();
+    await polySynthPage.pressPKey();
+
+    // Assert: Polysynth should remain collapsed
+    await polySynthPage.expectCollapsed();
+
+    // Act: Expand and verify both buttons are there
+    await polySynthPage.expandPolySynth();
+
+    // Assert: Both buttons should be visible for the keyboard shortcuts
+    await polySynthPage.expectPlayNoteButtonsVisible();
   });
 });

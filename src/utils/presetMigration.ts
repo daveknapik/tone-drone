@@ -4,7 +4,7 @@ import { DEFAULT_POLYSYNTHS_STATE, DEFAULT_BPM } from "./presetDefaults";
 /**
  * Current preset version
  */
-export const CURRENT_PRESET_VERSION = 3;
+export const CURRENT_PRESET_VERSION = 4;
 
 /**
  * Migrate a preset from an older version to the current version
@@ -32,6 +32,9 @@ function runMigration(preset: Preset, fromVersion: number): Preset {
 
     case 2:
       return migrateV2ToV3(preset);
+
+    case 3:
+      return migrateV3ToV4(preset);
 
     default:
       // No migration needed for this version
@@ -67,6 +70,30 @@ function migrateV2ToV3(preset: Preset): Preset {
       ...preset.state,
       // Add BPM with default value if missing
       bpm: preset.state.bpm ?? DEFAULT_BPM,
+    },
+  };
+}
+
+/**
+ * Migration from version 3 to version 4
+ * Adds second polysynth to presets that only had one
+ */
+function migrateV3ToV4(preset: Preset): Preset {
+  const currentPolysynths = preset.state.polysynths?.polysynths ?? [];
+
+  // If there's only 1 polysynth, add a second one
+  const updatedPolysynths = currentPolysynths.length === 1
+    ? [...currentPolysynths, DEFAULT_POLYSYNTHS_STATE.polysynths[1]]
+    : currentPolysynths;
+
+  return {
+    ...preset,
+    version: 4,
+    state: {
+      ...preset.state,
+      polysynths: {
+        polysynths: updatedPolysynths,
+      },
     },
   };
 }

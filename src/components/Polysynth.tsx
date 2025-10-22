@@ -12,18 +12,20 @@ import { PolySynthHandle, PolySynthParams } from "../types/PolySynthParams";
 
 interface PolysynthProps {
   polySynth: Tone.PolySynth;
+  keyboardShortcuts: string[];
+  initialParams?: PolySynthParams;
   ref?: React.Ref<PolySynthHandle>;
   onParameterChange?: () => void;
 }
 
-function PolySynth({ polySynth, ref, onParameterChange }: PolysynthProps) {
-  const [frequency, setFrequency] = useState(666);
-  const [waveform, setWaveform] = useState<OscillatorType>("sine");
-  const [volume, setVolume] = useState(-5);
-  const [attack, setAttack] = useState(0.5);
-  const [decay, setDecay] = useState(0.7);
-  const [sustain, setSustain] = useState(1);
-  const [release, setRelease] = useState(3);
+function PolySynth({ polySynth, keyboardShortcuts, initialParams, ref, onParameterChange }: PolysynthProps) {
+  const [frequency, setFrequency] = useState(initialParams?.frequency ?? 666);
+  const [waveform, setWaveform] = useState<OscillatorType>(initialParams?.waveform ?? "sine");
+  const [volume, setVolume] = useState(initialParams?.volume ?? -5);
+  const [attack, setAttack] = useState(initialParams?.attack ?? 0.5);
+  const [decay, setDecay] = useState(initialParams?.decay ?? 0.7);
+  const [sustain, setSustain] = useState(initialParams?.sustain ?? 1);
+  const [release, setRelease] = useState(initialParams?.release ?? 3);
 
   const { handleBrowserAudioStart } = useAudioContext();
 
@@ -72,10 +74,10 @@ function PolySynth({ polySynth, ref, onParameterChange }: PolysynthProps) {
     polySynth.triggerAttackRelease(frequency, release);
   };
 
-  // Keyboard shortcut: 'p' key to play note
+  // Keyboard shortcut to play note
   useKeyDown(() => {
     playNote();
-  }, ["p"]);
+  }, keyboardShortcuts);
 
   polySynth.set({
     oscillator: { type: waveform },

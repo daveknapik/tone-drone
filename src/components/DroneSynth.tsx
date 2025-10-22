@@ -82,7 +82,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
     }
   }, [recorder]);
 
-  const polysynths = usePolysynths(1);
+  const polysynths = usePolysynths(2);
 
   polysynths.forEach((polysynth) => {
     polysynth.connect(mainAudioEffectsBus.current);
