@@ -176,6 +176,27 @@ Use these tools:
 - **Grep**: Find references to topics in the codebase
 - **Glob**: Find related files to document
 
+### CRITICAL: Only Edit Project-Owned Files
+
+You may READ any files (including `node_modules/`, dependencies, etc.) to learn and understand context.
+
+However, you must ONLY EDIT/WRITE files owned by this project:
+
+**Project-owned directories (OK to edit):**
+- `src/` - Source code
+- `e2e/` - E2E tests
+- `docs/` - Documentation
+- `.claude/` - Claude Code configuration
+- Root files: `README.md`, `CLAUDE.md`, `package.json`, etc.
+
+**NEVER edit files in:**
+- `node_modules/` - Third-party dependencies
+- `dist/` or `build/` - Build output
+- `.git/` - Version control internals
+- Any other dependency or generated directories
+
+When searching for files to UPDATE, focus searches on project directories to avoid considering dependency files as candidates for editing.
+
 ## Output Format
 
 When updating documentation:

@@ -119,8 +119,9 @@ App
         │   ├── Filter
         │   ├── Delay
         │   └── EffectsBusSendControl
-        ├── PolySynths
-        │   └── Polysynth (x1)
+        ├── PolySynths (collapsible)
+        │   ├── Polysynth 1 (left/top, 'o' key)
+        │   └── Polysynth 2 (right/bottom, 'p' key)
         └── Oscillators (collapsible)
             ├── FrequencyRangeControl
             ├── BpmControl
@@ -241,7 +242,9 @@ const useAudioEffect = () => {
 
 - Creates polyphonic Tone.PolySynth instances
 - Returns array of `Tone.PolySynth` objects
-- Currently creates 1 polysynth for general use
+- Creates 2 polysynths with independent controls:
+  - PolySynth 1: 'o' key, default 666 Hz
+  - PolySynth 2: 'p' key, default 999 Hz (perfect fifth)
 
 #### useSequences
 
@@ -349,7 +352,8 @@ Oscillator 4 ──┼──→ Effects Bus ──→ Destination
 Oscillator 5 ──┤         ↓               ↓
 Oscillator 6 ──┤    [Effects]       [Recorder]
 Synths (x6) ───┤ (step sequencer)
-Polysynth (x1) ┘
+PolySynth 1 ───┤
+PolySynth 2 ───┘
 ```
 
 ### Detailed Effects Chain
@@ -378,7 +382,7 @@ Output
 
 1. **Oscillators**: Each oscillator connects to its own channel, which connects to the effects bus
 2. **Synths**: Each synth (for step sequencer) connects to its own panner, which connects to the effects bus
-3. **Polysynth**: Connects directly to the effects bus
+3. **PolySynths**: Each of the 2 polysynths connects directly to the effects bus
 4. **Effects**: Chained in series through the effects bus channel
 5. **Bus Send**: Controls the level going into the effects chain (all audio routes through the effects bus)
 6. **Recorder**: Taps the master output for recording

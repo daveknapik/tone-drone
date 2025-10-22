@@ -25,12 +25,12 @@ All audio sources route through a central effects bus managed by `useAudioEffect
 
 Oscillators (6) → Channels (6) → Effects Bus → Master Output
 Synths (6) → Panners (6) ↗ (step sequencer note triggers)
-Polysynth (1) ↗
+PolySynths (2) ↗
 
 - **Effects Bus**: Central audio routing - all sources route through the effects chain
 - **Individual Channels**: Each oscillator has its own Tone.Channel for volume/pan
 - **Synths**: Monophonic synthesizers for step sequencer note triggering (one per oscillator)
-- **Polysynth**: Polyphonic synthesizer for general use
+- **PolySynths**: Two polyphonic synthesizers with independent controls (keyboard shortcuts 'o' and 'p')
 - **Bus Send Control**: Controls the level going into the effects chain
 
 ### Key Hooks and Their Responsibilities
