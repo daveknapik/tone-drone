@@ -17,7 +17,7 @@ Complete guide to keyboard shortcuts available in Tone Drone.
 
 ### P - Play PolySynth Note
 
-- **Key**: `P`
+- **Key**: `p`
 - **Action**: Triggers a note on the polysynth
 - **Details**:
   - Plays a single note using the current polysynth settings
@@ -172,7 +172,7 @@ Keyboard shortcuts are implemented using:
 ### Event Handling
 
 - Shortcuts use `key` property (not `keyCode`)
-- Case-insensitive (Q and q both work)
+- Case-sensitive (lowercase keys only: q, w, a, s, z, x, p)
 - Prevents default browser behavior where appropriate
 
 ### Code Reference
@@ -203,7 +203,7 @@ Print or save this quick reference:
 │     TONE DRONE KEYBOARD SHORTCUTS   │
 ├─────────────────────────────────────┤
 │  Space  │  Play/Pause Sequencer     │
-│    P    │  Play PolySynth Note      │
+│    p    │  Play PolySynth Note      │
 ├─────────┼───────────────────────────┤
 │    Q    │  Toggle Oscillator 1      │
 │    W    │  Toggle Oscillator 2      │
