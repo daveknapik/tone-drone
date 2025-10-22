@@ -34,6 +34,15 @@ describe("presetUrl", () => {
           sustain: 1,
           release: 3,
         },
+        {
+          frequency: 999,
+          waveform: "sine",
+          volume: -5,
+          attack: 0.5,
+          decay: 0.7,
+          sustain: 1,
+          release: 3,
+        },
       ],
     },
     effects: {

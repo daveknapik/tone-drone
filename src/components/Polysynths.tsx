@@ -6,11 +6,11 @@ import Heading from "./Heading";
 import { useState, Fragment, useRef, useImperativeHandle } from "react";
 
 import PolySynth from "./Polysynth";
-import { DEFAULT_POLYSYNTH_PARAMS } from "../utils/presetDefaults";
 import {
-  PolySynthHandle,
-  PolySynthsState,
-} from "../types/PolySynthParams";
+  DEFAULT_POLYSYNTH_PARAMS,
+  DEFAULT_POLYSYNTHS_STATE,
+} from "../utils/presetDefaults";
+import { PolySynthHandle, PolySynthsState } from "../types/PolySynthParams";
 
 export interface PolySynthsHandle {
   getState: () => PolySynthsState;
@@ -26,6 +26,10 @@ interface PolySynthsProps {
 function PolySynths({ polysynths, ref, onParameterChange }: PolySynthsProps) {
   const [expandPolysynths, setExpandPolysynths] = useState(false);
 
+  // Keyboard shortcuts for each polysynth
+  // Polysynth 1 (left/top): 'o', Polysynth 2 (right/bottom): 'p'
+  const keyboardShortcuts = [["o"], ["p"]];
+
   // Create refs for each polysynth component
   const polysynthRefs = useRef<(PolySynthHandle | null)[]>([]);
 
@@ -33,8 +37,8 @@ function PolySynths({ polysynths, ref, onParameterChange }: PolySynthsProps) {
   useImperativeHandle(ref, () => ({
     getState: (): PolySynthsState => {
       // Get params from each polysynth child component
-      const polysynthParams = polysynthRefs.current.map((psRef) =>
-        psRef?.getParams() ?? DEFAULT_POLYSYNTH_PARAMS
+      const polysynthParams = polysynthRefs.current.map(
+        (psRef) => psRef?.getParams() ?? DEFAULT_POLYSYNTH_PARAMS
       );
 
       return {
@@ -59,7 +63,7 @@ function PolySynths({ polysynths, ref, onParameterChange }: PolySynthsProps) {
         expanded={expandPolysynths}
         toggleExpanded={toggleExpandPolysynths}
       >
-        PolySynth
+        PolySynths
       </Heading>
       <div
         className={clsx(
@@ -72,6 +76,8 @@ function PolySynths({ polysynths, ref, onParameterChange }: PolySynthsProps) {
           <PolySynth
             key={i}
             polySynth={polysynth}
+            keyboardShortcuts={keyboardShortcuts[i] ?? ["p"]}
+            initialParams={DEFAULT_POLYSYNTHS_STATE.polysynths[i]}
             ref={(el) => {
               polysynthRefs.current[i] = el;
             }}

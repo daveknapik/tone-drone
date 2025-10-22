@@ -171,7 +171,7 @@ describe("presetMigration", () => {
 
     it("should return correct migration path from v2", () => {
       const path = getMigrationPath(2);
-      expect(path).toEqual([2]);
+      expect(path).toEqual([2, 3]); // v2→v3, v3→v4
     });
 
     it("should return empty array for current version", () => {
@@ -230,7 +230,12 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v2Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v2Preset.state.oscillators);
-        expect(migrated.state.polysynths).toEqual(v2Preset.state.polysynths);
+        // First polysynth should be preserved from v2
+        expect(migrated.state.polysynths.polysynths[0]).toEqual(
+          v2Preset.state.polysynths.polysynths[0]
+        );
+        // Second polysynth should be added during v3→v4 migration
+        expect(migrated.state.polysynths.polysynths).toHaveLength(2);
         expect(migrated.state.effects).toEqual(v2Preset.state.effects);
         expect(migrated.state.effectsBusSend).toBe(
           v2Preset.state.effectsBusSend

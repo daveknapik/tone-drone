@@ -38,6 +38,15 @@ describe("presetSerializer", () => {
           sustain: 1,
           release: 3,
         },
+        {
+          frequency: 999,
+          waveform: "sine",
+          volume: -5,
+          attack: 0.5,
+          decay: 0.7,
+          sustain: 1,
+          release: 3,
+        },
       ],
     },
     effects: {
@@ -85,7 +94,7 @@ describe("presetSerializer", () => {
       const name = "Test Preset";
       const preset = createPreset(name, mockPresetState);
 
-      expect(preset.version).toBe(3);
+      expect(preset.version).toBe(4);
       expect(preset.metadata.name).toBe(name);
       expect(preset.metadata.id).toBeTruthy();
       expect(preset.metadata.created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -130,7 +139,17 @@ describe("presetSerializer", () => {
     });
 
     it("should deserialize and migrate a v2 preset without BPM", () => {
-      // Create a v2 preset without BPM
+      // Create a v2 preset without BPM and with only 1 polysynth
+      const v2PresetState = {
+        oscillators: mockPresetState.oscillators,
+        polysynths: {
+          polysynths: [mockPresetState.polysynths.polysynths[0]],
+        },
+        effects: mockPresetState.effects,
+        effectsBusSend: mockPresetState.effectsBusSend,
+        // No BPM field - should be added by migration
+      };
+
       const v2Preset = {
         version: 2,
         metadata: {
@@ -138,25 +157,24 @@ describe("presetSerializer", () => {
           name: "Test V2",
           created: "2024-01-01T00:00:00.000Z",
         },
-        state: {
-          oscillators: mockPresetState.oscillators,
-          polysynths: mockPresetState.polysynths,
-          effects: mockPresetState.effects,
-          effectsBusSend: mockPresetState.effectsBusSend,
-          // No BPM field - should be added by migration
-        },
+        state: v2PresetState,
       };
 
       const serialized = JSON.stringify(v2Preset);
       const deserialized = deserializePreset(serialized);
 
-      // Should be migrated to v3
-      expect(deserialized.version).toBe(3);
+      // Should be migrated to v4
+      expect(deserialized.version).toBe(4);
       // Should have BPM added with default value
       expect(deserialized.state.bpm).toBe(120);
+      // Should have second polysynth added
+      expect(deserialized.state.polysynths.polysynths).toHaveLength(2);
+      expect(deserialized.state.polysynths.polysynths[1].frequency).toBe(999);
       // Other state should be preserved
       expect(deserialized.state.oscillators).toEqual(mockPresetState.oscillators);
-      expect(deserialized.state.polysynths).toEqual(mockPresetState.polysynths);
+      expect(deserialized.state.polysynths.polysynths[0]).toEqual(
+        mockPresetState.polysynths.polysynths[0]
+      );
     });
 
     it("should throw error for invalid JSON", () => {
