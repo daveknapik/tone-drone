@@ -2,7 +2,7 @@ import * as Tone from "tone";
 
 import { useEffect, useState } from "react";
 
-export function usePolysynths(polysynthCount = 2): Tone.PolySynth[] {
+export function usePolysynths(polysynthCount = 1): Tone.PolySynth[] {
   const [polysynths, setPolysynths] = useState<Tone.PolySynth[]>([]);
 
   useEffect(() => {
