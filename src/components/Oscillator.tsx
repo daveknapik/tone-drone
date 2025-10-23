@@ -10,6 +10,7 @@ import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { useAudioContext } from "../hooks/useAudioContext";
 import { useKeyDown } from "../hooks/useKeyDown";
 import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
+import { getFatDefaults } from "../utils/fatOscillatorDefaults";
 
 interface OscillatorProps {
   channel: Tone.Channel;
@@ -17,7 +18,7 @@ interface OscillatorProps {
   handleStepClick: (sequenceIndex: number, stepIndex: number) => void;
   maxFreq: number;
   minFreq: number;
-  oscillator: Tone.Oscillator;
+  oscillator: Tone.Oscillator | Tone.FatOscillator;
   panner: Tone.Panner;
   playPauseKey: string;
   sequence: Sequence;
@@ -26,6 +27,7 @@ interface OscillatorProps {
   updateSequenceFrequency: (sequenceIndex: number, frequency: number) => void;
   ref?: React.Ref<OscillatorHandle>;
   onParameterChange?: () => void;
+  onOscillatorTypeChange?: (type: "basic" | "fat") => void;
 }
 
 function Oscillator({
@@ -43,6 +45,7 @@ function Oscillator({
   updateSequenceFrequency,
   ref,
   onParameterChange,
+  onOscillatorTypeChange,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(minFreq);
@@ -52,6 +55,12 @@ function Oscillator({
   const [volume, setVolume] = useState(-5);
   const [pan, setPan] = useState(0);
 
+  // Oscillator type and Fat parameters
+  const [oscillatorType, setOscillatorType] = useState<"basic" | "fat">("basic");
+  const [fatCount, setFatCount] = useState(3);
+  const [fatSpread, setFatSpread] = useState(12);
+  const [lastWaveformForDefaults, setLastWaveformForDefaults] = useState("sine");
+
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Keep a ref with current state values for imperative access
@@ -60,6 +69,9 @@ function Oscillator({
     waveform,
     volume,
     pan,
+    oscillatorType,
+    fatCount,
+    fatSpread,
   });
 
   // Update ref whenever state changes
@@ -69,8 +81,11 @@ function Oscillator({
       waveform,
       volume,
       pan,
+      oscillatorType,
+      fatCount,
+      fatSpread,
     };
-  }, [frequency, waveform, volume, pan]);
+  }, [frequency, waveform, volume, pan, oscillatorType, fatCount, fatSpread]);
 
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
@@ -80,6 +95,9 @@ function Oscillator({
       setWaveform(params.waveform);
       setVolume(params.volume);
       setPan(params.pan);
+      setOscillatorType(params.oscillatorType ?? "basic");
+      setFatCount(params.fatCount ?? 3);
+      setFatSpread(params.fatSpread ?? 12);
     },
   }));
 
@@ -116,6 +134,22 @@ function Oscillator({
   oscillator.frequency.setValueAtTime(frequency, 0.1);
   oscillator.type = waveform as Tone.ToneOscillatorType;
 
+  // Apply Fat params if oscillator is a FatOscillator
+  if (oscillator instanceof Tone.FatOscillator) {
+    oscillator.count = fatCount;
+    oscillator.spread = fatSpread;
+  }
+
+  // Restore playing state when oscillator instance changes
+  // This handles the case where useOscillators recreates oscillators when type changes
+  useEffect(() => {
+    if (isPlaying && oscillator) {
+      // New oscillator created while old one was playing
+      // Need to start the new one to restore sound
+      oscillator.start();
+    }
+  }, [oscillator, isPlaying]);
+
   const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFrequency = parseFloat(e.target.value);
     setFrequency(newFrequency); // sets the frequency on the oscillator
@@ -124,7 +158,7 @@ function Oscillator({
   };
 
   return (
-    <div>
+    <div data-testid={`osc-${sequenceIndex}-type`}>
       <Slider
         inputName="frequency"
         labelText="Freq (Hz)"
@@ -162,7 +196,17 @@ function Oscillator({
       <div className="justify-between mt-1">
         <OptionsSelector<OscillatorType>
           handleChange={(e) => {
-            setWaveform(e.target.value);
+            const newWaveform = e.target.value;
+            setWaveform(newWaveform);
+
+            // Update Fat defaults based on new waveform (when in Fat mode)
+            if (oscillatorType === "fat") {
+              const defaults = getFatDefaults(newWaveform);
+              setFatCount(defaults.count);
+              setFatSpread(defaults.spread);
+              setLastWaveformForDefaults(newWaveform);
+            }
+
             onParameterChange?.();
           }}
           justifyBetween={true}
@@ -170,6 +214,58 @@ function Oscillator({
           value={waveform}
         />
       </div>
+      <div className="justify-between mt-2">
+        <OptionsSelector
+          handleChange={(e) => {
+            const newType = e.target.value as "basic" | "fat";
+            setOscillatorType(newType);
+
+            // When switching to Fat, only apply defaults if waveform changed
+            // This preserves user customizations when toggling basic→fat→basic→fat
+            if (newType === "fat" && waveform !== lastWaveformForDefaults) {
+              const defaults = getFatDefaults(waveform);
+              setFatCount(defaults.count);
+              setFatSpread(defaults.spread);
+              setLastWaveformForDefaults(waveform);
+            }
+
+            // Notify parent of type change
+            onOscillatorTypeChange?.(newType);
+            onParameterChange?.();
+          }}
+          justifyBetween={true}
+          options={["basic", "fat"]}
+          value={oscillatorType}
+        />
+      </div>
+      {oscillatorType === "fat" && (
+        <>
+          <Slider
+            inputName="fatCount"
+            labelText="Voices"
+            min={2}
+            max={10}
+            step={1}
+            value={fatCount}
+            handleChange={(e) => {
+              setFatCount(parseInt(e.target.value));
+              onParameterChange?.();
+            }}
+          />
+          <Slider
+            inputName="fatSpread"
+            labelText="Detune (¢)"
+            min={0}
+            max={100}
+            step={1}
+            value={fatSpread}
+            handleChange={(e) => {
+              setFatSpread(parseInt(e.target.value));
+              onParameterChange?.();
+            }}
+          />
+        </>
+      )}
       <div className="text-center mt-2">
         <Sequencer
           currentBeat={currentBeat}

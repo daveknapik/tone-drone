@@ -27,6 +27,9 @@ export const DEFAULT_OSCILLATOR_PARAMS: OscillatorParams = {
   waveform: "sine",
   volume: -5,
   pan: 0,
+  oscillatorType: "basic",
+  fatCount: 3,
+  fatSpread: 12,
 };
 
 export const DEFAULT_SEQUENCE: Sequence = {

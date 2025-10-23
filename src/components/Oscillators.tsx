@@ -56,7 +56,7 @@ function Oscillators({
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
-  const [oscillators, setOscillators] = useOscillators(oscillatorCount);
+  const [oscillators, setOscillators, setOscillatorTypes] = useOscillators(oscillatorCount);
   const [synths, setSynths] = useSynths(oscillatorCount);
   const [sequences, setSequences] = useSequences(oscillatorCount, stepCount);
 
@@ -205,7 +205,7 @@ function Oscillators({
     oscillator.connect(channel);
     channel.connect(bus.current);
 
-    return { oscillator, channel };
+    return { oscillator, channel, type: "basic" };
   };
 
   const createSynth = (): SynthWithPanner => {
@@ -313,6 +313,13 @@ function Oscillators({
                   oscillatorRefs.current[i] = el;
                 }}
                 onParameterChange={onParameterChange}
+                onOscillatorTypeChange={(type) => {
+                  setOscillatorTypes((prev) => {
+                    const newTypes = [...prev];
+                    newTypes[i] = type;
+                    return newTypes;
+                  });
+                }}
               />
             );
           })}

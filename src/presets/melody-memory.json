@@ -11,12 +11,12 @@
       "minFreq": 220,
       "maxFreq": 330,
       "oscillators": [
-        { "frequency": 220, "waveform": "sine", "volume": -10, "pan": -0.4 },
-        { "frequency": 275, "waveform": "sine", "volume": -10, "pan": 0.4 },
-        { "frequency": 330, "waveform": "triangle", "volume": -12, "pan": 0 },
-        { "frequency": 247.5, "waveform": "sine", "volume": -14, "pan": -0.2 },
-        { "frequency": 302.5, "waveform": "sine", "volume": -14, "pan": 0.2 },
-        { "frequency": 262.5, "waveform": "triangle", "volume": -16, "pan": 0 }
+        { "frequency": 220, "waveform": "sine", "volume": -10, "pan": -0.4, "oscillatorType": "basic", "fatCount": 3, "fatSpread": 12 },
+        { "frequency": 275, "waveform": "sine", "volume": -10, "pan": 0.4, "oscillatorType": "basic", "fatCount": 3, "fatSpread": 12 },
+        { "frequency": 330, "waveform": "triangle", "volume": -12, "pan": 0, "oscillatorType": "basic", "fatCount": 3, "fatSpread": 15 },
+        { "frequency": 247.5, "waveform": "sine", "volume": -14, "pan": -0.2, "oscillatorType": "basic", "fatCount": 3, "fatSpread": 12 },
+        { "frequency": 302.5, "waveform": "sine", "volume": -14, "pan": 0.2, "oscillatorType": "basic", "fatCount": 3, "fatSpread": 12 },
+        { "frequency": 262.5, "waveform": "triangle", "volume": -16, "pan": 0, "oscillatorType": "basic", "fatCount": 3, "fatSpread": 15 }
       ],
       "sequences": [
         {
