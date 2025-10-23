@@ -84,8 +84,8 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
 
   const polysynths = usePolysynths(2);
 
-  polysynths.forEach((polysynth) => {
-    polysynth.connect(mainAudioEffectsBus.current);
+  polysynths.forEach(({ panner }) => {
+    panner.connect(mainAudioEffectsBus.current);
   });
 
   // Create refs for all components that need to be accessed by presets

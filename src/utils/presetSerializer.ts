@@ -5,7 +5,7 @@ import { migratePreset, needsMigration } from "./presetMigration";
  * Current preset format version
  * Increment this when making breaking changes to preset structure
  */
-const CURRENT_VERSION = 4;
+const CURRENT_VERSION = 5;
 
 /**
  * Generate a unique ID for a preset

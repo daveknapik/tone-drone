@@ -1,4 +1,3 @@
-import * as Tone from "tone";
 import { clsx } from "clsx";
 
 import Heading from "./Heading";
@@ -11,6 +10,7 @@ import {
   DEFAULT_POLYSYNTHS_STATE,
 } from "../utils/presetDefaults";
 import { PolySynthHandle, PolySynthsState } from "../types/PolySynthParams";
+import { PolySynthWithPanner } from "../types/PolySynthWithPanner";
 
 export interface PolySynthsHandle {
   getState: () => PolySynthsState;
@@ -18,7 +18,7 @@ export interface PolySynthsHandle {
 }
 
 interface PolySynthsProps {
-  polysynths: Tone.PolySynth[];
+  polysynths: PolySynthWithPanner[];
   ref?: React.Ref<PolySynthsHandle>;
   onParameterChange?: () => void;
 }
@@ -72,10 +72,11 @@ function PolySynths({ polysynths, ref, onParameterChange }: PolySynthsProps) {
           polysynths.length > 1 && "md:grid-cols-2"
         )}
       >
-        {polysynths.map((polysynth, i) => (
+        {polysynths.map(({ polysynth, panner }, i) => (
           <PolySynth
             key={i}
             polySynth={polysynth}
+            panner={panner}
             keyboardShortcuts={keyboardShortcuts[i] ?? ["p"]}
             initialParams={DEFAULT_POLYSYNTHS_STATE.polysynths[i]}
             ref={(el) => {

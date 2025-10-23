@@ -1,24 +1,31 @@
 import * as Tone from "tone";
 
 import { useEffect, useState } from "react";
+import { PolySynthWithPanner } from "../types/PolySynthWithPanner";
 
-export function usePolysynths(polysynthCount = 2): Tone.PolySynth[] {
-  const [polysynths, setPolysynths] = useState<Tone.PolySynth[]>([]);
+export function usePolysynths(polysynthCount = 2): PolySynthWithPanner[] {
+  const [polysynths, setPolysynths] = useState<PolySynthWithPanner[]>([]);
 
   useEffect(() => {
-    const newPolysynths: Tone.PolySynth[] = [];
+    const newPolysynths: PolySynthWithPanner[] = [];
 
-    // Create the synths
+    // Create the synths with panners
     for (let i = 0; i < polysynthCount; i++) {
       const polysynth = new Tone.PolySynth();
-      newPolysynths.push(polysynth);
+      const panner = new Tone.Panner();
+
+      // Connect polysynth to panner
+      polysynth.connect(panner);
+
+      newPolysynths.push({ polysynth, panner });
     }
 
     setPolysynths(newPolysynths);
 
     return () => {
-      newPolysynths.forEach((polysynth) => {
+      newPolysynths.forEach(({ polysynth, panner }) => {
         polysynth.dispose();
+        panner.dispose();
       });
 
       setPolysynths([]);

@@ -4,7 +4,7 @@ import { DEFAULT_POLYSYNTHS_STATE, DEFAULT_BPM } from "./presetDefaults";
 /**
  * Current preset version
  */
-export const CURRENT_PRESET_VERSION = 4;
+export const CURRENT_PRESET_VERSION = 5;
 
 /**
  * Migrate a preset from an older version to the current version
@@ -35,6 +35,9 @@ function runMigration(preset: Preset, fromVersion: number): Preset {
 
     case 3:
       return migrateV3ToV4(preset);
+
+    case 4:
+      return migrateV4ToV5(preset);
 
     default:
       // No migration needed for this version
@@ -89,6 +92,31 @@ function migrateV3ToV4(preset: Preset): Preset {
   return {
     ...preset,
     version: 4,
+    state: {
+      ...preset.state,
+      polysynths: {
+        polysynths: updatedPolysynths,
+      },
+    },
+  };
+}
+
+/**
+ * Migration from version 4 to version 5
+ * Adds pan control to all polysynths (centered by default)
+ */
+function migrateV4ToV5(preset: Preset): Preset {
+  const currentPolysynths = preset.state.polysynths?.polysynths ?? [];
+
+  // Add pan: 0 to each polysynth that doesn't have it
+  const updatedPolysynths = currentPolysynths.map((ps) => ({
+    ...ps,
+    pan: ps.pan ?? 0, // Centered panning for existing presets
+  }));
+
+  return {
+    ...preset,
+    version: 5,
     state: {
       ...preset.state,
       polysynths: {

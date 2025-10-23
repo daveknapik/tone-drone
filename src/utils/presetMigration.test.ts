@@ -171,7 +171,7 @@ describe("presetMigration", () => {
 
     it("should return correct migration path from v2", () => {
       const path = getMigrationPath(2);
-      expect(path).toEqual([2, 3]); // v2→v3, v3→v4
+      expect(path).toEqual([2, 3, 4]); // v2→v3, v3→v4, v4→v5
     });
 
     it("should return empty array for current version", () => {
@@ -204,6 +204,95 @@ describe("presetMigration", () => {
       });
     });
 
+    describe("v3 to v4 migration", () => {
+      it("should add second polysynth when only one exists", () => {
+        const v3Preset = createV2Preset();
+        v3Preset.version = 3;
+        v3Preset.state.bpm = 120;
+
+        const migrated = migratePreset(v3Preset);
+
+        expect(migrated.version).toBe(CURRENT_PRESET_VERSION);
+        expect(migrated.state.polysynths.polysynths).toHaveLength(2);
+        expect(migrated.state.polysynths.polysynths[1].frequency).toBe(999);
+      });
+    });
+
+    describe("v4 to v5 migration", () => {
+      it("should add pan parameter to polysynths with default value 0", () => {
+        const v4Preset = createV2Preset();
+        v4Preset.version = 4;
+        v4Preset.state.bpm = 120;
+        // Add second polysynth without pan - simulating v4 preset
+        const polysynthsWithoutPan = [
+          {
+            frequency: 666,
+            waveform: "sine" as OscillatorType,
+            volume: -5,
+            attack: 0.5,
+            decay: 0.7,
+            sustain: 1,
+            release: 3,
+          },
+          {
+            frequency: 999,
+            waveform: "sine" as OscillatorType,
+            volume: -5,
+            attack: 0.5,
+            decay: 0.7,
+            sustain: 1,
+            release: 3,
+          },
+        ];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+        v4Preset.state.polysynths.polysynths = polysynthsWithoutPan as any;
+
+        const migrated = migratePreset(v4Preset);
+
+        expect(migrated.version).toBe(CURRENT_PRESET_VERSION);
+        expect(migrated.state.polysynths.polysynths).toHaveLength(2);
+        expect(migrated.state.polysynths.polysynths[0].pan).toBe(0);
+        expect(migrated.state.polysynths.polysynths[1].pan).toBe(0);
+      });
+
+      it("should preserve existing pan values if present", () => {
+        const v4Preset = createV2Preset();
+        v4Preset.version = 4;
+        v4Preset.state.bpm = 120;
+        // Add polysynths that already have pan values
+        const polysynthsWithPan = [
+          {
+            frequency: 666,
+            waveform: "sine" as OscillatorType,
+            volume: -5,
+            pan: -0.3,
+            attack: 0.5,
+            decay: 0.7,
+            sustain: 1,
+            release: 3,
+          },
+          {
+            frequency: 999,
+            waveform: "sine" as OscillatorType,
+            volume: -5,
+            pan: 0.3,
+            attack: 0.5,
+            decay: 0.7,
+            sustain: 1,
+            release: 3,
+          },
+        ];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+        v4Preset.state.polysynths.polysynths = polysynthsWithPan as any;
+
+        const migrated = migratePreset(v4Preset);
+
+        expect(migrated.version).toBe(CURRENT_PRESET_VERSION);
+        expect(migrated.state.polysynths.polysynths[0].pan).toBe(-0.3);
+        expect(migrated.state.polysynths.polysynths[1].pan).toBe(0.3);
+      });
+    });
+
     describe("v2 to v3 migration", () => {
       it("should add bpm with default value when missing", () => {
         const v2Preset = createV2Preset();
@@ -230,10 +319,11 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v2Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v2Preset.state.oscillators);
-        // First polysynth should be preserved from v2
-        expect(migrated.state.polysynths.polysynths[0]).toEqual(
-          v2Preset.state.polysynths.polysynths[0]
-        );
+        // First polysynth should be preserved from v2, but with pan added by v4→v5 migration
+        expect(migrated.state.polysynths.polysynths[0]).toEqual({
+          ...v2Preset.state.polysynths.polysynths[0],
+          pan: 0, // Added by v4→v5 migration
+        });
         // Second polysynth should be added during v3→v4 migration
         expect(migrated.state.polysynths.polysynths).toHaveLength(2);
         expect(migrated.state.effects).toEqual(v2Preset.state.effects);

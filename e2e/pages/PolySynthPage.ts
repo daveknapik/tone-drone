@@ -26,7 +26,7 @@ export class PolySynthPage extends BasePage {
    * Note: This is a clickable div, not a semantic button
    */
   get polySynthHeading() {
-    return this.page.getByText(/^PolySynth$/i);
+    return this.page.getByText(/^PolySynths$/i);
   }
 
   /**
@@ -63,7 +63,9 @@ export class PolySynthPage extends BasePage {
    * Waits for both Play Note buttons to become visible
    */
   async expandPolySynth(): Promise<void> {
-    const isExpanded = await this.playNoteButton1.isVisible().catch(() => false);
+    const isExpanded = await this.playNoteButton1
+      .isVisible()
+      .catch(() => false);
 
     if (!isExpanded) {
       await this.polySynthHeading.click();
@@ -77,7 +79,9 @@ export class PolySynthPage extends BasePage {
    * Waits for both Play Note buttons to become hidden
    */
   async collapsePolySynth(): Promise<void> {
-    const isExpanded = await this.playNoteButton1.isVisible().catch(() => false);
+    const isExpanded = await this.playNoteButton1
+      .isVisible()
+      .catch(() => false);
 
     if (isExpanded) {
       await this.polySynthHeading.click();
@@ -164,9 +168,7 @@ export class PolySynthPage extends BasePage {
   async expectBothPlayNoteButtonsPresent(): Promise<void> {
     const buttons = await this.playNoteButtons.count();
     if (buttons !== 2) {
-      throw new Error(
-        `Expected 2 Play Note buttons, but found ${buttons}`
-      );
+      throw new Error(`Expected 2 Play Note buttons, but found ${buttons}`);
     }
     await this.playNoteButton1.waitFor({ state: "visible" });
     await this.playNoteButton2.waitFor({ state: "visible" });
