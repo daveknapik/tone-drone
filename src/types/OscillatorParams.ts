@@ -1,4 +1,9 @@
 /**
+ * Oscillator type: basic (Tone.Oscillator) or fat (Tone.FatOscillator)
+ */
+export type OscillatorType = "basic" | "fat";
+
+/**
  * Parameters for a single Oscillator component that should be persisted in presets
  */
 export interface OscillatorParams {
@@ -6,6 +11,9 @@ export interface OscillatorParams {
   waveform: string; // "sine" | "square" | "triangle" | "sawtooth"
   volume: number;
   pan: number;
+  oscillatorType: OscillatorType;
+  fatCount: number; // 2-10 voices (only applies when oscillatorType is "fat")
+  fatSpread: number; // 0-100 cents detune spread (only applies when oscillatorType is "fat")
 }
 
 /**

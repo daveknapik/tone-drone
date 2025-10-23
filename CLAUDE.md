@@ -228,14 +228,15 @@ test("should do something", async ({ page }) => {
 - **Audio Context**: Managed via `src/context/audio.tsx` - handles browser audio initialization and Tone.js transport control
 - **Effects Bus**: Central audio routing through `useAudioEffectsBus` hook - connects all audio sources through a chain of effects
 - **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, etc.) has its own custom hook in `src/hooks/`
-- **Oscillators**: Created with Tone.Oscillator, each paired with a Tone.Channel for individual volume/pan control
+- **Oscillators**: Created with Tone.Oscillator or Tone.FatOscillator, each paired with a Tone.Channel for individual volume/pan control. Users can toggle between basic and fat oscillator types for thicker, chorus-like sounds
 - **Synths**: Monophonic synthesizers for step sequencer note triggering, managed via `useSynths` hook
 - **PolySynths**: Two polyphonic synthesizers for melodic elements, managed via `usePolysynths` hook
 
 ### Component Structure
 
 - **DroneSynth**: Main synthesizer component that orchestrates all audio components
-- **Oscillators**: Contains the step sequencer with 6 oscillators, each with 16 steps
+- **Oscillators**: Contains the step sequencer with 6 oscillators, each with 16 steps. Each oscillator supports both basic and fat modes
+- **Oscillator Controls**: Each oscillator has frequency, waveform, volume, and pan controls. In fat mode, includes voices slider (2-10) and detune spread slider (0-100 cents)
 - **Effects**: Collapsible section containing all audio effect controls
 - **Individual Effect Components**: BitCrusher, Chebyshev, Delay, etc. - each controls its respective Tone.js effect
 
@@ -249,6 +250,8 @@ test("should do something", async ({ page }) => {
 ### Key Technical Details
 
 - **Tone.js Integration**: All audio synthesis handled through Tone.js library
+- **Oscillator Types**: Supports both Tone.Oscillator (basic, single voice) and Tone.FatOscillator (fat mode with multiple detuned voices). Type switching properly disposes and recreates oscillator instances while preserving playing state
+- **Fat Oscillator Parameters**: When switching to fat mode, waveform-specific defaults are applied (sine: 3 voices/12¢, sawtooth: 5 voices/30¢, square: 3 voices/22¢, triangle: 3 voices/15¢)
 - **Step Sequencer**: 16-step sequencer with visual beat indication and real-time step editing
 - **Effects Chain**: Linear effects chain with send control for the main effects bus
 - **Recording**: Built-in recording functionality via `useRecorder` hook
@@ -258,7 +261,9 @@ test("should do something", async ({ page }) => {
 
 Located in `src/types/`:
 
-- `OscillatorWithChannel`: Pairs Tone.Oscillator with Tone.Channel
+- `OscillatorType`: Union type `"basic" | "fat"` that specifies the oscillator implementation
+- `OscillatorParams`: Interface for persistent oscillator state including frequency, waveform, volume, pan, oscillatorType, fatCount, and fatSpread
+- `OscillatorWithChannel`: Pairs Tone.Oscillator or Tone.FatOscillator with Tone.Channel and tracks the oscillator type
 - `SynthWithPanner`: Pairs Tone.Synth with Tone.Panner
 - `Sequence`: Defines step pattern with frequency and boolean steps array
 - `AudioEffect`: Base interface for audio effects
@@ -266,7 +271,7 @@ Located in `src/types/`:
 
 ### Key Hooks
 
-- `useOscillators`: Creates and manages Tone.Oscillator instances for continuous drone sounds
+- `useOscillators`: Creates and manages Tone.Oscillator or Tone.FatOscillator instances for continuous drone sounds. Returns oscillators array, setOscillators setter, and setTypes setter for switching between basic and fat modes. Accepts optional oscillatorTypes array to initialize with specific types
 - `useSequences`: Manages step sequencer patterns and frequencies
 - `useSynths`: Creates monophonic Tone.Synth instances for step sequencer note triggering
 - `usePolysynths`: Creates polyphonic synthesizers (currently 2 instances for melodic elements)
@@ -310,7 +315,7 @@ The app includes a comprehensive preset management system:
 
 Preset state includes:
 
-- Oscillator settings (frequency, waveform, volume, pan)
+- Oscillator settings (frequency, waveform, volume, pan, oscillator type, fat count, fat spread)
 - Sequencer patterns (16 steps per oscillator)
 - All audio effect parameters
 - Effects bus send level

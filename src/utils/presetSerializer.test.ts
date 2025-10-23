@@ -13,8 +13,8 @@ describe("presetSerializer", () => {
       minFreq: 440,
       maxFreq: 454,
       oscillators: [
-        { frequency: 440, waveform: "sine", volume: -5, pan: 0 },
-        { frequency: 445, waveform: "square", volume: -10, pan: 0.5 },
+        { frequency: 440, waveform: "sine", volume: -5, pan: 0, oscillatorType: "basic", fatCount: 3, fatSpread: 12 },
+        { frequency: 445, waveform: "square", volume: -10, pan: 0.5, oscillatorType: "basic", fatCount: 3, fatSpread: 22 },
       ],
       sequences: [
         {
