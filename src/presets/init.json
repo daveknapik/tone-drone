@@ -21,27 +21,129 @@
       "sequences": [
         {
           "frequency": 440,
-          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+          "steps": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
         },
         {
           "frequency": 440,
-          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+          "steps": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
         },
         {
           "frequency": 440,
-          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+          "steps": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
         },
         {
           "frequency": 440,
-          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+          "steps": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
         },
         {
           "frequency": 440,
-          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+          "steps": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
         },
         {
           "frequency": 440,
-          "steps": [false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false]
+          "steps": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
         }
       ]
     },
@@ -51,7 +153,7 @@
           "frequency": 666,
           "waveform": "sine",
           "volume": -5,
-          "pan": -0.3,
+          "pan": 0,
           "attack": 0.5,
           "decay": 0.7,
           "sustain": 1,
@@ -61,7 +163,7 @@
           "frequency": 999,
           "waveform": "sine",
           "volume": -5,
-          "pan": 0.3,
+          "pan": 0,
           "attack": 0.5,
           "decay": 0.7,
           "sustain": 1,
