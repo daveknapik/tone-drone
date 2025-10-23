@@ -52,6 +52,7 @@ export const DEFAULT_POLYSYNTH_PARAMS: PolySynthParams = {
   frequency: 666,
   waveform: "sine" as OscillatorType,
   volume: -5,
+  pan: 0,
   attack: 0.5,
   decay: 0.7,
   sustain: 1,

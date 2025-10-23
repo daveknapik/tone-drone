@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "metadata": {
     "id": "factory-the-ending-world",
     "name": "The Ending World",
@@ -51,6 +51,7 @@
           "frequency": 666,
           "waveform": "sine",
           "volume": -5,
+          "pan": -0.3,
           "attack": 0.5,
           "decay": 0.7,
           "sustain": 1,
@@ -60,6 +61,7 @@
           "frequency": 999,
           "waveform": "sine",
           "volume": -5,
+          "pan": 0.3,
           "attack": 0.5,
           "decay": 0.7,
           "sustain": 1,

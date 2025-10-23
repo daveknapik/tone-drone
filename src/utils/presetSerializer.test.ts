@@ -33,6 +33,7 @@ describe("presetSerializer", () => {
           frequency: 666,
           waveform: "sine",
           volume: -5,
+          pan: 0,
           attack: 0.5,
           decay: 0.7,
           sustain: 1,
@@ -42,6 +43,7 @@ describe("presetSerializer", () => {
           frequency: 999,
           waveform: "sine",
           volume: -5,
+          pan: 0,
           attack: 0.5,
           decay: 0.7,
           sustain: 1,
@@ -94,7 +96,7 @@ describe("presetSerializer", () => {
       const name = "Test Preset";
       const preset = createPreset(name, mockPresetState);
 
-      expect(preset.version).toBe(4);
+      expect(preset.version).toBe(5);
       expect(preset.metadata.name).toBe(name);
       expect(preset.metadata.id).toBeTruthy();
       expect(preset.metadata.created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -163,8 +165,8 @@ describe("presetSerializer", () => {
       const serialized = JSON.stringify(v2Preset);
       const deserialized = deserializePreset(serialized);
 
-      // Should be migrated to v4
-      expect(deserialized.version).toBe(4);
+      // Should be migrated to v5
+      expect(deserialized.version).toBe(5);
       // Should have BPM added with default value
       expect(deserialized.state.bpm).toBe(120);
       // Should have second polysynth added

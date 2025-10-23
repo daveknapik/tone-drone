@@ -12,16 +12,18 @@ import { PolySynthHandle, PolySynthParams } from "../types/PolySynthParams";
 
 interface PolysynthProps {
   polySynth: Tone.PolySynth;
+  panner: Tone.Panner;
   keyboardShortcuts: string[];
   initialParams?: PolySynthParams;
   ref?: React.Ref<PolySynthHandle>;
   onParameterChange?: () => void;
 }
 
-function PolySynth({ polySynth, keyboardShortcuts, initialParams, ref, onParameterChange }: PolysynthProps) {
+function PolySynth({ polySynth, panner, keyboardShortcuts, initialParams, ref, onParameterChange }: PolysynthProps) {
   const [frequency, setFrequency] = useState(initialParams?.frequency ?? 666);
   const [waveform, setWaveform] = useState<OscillatorType>(initialParams?.waveform ?? "sine");
   const [volume, setVolume] = useState(initialParams?.volume ?? -5);
+  const [pan, setPan] = useState(initialParams?.pan ?? 0);
   const [attack, setAttack] = useState(initialParams?.attack ?? 0.5);
   const [decay, setDecay] = useState(initialParams?.decay ?? 0.7);
   const [sustain, setSustain] = useState(initialParams?.sustain ?? 1);
@@ -34,6 +36,7 @@ function PolySynth({ polySynth, keyboardShortcuts, initialParams, ref, onParamet
     frequency,
     waveform,
     volume,
+    pan,
     attack,
     decay,
     sustain,
@@ -46,12 +49,13 @@ function PolySynth({ polySynth, keyboardShortcuts, initialParams, ref, onParamet
       frequency,
       waveform,
       volume,
+      pan,
       attack,
       decay,
       sustain,
       release,
     };
-  }, [frequency, waveform, volume, attack, decay, sustain, release]);
+  }, [frequency, waveform, volume, pan, attack, decay, sustain, release]);
 
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
@@ -60,6 +64,7 @@ function PolySynth({ polySynth, keyboardShortcuts, initialParams, ref, onParamet
       setFrequency(params.frequency);
       setWaveform(params.waveform);
       setVolume(params.volume);
+      setPan(params.pan);
       setAttack(params.attack);
       setDecay(params.decay);
       setSustain(params.sustain);
@@ -68,6 +73,7 @@ function PolySynth({ polySynth, keyboardShortcuts, initialParams, ref, onParamet
   }));
 
   polySynth.volume.setTargetAtTime(volume, 0, 0.01);
+  panner.pan.setTargetAtTime(pan, 0, 0.01);
 
   const playNote = (): void => {
     void handleBrowserAudioStart();
@@ -104,6 +110,18 @@ function PolySynth({ polySynth, keyboardShortcuts, initialParams, ref, onParamet
         value={volume}
         handleChange={(e) => {
           setVolume(parseFloat(e.target.value));
+          onParameterChange?.();
+        }}
+      />
+      <Slider
+        inputName="pan"
+        labelText="Pan"
+        min={-1}
+        max={1}
+        step={0.01}
+        value={pan}
+        handleChange={(e) => {
+          setPan(parseFloat(e.target.value));
           onParameterChange?.();
         }}
       />

@@ -5,6 +5,7 @@ export interface PolySynthParams {
   frequency: number;
   waveform: OscillatorType;
   volume: number;
+  pan: number;
   attack: number;
   decay: number;
   sustain: number;
