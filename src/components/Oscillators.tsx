@@ -203,7 +203,7 @@ function Oscillators({
     const oscillator = new Tone.Oscillator(minFreq, "sine");
     const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
-    channel.connect(bus.current);
+    // Connection to bus handled by useConnectChannelsToBus hook
 
     return { oscillator, channel, type: "basic" };
   };
@@ -213,7 +213,7 @@ function Oscillators({
     const panner = new Tone.Panner();
 
     synth.connect(panner);
-    panner.connect(bus.current);
+    // Connection to bus handled by useConnectChannelsToBus hook
 
     return { synth, panner };
   };
