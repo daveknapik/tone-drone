@@ -49,19 +49,16 @@ export function useOscillators(
     };
   }, []);
 
-  // Update on type or count change without disposing reused instances
+  // Update on type change without disposing reused instances unnecessarily
   useEffect(() => {
     // No-op until initial mount completed
     if (!initializedRef.current) return;
 
     const current = oscillatorsRef.current;
 
-    // Handle updates for existing indices and count increase
-    const targetLength = Math.max(
-      current.length,
-      oscillatorCount,
-      types.length
-    );
+    // Handle updates for existing indices and additions
+    // Derive target length from current list and types only (component controls additions)
+    const targetLength = Math.max(current.length, types.length);
     for (let i = 0; i < targetLength; i++) {
       const desiredType = types[i] ?? "basic";
       const existing = current[i];
@@ -80,25 +77,15 @@ export function useOscillators(
       }
     }
 
-    // Handle count decrease after updates
-    if (oscillatorCount < current.length) {
-      for (let i = oscillatorCount; i < current.length; i++) {
-        current[i].oscillator.dispose();
-        current[i].channel.dispose();
-      }
-      current.length = oscillatorCount;
-    }
-
     oscillatorsRef.current = current;
     setOscillators([...current]);
-  }, [oscillatorCount, types]);
+  }, [types]);
 
   // Expose a setter that keeps the ref in sync for external mutations (e.g., addOscillator)
   const setOscillatorsSync: Dispatch<
     SetStateAction<OscillatorWithChannel[]>
   > = (updater) => {
     setOscillators((prev) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const next =
         typeof updater === "function"
           ? (
