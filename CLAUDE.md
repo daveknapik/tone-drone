@@ -251,7 +251,7 @@ test("should do something", async ({ page }) => {
 
 - **Tone.js Integration**: All audio synthesis handled through Tone.js library
 - **Oscillator Types**: Supports both Tone.Oscillator (basic, single voice) and Tone.FatOscillator (fat mode with multiple detuned voices). Type switching properly disposes and recreates oscillator instances while preserving playing state
-- **Fat Oscillator Parameters**: When switching to fat mode, waveform-specific defaults are applied (sine: 3 voices/12¢, sawtooth: 5 voices/30¢, square: 3 voices/22¢, triangle: 3 voices/15¢)
+- **Fat Oscillator Parameters**: Auto-switches between basic (voices=1) and fat (voices>1) modes. When switching to fat mode, detune is automatically set to minimum of 1 cent to prevent silence. Voices slider is always visible (1-10 range). Detune slider is always visible but disabled when voices=1
 - **Step Sequencer**: 16-step sequencer with visual beat indication and real-time step editing
 - **Effects Chain**: Linear effects chain with send control for the main effects bus
 - **Recording**: Built-in recording functionality via `useRecorder` hook

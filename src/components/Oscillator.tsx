@@ -127,7 +127,6 @@ function Oscillator({
       setFrequency(maxFreq);
     }
     // Only respond to boundary changes or external frequency shifts
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [minFreq, maxFreq]);
 
   // Apply channel properties when they change
