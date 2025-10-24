@@ -131,14 +131,14 @@ function Oscillator({
 
   // Apply channel properties when they change
   useEffect(() => {
-    channel?.volume.setTargetAtTime(volume, 0, 0.01);
-    channel?.pan.setTargetAtTime(pan, 0, 0.01);
+    channel?.volume.setTargetAtTime(volume, Tone.now(), 0.01);
+    channel?.pan.setTargetAtTime(pan, Tone.now(), 0.01);
   }, [channel, volume, pan]);
 
   // Apply oscillator properties and ensure correct order on instance changes
   useEffect(() => {
     // Set core properties first
-    oscillator.frequency.setValueAtTime(frequency, 0);
+    oscillator.frequency.setValueAtTime(frequency, Tone.now());
     oscillator.type = waveform as Tone.ToneOscillatorType;
 
     if (oscillator instanceof Tone.FatOscillator) {
