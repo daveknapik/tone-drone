@@ -10,6 +10,7 @@ interface SliderProps {
   value: number;
   logarithmic?: boolean;
   testId?: string;
+  disabled?: boolean;
 }
 
 function Slider({
@@ -22,6 +23,7 @@ function Slider({
   value,
   logarithmic = false,
   testId,
+  disabled = false,
 }: SliderProps) {
   const id = useId();
 
@@ -59,7 +61,11 @@ function Slider({
   const sliderValue = logarithmic ? toLogarithmic(value) : value;
 
   return (
-    <div className="flex space-x-2">
+    <div
+      className={
+        "flex space-x-2 " + (disabled ? "opacity-50 cursor-not-allowed" : "")
+      }
+    >
       <label
         htmlFor={id}
         className={labelText ? "w-18 md:w-24 basis-1/4" : "basis-2/8"}
@@ -77,6 +83,8 @@ function Slider({
         type="range"
         value={sliderValue}
         data-testid={testId}
+        disabled={disabled}
+        aria-disabled={disabled}
       />
       <div className="w-6 md:w-8 basis-1/8">{value}</div>
     </div>

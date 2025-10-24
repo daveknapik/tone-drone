@@ -5,12 +5,17 @@
 */
 
 import * as Tone from "tone";
+import { useEffect } from "react";
 
 export function useConnectChannelsToBus(
   channels: (Tone.Channel | Tone.Panner)[],
   bus: Tone.Channel
 ): void {
-  channels.forEach((channel) => {
-    channel.connect(bus);
-  });
+  useEffect(() => {
+    if (!bus || !channels?.length) return;
+    channels.forEach((channel) => {
+      channel.connect(bus);
+    });
+    // No explicit cleanup needed; channels are disposed elsewhere
+  }, [bus, channels]);
 }

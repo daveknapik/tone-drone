@@ -296,10 +296,10 @@ function Oscillators({
 
             return (
               <Oscillator
+                key={i}
                 channel={oscillator.channel}
                 currentBeat={currentBeat}
                 handleStepClick={handleStepClick}
-                key={i}
                 maxFreq={maxFreq}
                 minFreq={minFreq}
                 oscillator={oscillator.oscillator}
