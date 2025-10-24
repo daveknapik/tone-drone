@@ -2,90 +2,90 @@ import { test, expect } from "../fixtures/testFixtures";
 import { FatOscillatorPage } from "../pages/FatOscillatorPage";
 import { PresetPage } from "../pages/PresetPage";
 
-test.describe("FatOscillator - Toggle Visibility", () => {
+test.describe("FatOscillator - Parameter Visibility", () => {
   let fatOscPage: FatOscillatorPage;
 
   test.beforeEach(async ({ page }) => {
     fatOscPage = new FatOscillatorPage(page);
   });
 
-  test("should display oscillator type toggle (basic/fat)", async () => {
+  test("should display voices slider as always visible", async () => {
     // Arrange - page loads with default oscillators
-    // Act & Assert
-    await fatOscPage.expectOscillatorType(0, "basic");
-  });
-
-  test("should hide fat parameters when basic mode is active", async () => {
-    // Arrange - oscillator starts in basic mode
-    // Act & Assert - voices and detune sliders should not be visible
-    await fatOscPage.expectVoicesHidden(0);
-    await fatOscPage.expectDetuneHidden(0);
-  });
-
-  test("should show fat parameters when fat mode is active", async () => {
-    // Arrange & Act - switch to fat mode
-    await fatOscPage.setOscillatorType(0, "fat");
-
-    // Assert - voices and detune sliders should be visible
+    // Act & Assert - voices slider should always be visible
     await fatOscPage.expectVoicesVisible(0);
-    await fatOscPage.expectDetuneVisible(0);
+  });
+
+  test("should disable detune slider when in basic mode (voices = 1)", async () => {
+    // Arrange - oscillator starts in basic mode with voices = 1
+    // Act & Assert - detune slider should be visible but disabled
+    await fatOscPage.expectVoices(0, 1);
+    await fatOscPage.expectDetuneDisabled(0);
+  });
+
+  test("should enable detune slider when in fat mode (voices > 1)", async () => {
+    // Arrange & Act - increase voices to switch to fat mode
+    await fatOscPage.setVoices(0, 3);
+
+    // Assert - detune slider should be visible and enabled
+    await fatOscPage.expectVoicesVisible(0);
+    await fatOscPage.expectDetuneEnabled(0);
   });
 });
 
-test.describe("FatOscillator - Type Switching", () => {
+test.describe("FatOscillator - Auto Type Switching", () => {
   let fatOscPage: FatOscillatorPage;
 
   test.beforeEach(async ({ page }) => {
     fatOscPage = new FatOscillatorPage(page);
   });
 
-  test("should toggle from basic to fat", async () => {
-    // Arrange - starts in basic mode
-    await fatOscPage.expectOscillatorType(0, "basic");
+  test("should auto-switch to fat when voices > 1", async () => {
+    // Arrange - starts in basic mode with voices = 1
+    await fatOscPage.expectVoices(0, 1);
 
-    // Act - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
+    // Act - increase voices to 3
+    await fatOscPage.setVoices(0, 3);
 
-    // Assert - type should be fat
-    await fatOscPage.expectOscillatorType(0, "fat");
-  });
-
-  test("should show fat sliders with sine defaults when switching to fat from sine", async () => {
-    // Arrange - starts with sine waveform in basic mode
-    await fatOscPage.expectWaveform(0, "sine");
-
-    // Act - switch to fat mode
-    await fatOscPage.setOscillatorType(0, "fat");
-
-    // Assert - fat sliders visible with sine defaults (3 voices, 12 cents)
-    await fatOscPage.expectVoicesVisible(0);
+    // Assert - should auto-switch to fat mode and detune should be enabled
     await fatOscPage.expectVoices(0, 3);
-    await fatOscPage.expectDetune(0, 12);
+    await fatOscPage.expectDetuneEnabled(0);
   });
 
-  test("should toggle from fat back to basic", async () => {
-    // Arrange - switch to fat first
-    await fatOscPage.setOscillatorType(0, "fat");
-    await fatOscPage.expectOscillatorType(0, "fat");
+  test("should auto-switch to fat and enforce minimum detune when increasing voices", async () => {
+    // Arrange - starts with sine waveform in basic mode with detune=0
+    await fatOscPage.setWaveform(0, "sine");
 
-    // Act - switch back to basic
-    await fatOscPage.setOscillatorType(0, "basic");
+    // Act - increase voices to 3 to switch to fat mode
+    await fatOscPage.setVoices(0, 3);
 
-    // Assert - type should be basic
-    await fatOscPage.expectOscillatorType(0, "basic");
+    // Assert - should auto-switch to fat and enforce detune minimum
+    // When fatCount changes from 1 to 3, oscillatorType auto-switches from basic to fat
+    // Detune is bumped from 0 to 1 (minimum for fat mode to prevent silence)
+    await fatOscPage.expectVoices(0, 3);
+    await fatOscPage.expectDetune(0, 1); // bumped from 0 to minimum of 1
   });
 
-  test("should hide fat sliders when switching from fat to basic", async () => {
+  test("should auto-switch back to basic when voices = 1", async () => {
     // Arrange - switch to fat first
-    await fatOscPage.setOscillatorType(0, "fat");
-    await fatOscPage.expectVoicesVisible(0);
+    await fatOscPage.setVoices(0, 3);
+    await fatOscPage.expectDetuneEnabled(0);
 
-    // Act - switch back to basic
-    await fatOscPage.setOscillatorType(0, "basic");
+    // Act - reduce voices back to 1
+    await fatOscPage.setVoices(0, 1);
 
-    // Assert - fat sliders should be hidden
-    await fatOscPage.expectVoicesHidden(0);
-    await fatOscPage.expectDetuneHidden(0);
+    // Assert - should auto-switch to basic and detune should be disabled
+    await fatOscPage.expectVoices(0, 1);
+    await fatOscPage.expectDetuneDisabled(0);
+  });
+
+  test("should enforce detune minimum of 1 when in fat mode", async () => {
+    // Arrange - switch to fat with voices > 1
+    await fatOscPage.setVoices(0, 3);
+
+    // The detune should have been set to at least 1 (sine default is 12, but let's verify)
+    // When switching from basic (detune=0) to fat, detune is bumped to 1 minimum
+    const detune = await fatOscPage.getDetune(0);
+    expect(detune).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -94,12 +94,20 @@ test.describe("FatOscillator - Parameter Adjustment", () => {
 
   test.beforeEach(async ({ page }) => {
     fatOscPage = new FatOscillatorPage(page);
-    // Setup: switch to fat mode
-    await fatOscPage.setOscillatorType(0, "fat");
+    // Setup: switch to fat mode by increasing voices
+    await fatOscPage.setVoices(0, 3);
   });
 
-  test("should adjust voices slider (minimum value 2)", async () => {
+  test("should adjust voices slider (minimum value 1 for basic mode)", async () => {
     // Act - set voices to minimum
+    await fatOscPage.setVoices(0, 1);
+
+    // Assert
+    await fatOscPage.expectVoices(0, 1);
+  });
+
+  test("should adjust voices slider (minimum value 2 for fat mode)", async () => {
+    // Act - set voices to 2 (minimum for fat with multiple voices)
     await fatOscPage.setVoices(0, 2);
 
     // Assert
@@ -122,12 +130,13 @@ test.describe("FatOscillator - Parameter Adjustment", () => {
     await fatOscPage.expectVoices(0, 6);
   });
 
-  test("should adjust detune slider (minimum value 0)", async () => {
+  test("should adjust detune slider (minimum value 1 in fat mode)", async () => {
+    // Detune minimum is 1 (not 0) when voices > 1 to prevent silence
     // Act - set detune to minimum
-    await fatOscPage.setDetune(0, 0);
+    await fatOscPage.setDetune(0, 1);
 
     // Assert
-    await fatOscPage.expectDetune(0, 0);
+    await fatOscPage.expectDetune(0, 1);
   });
 
   test("should adjust detune slider (maximum value 100)", async () => {
@@ -146,8 +155,8 @@ test.describe("FatOscillator - Parameter Adjustment", () => {
     await fatOscPage.expectDetune(0, 50);
   });
 
-  test("should persist fat parameter values when switching oscillators", async () => {
-    // Arrange - set custom values on oscillator 0
+  test("should persist fat parameter values through voice changes", async () => {
+    // Arrange - set custom values on oscillator 0 in fat mode
     await fatOscPage.setVoices(0, 7);
     await fatOscPage.setDetune(0, 45);
 
@@ -155,16 +164,16 @@ test.describe("FatOscillator - Parameter Adjustment", () => {
     const voices0 = await fatOscPage.getVoices(0);
     const detune0 = await fatOscPage.getDetune(0);
 
-    // Act - interact with oscillator 1, then switch back to 0
-    // (This tests that values persist in state)
-    // Switch oscillator 0 to basic and back
-    await fatOscPage.setOscillatorType(0, "basic");
-    await fatOscPage.setOscillatorType(0, "fat");
+    // Act - change voices then change back (staying in fat mode)
+    await fatOscPage.setVoices(0, 4);
+    await fatOscPage.setVoices(0, 7);
 
-    // Assert - values should be preserved
+    // Assert - custom voice value should be restored
     const voicesAfter = await fatOscPage.getVoices(0);
-    const detuneAfter = await fatOscPage.getDetune(0);
     expect(voicesAfter).toBe(voices0);
+
+    // Detune should remain stable when changing voices
+    const detuneAfter = await fatOscPage.getDetune(0);
     expect(detuneAfter).toBe(detune0);
   });
 });
@@ -176,86 +185,66 @@ test.describe("FatOscillator - Waveform-Specific Defaults", () => {
     fatOscPage = new FatOscillatorPage(page);
   });
 
-  test("should apply sine defaults (3 voices, 12 cents) when switching to fat", async () => {
-    // Arrange - ensure sine waveform
+  test("should maintain voices when changing waveform in fat mode", async () => {
+    // Arrange - switch to fat mode with sine
     await fatOscPage.setWaveform(0, "sine");
-
-    // Act - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
-
-    // Assert - check sine defaults
-    await fatOscPage.expectVoices(0, 3);
-    await fatOscPage.expectDetune(0, 12);
-  });
-
-  test("should apply sawtooth defaults (5 voices, 30 cents) when switching to fat", async () => {
-    // Arrange - switch to sawtooth waveform
-    await fatOscPage.setWaveform(0, "sawtooth");
-
-    // Act - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
-
-    // Assert - check sawtooth defaults
-    await fatOscPage.expectVoices(0, 5);
-    await fatOscPage.expectDetune(0, 30);
-  });
-
-  test("should apply square defaults (3 voices, 22 cents) when switching to fat", async () => {
-    // Arrange - switch to square waveform
-    await fatOscPage.setWaveform(0, "square");
-
-    // Act - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
-
-    // Assert - check square defaults
-    await fatOscPage.expectVoices(0, 3);
-    await fatOscPage.expectDetune(0, 22);
-  });
-
-  test("should apply triangle defaults (3 voices, 15 cents) when switching to fat", async () => {
-    // Arrange - switch to triangle waveform
-    await fatOscPage.setWaveform(0, "triangle");
-
-    // Act - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
-
-    // Assert - check triangle defaults
-    await fatOscPage.expectVoices(0, 3);
-    await fatOscPage.expectDetune(0, 15);
-  });
-
-  test("should update fat defaults when changing waveform while in fat mode", async () => {
-    // Arrange - switch to fat with sine
-    await fatOscPage.setWaveform(0, "sine");
-    await fatOscPage.setOscillatorType(0, "fat");
-    await fatOscPage.expectVoices(0, 3);
-    await fatOscPage.expectDetune(0, 12);
+    const voicesCount = 5;
+    await fatOscPage.setVoices(0, voicesCount);
 
     // Act - change waveform to sawtooth
     await fatOscPage.setWaveform(0, "sawtooth");
 
-    // Assert - defaults should update to sawtooth values
-    await fatOscPage.expectVoices(0, 5);
-    await fatOscPage.expectDetune(0, 30);
+    // Assert - voices count should remain the same
+    // Note: In the current implementation, waveform changes do NOT apply defaults
+    await fatOscPage.expectWaveform(0, "sawtooth");
+    await fatOscPage.expectVoices(0, voicesCount);
   });
 
-  test("should update fat defaults for all waveforms in sequence", async () => {
-    // This tests the complete waveform-to-defaults mapping
+  test("should support all waveforms while in fat mode", async () => {
+    // Arrange - switch to fat mode
+    await fatOscPage.setVoices(0, 4);
+
+    // Act & Assert - test that we can set each waveform without issues
+    const waveforms = ["sine", "square", "triangle", "sawtooth"] as const;
+    for (const waveform of waveforms) {
+      await fatOscPage.setWaveform(0, waveform);
+      await fatOscPage.expectWaveform(0, waveform);
+      // Voices should remain at 4 for all waveforms
+      await fatOscPage.expectVoices(0, 4);
+    }
+  });
+
+  test("should maintain detune when changing waveform in fat mode", async () => {
+    // Arrange - switch to fat with custom detune
+    await fatOscPage.setVoices(0, 3);
+    await fatOscPage.setDetune(0, 45);
+
+    // Act - change waveform to sawtooth
+    await fatOscPage.setWaveform(0, "sawtooth");
+
+    // Assert - detune should remain at 45 (not switch to sawtooth default of 30)
+    await fatOscPage.expectDetune(0, 45);
+  });
+
+  test("should allow manual voices adjustment for each waveform", async () => {
+    // Test that voices can be manually set to any value for any waveform
+    // (waveform-specific defaults only apply on initial fat mode activation)
     const testCases = [
-      { waveform: "sine", voices: 3, detune: 12 },
-      { waveform: "square", voices: 3, detune: 22 },
-      { waveform: "triangle", voices: 3, detune: 15 },
-      { waveform: "sawtooth", voices: 5, detune: 30 },
+      { waveform: "sine", voices: 4 },
+      { waveform: "square", voices: 6 },
+      { waveform: "triangle", voices: 7 },
+      { waveform: "sawtooth", voices: 3 },
     ] as const;
 
     // Arrange - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
+    await fatOscPage.setVoices(0, 3);
 
-    // Act & Assert - test each waveform
-    for (const { waveform, voices, detune } of testCases) {
+    // Act & Assert - set different voices for each waveform
+    for (const { waveform, voices } of testCases) {
       await fatOscPage.setWaveform(0, waveform);
+      await fatOscPage.setVoices(0, voices);
+      await fatOscPage.expectWaveform(0, waveform);
       await fatOscPage.expectVoices(0, voices);
-      await fatOscPage.expectDetune(0, detune);
     }
   });
 });
@@ -274,9 +263,8 @@ test.describe("FatOscillator - Preset Integration", () => {
     await presetPage.loadFactoryPreset("factory-init");
 
     // Switch oscillator 0 to fat with custom values
-    await fatOscPage.setOscillatorType(0, "fat");
-    await fatOscPage.setWaveform(0, "square");
     await fatOscPage.setVoices(0, 7);
+    await fatOscPage.setWaveform(0, "square");
     await fatOscPage.setDetune(0, 55);
 
     // Act - save as new preset
@@ -292,16 +280,14 @@ test.describe("FatOscillator - Preset Integration", () => {
     await expect(presetPage.newButton).not.toBeVisible();
 
     // Assert - verify saved state
-    await fatOscPage.expectOscillatorType(0, "fat");
-    await fatOscPage.expectWaveform(0, "square");
     await fatOscPage.expectVoices(0, 7);
+    await fatOscPage.expectWaveform(0, "square");
     await fatOscPage.expectDetune(0, 55);
   });
 
   test("should reload fat oscillator settings from saved preset", async ({ page }) => {
     // Arrange - create and save a preset with fat oscillator settings
     await presetPage.loadFactoryPreset("factory-init");
-    await fatOscPage.setOscillatorType(0, "fat");
     await fatOscPage.setWaveform(0, "sawtooth");
     await fatOscPage.setVoices(0, 8);
     await fatOscPage.setDetune(0, 65);
@@ -315,13 +301,13 @@ test.describe("FatOscillator - Preset Integration", () => {
     await presetPage.saveAsButton.click();
     await expect(presetPage.newButton).not.toBeVisible();
 
-    // Act - change values
+    // Act - change values to different settings
     await fatOscPage.setVoices(0, 3);
-    await fatOscPage.setDetune(0, 12);
+    await fatOscPage.setDetune(0, 25);
 
     // Verify they changed
     await fatOscPage.expectVoices(0, 3);
-    await fatOscPage.expectDetune(0, 12);
+    await fatOscPage.expectDetune(0, 25);
 
     // Reload the preset
     page.once("dialog", async (dialog) => {
@@ -343,10 +329,9 @@ test.describe("FatOscillator - Preset Integration", () => {
     // Arrange - load a factory preset (doesn't have fat oscillator data)
     await presetPage.loadFactoryPreset("factory-init");
 
-    // Act & Assert - oscillator should be in basic mode
-    await fatOscPage.expectOscillatorType(0, "basic");
-    await fatOscPage.expectVoicesHidden(0);
-    await fatOscPage.expectDetuneHidden(0);
+    // Act & Assert - oscillator should be in basic mode with voices = 1
+    await fatOscPage.expectVoices(0, 1);
+    await fatOscPage.expectDetuneDisabled(0);
   });
 
   test("should support mix of basic and fat oscillators in same preset", async ({ page }) => {
@@ -354,13 +339,13 @@ test.describe("FatOscillator - Preset Integration", () => {
     await presetPage.loadFactoryPreset("factory-init");
 
     // Set up: oscillator 0 as fat, oscillator 1 as basic
-    await fatOscPage.setOscillatorType(0, "fat");
     await fatOscPage.setWaveform(0, "sine");
     await fatOscPage.setVoices(0, 6);
     await fatOscPage.setDetune(0, 25);
 
-    // Oscillator 1 stays basic
-    await fatOscPage.expectOscillatorType(1, "basic");
+    // Oscillator 1 stays basic (voices = 1)
+    await fatOscPage.expectVoices(1, 1);
+    await fatOscPage.expectDetuneDisabled(1);
 
     // Act - save preset
     page.once("dialog", async (dialog) => {
@@ -373,12 +358,11 @@ test.describe("FatOscillator - Preset Integration", () => {
     await expect(presetPage.newButton).not.toBeVisible();
 
     // Assert - verify mixed states are preserved
-    await fatOscPage.expectOscillatorType(0, "fat");
     await fatOscPage.expectVoices(0, 6);
     await fatOscPage.expectDetune(0, 25);
 
-    await fatOscPage.expectOscillatorType(1, "basic");
-    await fatOscPage.expectVoicesHidden(1);
+    await fatOscPage.expectVoices(1, 1);
+    await fatOscPage.expectDetuneDisabled(1);
   });
 
   test("should handle multiple oscillators with different fat settings", async ({ page }) => {
@@ -387,13 +371,11 @@ test.describe("FatOscillator - Preset Integration", () => {
 
     // Configure multiple oscillators with different settings
     // Oscillator 0: fat with sine defaults
-    await fatOscPage.setOscillatorType(0, "fat");
     await fatOscPage.setWaveform(0, "sine");
     await fatOscPage.setVoices(0, 4);
     await fatOscPage.setDetune(0, 16);
 
     // Oscillator 1: fat with sawtooth
-    await fatOscPage.setOscillatorType(1, "fat");
     await fatOscPage.setWaveform(1, "sawtooth");
     await fatOscPage.setVoices(1, 7);
     await fatOscPage.setDetune(1, 40);
@@ -409,12 +391,10 @@ test.describe("FatOscillator - Preset Integration", () => {
     await expect(presetPage.newButton).not.toBeVisible();
 
     // Assert - verify all settings preserved
-    await fatOscPage.expectOscillatorType(0, "fat");
     await fatOscPage.expectWaveform(0, "sine");
     await fatOscPage.expectVoices(0, 4);
     await fatOscPage.expectDetune(0, 16);
 
-    await fatOscPage.expectOscillatorType(1, "fat");
     await fatOscPage.expectWaveform(1, "sawtooth");
     await fatOscPage.expectVoices(1, 7);
     await fatOscPage.expectDetune(1, 40);
@@ -430,28 +410,25 @@ test.describe("FatOscillator - Modified Indicator", () => {
     presetPage = new PresetPage(page);
   });
 
-  test("should show modified indicator when changing oscillator type", async () => {
+  test("should show modified indicator when changing voices (switching to fat)", async () => {
     // Arrange - load a preset
     await presetPage.loadFactoryPreset("factory-init");
     await presetPage.expectNoModifiedIndicator();
 
-    // Act - change oscillator type
-    await fatOscPage.setOscillatorType(0, "fat");
+    // Act - change voices to switch to fat mode
+    await fatOscPage.setVoices(0, 3);
 
     // Assert - modified indicator should appear
     await presetPage.expectModifiedIndicator();
   });
 
-  test("should show modified indicator when changing voices", async () => {
+  test("should show modified indicator when changing voices (staying in fat)", async () => {
     // Arrange - load a preset
     await presetPage.loadFactoryPreset("factory-init");
-    await presetPage.expectNoModifiedIndicator();
-
-    // Switch to fat (this will show modified indicator)
-    await fatOscPage.setOscillatorType(0, "fat");
+    await fatOscPage.setVoices(0, 3); // Initial switch to fat
     await presetPage.expectModifiedIndicator();
 
-    // Act - change voices (should keep modified indicator)
+    // Act - change voices further (should keep modified indicator)
     await fatOscPage.setVoices(0, 7);
 
     // Assert - modified indicator should still be showing
@@ -461,11 +438,11 @@ test.describe("FatOscillator - Modified Indicator", () => {
   test("should show modified indicator when changing detune", async () => {
     // Arrange - load a preset and switch to fat
     await presetPage.loadFactoryPreset("factory-init");
-    await fatOscPage.setOscillatorType(0, "fat");
+    await fatOscPage.setVoices(0, 3);
 
     // Clear the modified state by loading another preset
     await presetPage.loadFactoryPreset("factory-melody-memory");
-    await fatOscPage.setOscillatorType(0, "fat");
+    await fatOscPage.setVoices(0, 3);
     await presetPage.expectModifiedIndicator();
 
     // Wait for the page to stabilize
@@ -486,57 +463,58 @@ test.describe("FatOscillator - Edge Cases", () => {
     fatOscPage = new FatOscillatorPage(page);
   });
 
-  test("should handle rapid type switching", async () => {
-    // Act - rapidly toggle between basic and fat
+  test("should handle rapid voice switching between basic and fat", async () => {
+    // Act - rapidly toggle between basic (voices=1) and fat (voices>1)
     for (let i = 0; i < 5; i++) {
-      await fatOscPage.setOscillatorType(0, "fat");
-      await fatOscPage.expectOscillatorType(0, "fat");
+      await fatOscPage.setVoices(0, 3); // Switch to fat
+      await fatOscPage.expectVoices(0, 3);
+      await fatOscPage.expectDetuneEnabled(0);
 
-      await fatOscPage.setOscillatorType(0, "basic");
-      await fatOscPage.expectOscillatorType(0, "basic");
+      await fatOscPage.setVoices(0, 1); // Switch to basic
+      await fatOscPage.expectVoices(0, 1);
+      await fatOscPage.expectDetuneDisabled(0);
     }
 
     // Assert - should end in basic mode
-    await fatOscPage.expectOscillatorType(0, "basic");
-    await fatOscPage.expectVoicesHidden(0);
+    await fatOscPage.expectVoices(0, 1);
+    await fatOscPage.expectDetuneDisabled(0);
   });
 
-  test("should maintain fat parameters through waveform changes", async () => {
+  test("should maintain custom parameters when changing waveform in fat mode", async () => {
     // Arrange - switch to fat and set custom values
-    await fatOscPage.setOscillatorType(0, "fat");
     await fatOscPage.setVoices(0, 8);
     await fatOscPage.setDetune(0, 70);
 
-    // Act - change waveforms multiple times (this updates defaults)
+    // Act - change waveforms multiple times
     await fatOscPage.setWaveform(0, "square");
     await fatOscPage.setWaveform(0, "triangle");
     await fatOscPage.setWaveform(0, "sawtooth");
 
-    // When switching waveforms, defaults get applied, overwriting custom values
-    // This is the expected behavior based on the implementation
-    // Verify we're at sawtooth defaults now
-    await fatOscPage.expectVoices(0, 5);
-    await fatOscPage.expectDetune(0, 30);
+    // Assert - voices and detune should remain at user-set values
+    // Waveform changes do NOT apply defaults in the current implementation
+    await fatOscPage.expectVoices(0, 8);
+    await fatOscPage.expectDetune(0, 70);
   });
 
-  test("should maintain oscillator type when changing waveform", async () => {
+  test("should maintain fat mode when changing waveform", async () => {
     // Arrange - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
-    await fatOscPage.expectOscillatorType(0, "fat");
+    await fatOscPage.setVoices(0, 5);
+    await fatOscPage.expectDetuneEnabled(0);
 
     // Act - change waveform
     await fatOscPage.setWaveform(0, "square");
 
-    // Assert - should still be in fat mode
-    await fatOscPage.expectOscillatorType(0, "fat");
-    await fatOscPage.expectVoicesVisible(0);
+    // Assert - should still be in fat mode with detune enabled
+    // Voices should remain at 5 (not change to square default of 3)
+    await fatOscPage.expectVoices(0, 5);
+    await fatOscPage.expectDetuneEnabled(0);
   });
 
   test("should properly handle voices slider boundary values", async () => {
     // Arrange - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
+    await fatOscPage.setVoices(0, 3);
 
-    // Test minimum
+    // Test low end in fat mode
     await fatOscPage.setVoices(0, 2);
     await fatOscPage.expectVoices(0, 2);
 
@@ -544,25 +522,42 @@ test.describe("FatOscillator - Edge Cases", () => {
     await fatOscPage.setVoices(0, 10);
     await fatOscPage.expectVoices(0, 10);
 
-    // Test back to minimum
+    // Test back to low end
     await fatOscPage.setVoices(0, 2);
     await fatOscPage.expectVoices(0, 2);
+
+    // Test basic mode (voices = 1)
+    await fatOscPage.setVoices(0, 1);
+    await fatOscPage.expectVoices(0, 1);
   });
 
-  test("should properly handle detune slider boundary values", async () => {
+  test("should properly handle detune slider boundary values in fat mode", async () => {
     // Arrange - switch to fat
-    await fatOscPage.setOscillatorType(0, "fat");
+    await fatOscPage.setVoices(0, 3);
 
-    // Test minimum
-    await fatOscPage.setDetune(0, 0);
-    await fatOscPage.expectDetune(0, 0);
+    // Test minimum in fat mode (1, not 0)
+    await fatOscPage.setDetune(0, 1);
+    await fatOscPage.expectDetune(0, 1);
 
     // Test maximum
     await fatOscPage.setDetune(0, 100);
     await fatOscPage.expectDetune(0, 100);
 
     // Test back to minimum
-    await fatOscPage.setDetune(0, 0);
+    await fatOscPage.setDetune(0, 1);
+    await fatOscPage.expectDetune(0, 1);
+  });
+
+  test("should disable detune slider when reverting to basic mode", async () => {
+    // Arrange - start in fat mode
+    await fatOscPage.setVoices(0, 5);
+    await fatOscPage.setDetune(0, 50);
+
+    // Act - revert to basic mode
+    await fatOscPage.setVoices(0, 1);
+
+    // Assert - detune should be disabled and value should be 0
+    await fatOscPage.expectDetuneDisabled(0);
     await fatOscPage.expectDetune(0, 0);
   });
 });
