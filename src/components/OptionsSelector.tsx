@@ -10,6 +10,7 @@ interface OptionsSelectorProps<T extends OptionType> {
   justifyBetween?: boolean;
   options: T[];
   value: string | number;
+  renderLabel?: (option: T) => React.ReactNode;
 }
 
 function OptionsSelector<T extends OptionType>({
@@ -17,6 +18,7 @@ function OptionsSelector<T extends OptionType>({
   justifyBetween = false,
   options,
   value,
+  renderLabel,
 }: OptionsSelectorProps<T>) {
   const id = useId();
 
@@ -46,7 +48,7 @@ function OptionsSelector<T extends OptionType>({
             value={option}
           />
           <label htmlFor={`option-${option}-${id}`}>
-            {buildLabelText(option)}
+            {renderLabel ? renderLabel(option) : buildLabelText(option)}
           </label>
         </div>
       ))}
