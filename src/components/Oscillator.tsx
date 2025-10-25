@@ -156,7 +156,7 @@ function Oscillator({
     if (hasCancelScheduledValues(freqParam)) {
       freqParam.cancelScheduledValues(now);
     }
-    oscillator.frequency.setTargetAtTime(frequency, now, 0.02);
+    oscillator.frequency.setValueAtTime(frequency, now);
     oscillator.type = waveform as Tone.ToneOscillatorType;
 
     if (oscillator instanceof Tone.FatOscillator) {
@@ -204,7 +204,7 @@ function Oscillator({
         if (hasCancelScheduledValues(synthFreq)) {
           synthFreq.cancelScheduledValues(now);
         }
-        synth.frequency.setTargetAtTime(f, now, 0.02); // smooth synth pitch while playing
+        synth.frequency.setValueAtTime(f, now);
         updateSequenceFrequency(sequenceIndex, f);
         onParameterChange?.();
         pendingFreqRef.current = null;
