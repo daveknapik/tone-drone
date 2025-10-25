@@ -29,6 +29,15 @@ interface OscillatorProps {
   onOscillatorTypeChange?: (type: "basic" | "fat") => void;
 }
 
+function hasCancelScheduledValues(
+  x: unknown
+): x is { cancelScheduledValues: (time: number) => void } {
+  return (
+    !!x &&
+    typeof (x as Record<string, unknown>).cancelScheduledValues === "function"
+  );
+}
+
 function Oscillator({
   channel,
   currentBeat,
@@ -124,13 +133,28 @@ function Oscillator({
 
   // Apply channel properties when they change
   useEffect(() => {
-    channel?.volume.setTargetAtTime(volume, Tone.now(), 0.01);
-    channel?.pan.setTargetAtTime(pan, Tone.now(), 0.01);
+    const now = Tone.now();
+    const volParam = (channel as unknown as { volume: unknown }).volume;
+    const panParam = (channel as unknown as { pan: unknown }).pan;
+    if (hasCancelScheduledValues(volParam)) {
+      volParam.cancelScheduledValues(now);
+    }
+    if (hasCancelScheduledValues(panParam)) {
+      panParam.cancelScheduledValues(now);
+    }
+    channel?.volume.setTargetAtTime(volume, now, 0.015);
+    channel?.pan.setTargetAtTime(pan, now, 0.015);
   }, [channel, volume, pan]);
 
   // Apply oscillator properties when instance or params change (no start/stop here)
   useEffect(() => {
-    oscillator.frequency.setValueAtTime(frequency, Tone.now());
+    const now = Tone.now();
+    const freqParam = (oscillator as unknown as { frequency: unknown })
+      .frequency;
+    if (hasCancelScheduledValues(freqParam)) {
+      freqParam.cancelScheduledValues(now);
+    }
+    oscillator.frequency.setTargetAtTime(frequency, now, 0.01);
     oscillator.type = waveform as Tone.ToneOscillatorType;
 
     if (oscillator instanceof Tone.FatOscillator) {
@@ -157,7 +181,12 @@ function Oscillator({
   const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFrequency = parseFloat(e.target.value);
     setFrequency(newFrequency); // sets the frequency on the oscillator
-    synth.frequency.setValueAtTime(newFrequency, 0.1); // sets the frequency on the synth, enabling pitch changes whilst playing
+    const now = Tone.now();
+    const synthFreq = (synth as unknown as { frequency: unknown }).frequency;
+    if (hasCancelScheduledValues(synthFreq)) {
+      synthFreq.cancelScheduledValues(now);
+    }
+    synth.frequency.setTargetAtTime(newFrequency, now, 0.01); // sets the frequency on the synth, enabling pitch changes whilst playing
     updateSequenceFrequency(sequenceIndex, newFrequency); // updates the sequence frequency so future notes in the sequence play at the new frequency
   };
 
