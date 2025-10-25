@@ -41,8 +41,8 @@ export const DEFAULT_SEQUENCE: Sequence = {
 };
 
 export const DEFAULT_OSCILLATORS_STATE: OscillatorsState = {
-  minFreq: 440,
-  maxFreq: 454,
+  minFreq: 30,
+  maxFreq: 1000,
   oscillators: Array.from({ length: 6 }, () => ({
     ...DEFAULT_OSCILLATOR_PARAMS,
   })),

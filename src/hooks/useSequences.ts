@@ -1,6 +1,7 @@
 import { Sequence } from "../types/Sequence";
 
 import { Dispatch, SetStateAction, useState } from "react";
+import { DEFAULT_SEQUENCE } from "../utils/presetDefaults";
 
 export function useSequences(
   sequenceCount: number,
@@ -11,7 +12,7 @@ export function useSequences(
 
     for (let i = 0; i < sequenceCount; i++) {
       const sequence: Sequence = {
-        frequency: 440,
+        frequency: DEFAULT_SEQUENCE.frequency,
         steps: [],
       };
 

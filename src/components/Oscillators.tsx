@@ -22,6 +22,7 @@ import { Sequence } from "../types/Sequence";
 // import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import {
   DEFAULT_OSCILLATOR_PARAMS,
+  DEFAULT_OSCILLATORS_STATE,
   DEFAULT_SEQUENCE,
 } from "../utils/presetDefaults";
 import { useOscillators } from "../hooks/useOscillators";
@@ -54,8 +55,8 @@ function Oscillators({
   onParameterChange,
   bpmControlRef,
 }: OscillatorsProps) {
-  const [minFreq, setMinFreq] = useState(440);
-  const [maxFreq, setMaxFreq] = useState(454);
+  const [minFreq, setMinFreq] = useState(DEFAULT_OSCILLATORS_STATE.minFreq);
+  const [maxFreq, setMaxFreq] = useState(DEFAULT_OSCILLATORS_STATE.maxFreq);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
@@ -204,7 +205,10 @@ function Oscillators({
   );
 
   const createOscillator = (): OscillatorWithChannel => {
-    const oscillator = new Tone.Oscillator(minFreq, "sine");
+    const oscillator = new Tone.Oscillator(
+      DEFAULT_OSCILLATOR_PARAMS.frequency,
+      "sine"
+    );
     const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
     channel.connect(bus.current);

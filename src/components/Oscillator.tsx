@@ -10,6 +10,7 @@ import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { useAudioContext } from "../hooks/useAudioContext";
 import { useKeyDown } from "../hooks/useKeyDown";
 import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
+import { DEFAULT_OSCILLATOR_PARAMS } from "../utils/presetDefaults";
 
 interface OscillatorProps {
   channel: Tone.Channel;
@@ -56,7 +57,7 @@ function Oscillator({
   onOscillatorTypeChange,
 }: OscillatorProps) {
   // Tone.Oscillator properties
-  const [frequency, setFrequency] = useState(minFreq);
+  const [frequency, setFrequency] = useState(DEFAULT_OSCILLATOR_PARAMS.frequency);
   const [waveform, setWaveform] = useState("sine");
 
   // Tone.Channel properties

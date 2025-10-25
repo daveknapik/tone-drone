@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { OscillatorType } from "../types/OscillatorParams";
+import { DEFAULT_OSCILLATOR_PARAMS } from "../utils/presetDefaults";
 
 export function useOscillators(
   oscillatorCount = 6,
@@ -24,8 +25,8 @@ export function useOscillators(
   const createOscillator = (type: OscillatorType): OscillatorWithChannel => {
     const oscillator =
       type === "fat"
-        ? new Tone.FatOscillator(440, "sine")
-        : new Tone.Oscillator(440, "sine");
+        ? new Tone.FatOscillator(DEFAULT_OSCILLATOR_PARAMS.frequency, "sine")
+        : new Tone.Oscillator(DEFAULT_OSCILLATOR_PARAMS.frequency, "sine");
     const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
     if (bus) {

@@ -8,8 +8,8 @@
   },
   "state": {
     "oscillators": {
-      "minFreq": 440,
-      "maxFreq": 454,
+      "minFreq": 30,
+      "maxFreq": 1000,
       "oscillators": [
         {
           "frequency": 440,

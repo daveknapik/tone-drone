@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { useOscillators } from "./useOscillators";
 import * as Tone from "tone";
+import { DEFAULT_OSCILLATOR_PARAMS } from "../utils/presetDefaults";
 
 // Mock Tone.js
 vi.mock("tone", () => {
@@ -61,7 +62,10 @@ describe("useOscillators", () => {
     it("should initialize oscillators with correct defaults", () => {
       renderHook(() => useOscillators(1));
 
-      expect(Tone.Oscillator).toHaveBeenCalledWith(440, "sine");
+      expect(Tone.Oscillator).toHaveBeenCalledWith(
+        DEFAULT_OSCILLATOR_PARAMS.frequency,
+        "sine"
+      );
       expect(Tone.Channel).toHaveBeenCalledWith(-5, 0);
     });
 
