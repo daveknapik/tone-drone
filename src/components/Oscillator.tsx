@@ -71,6 +71,8 @@ function Oscillator({
   const [fatSpread, setFatSpread] = useState(0);
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const freqRafIdRef = useRef<number | null>(null);
+  const pendingFreqRef = useRef<number | null>(null);
 
   // Keep a ref with current state values for imperative access
   const paramsRef = useRef<OscillatorParams>({
@@ -154,7 +156,7 @@ function Oscillator({
     if (hasCancelScheduledValues(freqParam)) {
       freqParam.cancelScheduledValues(now);
     }
-    oscillator.frequency.setTargetAtTime(frequency, now, 0.01);
+    oscillator.frequency.setTargetAtTime(frequency, now, 0.02);
     oscillator.type = waveform as Tone.ToneOscillatorType;
 
     if (oscillator instanceof Tone.FatOscillator) {
@@ -178,16 +180,37 @@ function Oscillator({
     }
   }, [oscillator, isPlaying]);
 
+  // Cleanup any pending rAF on unmount
+  useEffect(() => {
+    return () => {
+      if (freqRafIdRef.current != null) {
+        cancelAnimationFrame(freqRafIdRef.current);
+        freqRafIdRef.current = null;
+      }
+    };
+  }, []);
+
   const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFrequency = parseFloat(e.target.value);
-    setFrequency(newFrequency); // sets the frequency on the oscillator
-    const now = Tone.now();
-    const synthFreq = (synth as unknown as { frequency: unknown }).frequency;
-    if (hasCancelScheduledValues(synthFreq)) {
-      synthFreq.cancelScheduledValues(now);
-    }
-    synth.frequency.setTargetAtTime(newFrequency, now, 0.01); // sets the frequency on the synth, enabling pitch changes whilst playing
-    updateSequenceFrequency(sequenceIndex, newFrequency); // updates the sequence frequency so future notes in the sequence play at the new frequency
+    pendingFreqRef.current = newFrequency;
+
+    freqRafIdRef.current ??= requestAnimationFrame(() => {
+      const f = pendingFreqRef.current;
+      if (typeof f === "number") {
+        setFrequency(f); // update oscillator target
+        const now = Tone.now();
+        const synthFreq = (synth as unknown as { frequency: unknown })
+          .frequency;
+        if (hasCancelScheduledValues(synthFreq)) {
+          synthFreq.cancelScheduledValues(now);
+        }
+        synth.frequency.setTargetAtTime(f, now, 0.02); // smooth synth pitch while playing
+        updateSequenceFrequency(sequenceIndex, f);
+        onParameterChange?.();
+        pendingFreqRef.current = null;
+      }
+      freqRafIdRef.current = null;
+    });
   };
 
   return (
