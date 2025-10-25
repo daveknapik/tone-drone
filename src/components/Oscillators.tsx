@@ -19,7 +19,7 @@ import Oscillator from "./Oscillator";
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { Sequence } from "../types/Sequence";
 
-import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
+// import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import {
   DEFAULT_OSCILLATOR_PARAMS,
   DEFAULT_SEQUENCE,
@@ -59,9 +59,15 @@ function Oscillators({
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
-  const [oscillators, setOscillators, setOscillatorTypes] =
-    useOscillators(oscillatorCount);
-  const [synths, setSynths] = useSynths(oscillatorCount);
+  const [oscillators, setOscillators, setOscillatorTypes] = useOscillators(
+    oscillatorCount,
+    undefined,
+    bus.current ?? undefined
+  );
+  const [synths, setSynths] = useSynths(
+    oscillatorCount,
+    bus.current ?? undefined
+  );
   const [sequences, setSequences] = useSequences(oscillatorCount, stepCount);
 
   const beat = useRef(0);
@@ -99,13 +105,7 @@ function Oscillators({
     },
   }));
 
-  useConnectChannelsToBus(
-    [
-      ...oscillators.map((osc) => osc.channel),
-      ...synths.map((synth) => synth.panner),
-    ],
-    bus.current
-  );
+  // Explicitly connect panners in createSynth; oscillators are wired at creation
 
   const getActiveSteps = useCallback(() => {
     return sequences
@@ -217,7 +217,9 @@ function Oscillators({
     const panner = new Tone.Panner();
 
     synth.connect(panner);
-    panner.connect(bus.current);
+    if (bus.current) {
+      panner.connect(bus.current);
+    }
 
     return { synth, panner };
   };

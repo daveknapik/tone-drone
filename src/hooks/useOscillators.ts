@@ -7,7 +7,8 @@ import { OscillatorType } from "../types/OscillatorParams";
 
 export function useOscillators(
   oscillatorCount = 6,
-  oscillatorTypes?: OscillatorType[]
+  oscillatorTypes?: OscillatorType[],
+  bus?: Tone.Channel
 ): [
   OscillatorWithChannel[],
   Dispatch<SetStateAction<OscillatorWithChannel[]>>,
@@ -27,6 +28,9 @@ export function useOscillators(
         : new Tone.Oscillator(440, "sine");
     const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
+    if (bus) {
+      channel.connect(bus);
+    }
     return { oscillator, channel, type };
   };
 
