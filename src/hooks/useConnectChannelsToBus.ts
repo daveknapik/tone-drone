@@ -13,20 +13,9 @@ export function useConnectChannelsToBus(
 ): void {
   useEffect(() => {
     if (!bus || !channels?.length) return;
-
     channels.forEach((channel) => {
       channel.connect(bus);
     });
-
-    // Cleanup: disconnect channels when they change or component unmounts
-    return () => {
-      channels.forEach((channel) => {
-        try {
-          channel.disconnect(bus);
-        } catch {
-          // Channel may already be disposed, ignore errors
-        }
-      });
-    };
+    // No explicit cleanup needed; channels are disposed elsewhere
   }, [bus, channels]);
 }

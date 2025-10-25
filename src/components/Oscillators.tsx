@@ -28,7 +28,10 @@ import { useOscillators } from "../hooks/useOscillators";
 import { useSequences } from "../hooks/useSequences";
 import { useSynths } from "../hooks/useSynths";
 import { SynthWithPanner } from "../types/SynthWithPanner";
-import { OscillatorsHandle, OscillatorsState } from "../types/OscillatorsParams";
+import {
+  OscillatorsHandle,
+  OscillatorsState,
+} from "../types/OscillatorsParams";
 import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
 import { BpmControlHandle } from "../types/BpmParams";
 
@@ -56,7 +59,8 @@ function Oscillators({
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
 
-  const [oscillators, setOscillators, setOscillatorTypes] = useOscillators(oscillatorCount);
+  const [oscillators, setOscillators, setOscillatorTypes] =
+    useOscillators(oscillatorCount);
   const [synths, setSynths] = useSynths(oscillatorCount);
   const [sequences, setSequences] = useSequences(oscillatorCount, stepCount);
 
@@ -203,7 +207,7 @@ function Oscillators({
     const oscillator = new Tone.Oscillator(minFreq, "sine");
     const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
-    // Connection to bus handled by useConnectChannelsToBus hook
+    channel.connect(bus.current);
 
     return { oscillator, channel, type: "basic" };
   };
@@ -213,7 +217,7 @@ function Oscillators({
     const panner = new Tone.Panner();
 
     synth.connect(panner);
-    // Connection to bus handled by useConnectChannelsToBus hook
+    panner.connect(bus.current);
 
     return { synth, panner };
   };
@@ -283,7 +287,10 @@ function Oscillators({
               maxFreq={maxFreq}
               minFreq={minFreq}
             />
-            <BpmControl onParameterChange={onParameterChange} ref={bpmControlRef} />
+            <BpmControl
+              onParameterChange={onParameterChange}
+              ref={bpmControlRef}
+            />
             <PlayPauseSequencerButton />
           </div>
           <button onClick={addOscillator}>+</button>
