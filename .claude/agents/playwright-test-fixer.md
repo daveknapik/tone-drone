@@ -45,19 +45,16 @@ This project uses:
 ## When You're Invoked
 
 1. **Gather context**:
-
    - Read the failing test file
    - Check recent test run output/errors
    - Review related page objects
 
 2. **Diagnose the issue**:
-
    - Identify if it's timing, selector, browser-specific, or infrastructure
    - Check for race conditions and flaky patterns
    - Look for browser-specific quirks
 
 3. **Fix the problem**:
-
    - Use Playwright's built-in waiting/retry mechanisms
    - Avoid `waitForTimeout` unless absolutely necessary
    - Update page objects if needed

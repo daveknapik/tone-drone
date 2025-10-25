@@ -13,8 +13,24 @@ describe("presetSerializer", () => {
       minFreq: 440,
       maxFreq: 454,
       oscillators: [
-        { frequency: 440, waveform: "sine", volume: -5, pan: 0, oscillatorType: "basic", fatCount: 3, fatSpread: 12 },
-        { frequency: 445, waveform: "square", volume: -10, pan: 0.5, oscillatorType: "basic", fatCount: 3, fatSpread: 22 },
+        {
+          frequency: 440,
+          waveform: "sine",
+          volume: -5,
+          pan: 0,
+          oscillatorType: "basic",
+          fatCount: 3,
+          fatSpread: 12,
+        },
+        {
+          frequency: 445,
+          waveform: "square",
+          volume: -10,
+          pan: 0.5,
+          oscillatorType: "basic",
+          fatCount: 3,
+          fatSpread: 22,
+        },
       ],
       sequences: [
         {
@@ -173,7 +189,9 @@ describe("presetSerializer", () => {
       expect(deserialized.state.polysynths.polysynths).toHaveLength(2);
       expect(deserialized.state.polysynths.polysynths[1].frequency).toBe(999);
       // Other state should be preserved
-      expect(deserialized.state.oscillators).toEqual(mockPresetState.oscillators);
+      expect(deserialized.state.oscillators).toEqual(
+        mockPresetState.oscillators
+      );
       expect(deserialized.state.polysynths.polysynths[0]).toEqual(
         mockPresetState.polysynths.polysynths[0]
       );

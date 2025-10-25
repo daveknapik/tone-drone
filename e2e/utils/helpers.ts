@@ -21,10 +21,7 @@ export async function startAudioContext(page: Page): Promise<void> {
 /**
  * Helper to check if an element is visible
  */
-export async function expectVisible(
-  page: Page,
-  testId: string
-): Promise<void> {
+export async function expectVisible(page: Page, testId: string): Promise<void> {
   await expect(page.getByTestId(testId)).toBeVisible();
 }
 
@@ -53,8 +50,8 @@ export async function setLocalStorageItem(
   key: string,
   value: string
 ): Promise<void> {
-  await page.evaluate(
-    ({ k, v }) => localStorage.setItem(k, v),
-    { k: key, v: value }
-  );
+  await page.evaluate(({ k, v }) => localStorage.setItem(k, v), {
+    k: key,
+    v: value,
+  });
 }

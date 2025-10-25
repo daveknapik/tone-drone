@@ -11,37 +11,187 @@
       "minFreq": 110,
       "maxFreq": 220,
       "oscillators": [
-        { "frequency": 110, "waveform": "square", "volume": -8, "pan": -0.3, "oscillatorType": "basic", "fatCount": 1, "fatSpread": 0 },
-        { "frequency": 146.67, "waveform": "square", "volume": -10, "pan": 0.3, "oscillatorType": "basic", "fatCount": 1, "fatSpread": 0 },
-        { "frequency": 183.33, "waveform": "sawtooth", "volume": -12, "pan": 0, "oscillatorType": "basic", "fatCount": 1, "fatSpread": 0 },
-        { "frequency": 128.33, "waveform": "square", "volume": -12, "pan": -0.5, "oscillatorType": "basic", "fatCount": 1, "fatSpread": 0 },
-        { "frequency": 201.67, "waveform": "triangle", "volume": -15, "pan": 0.5, "oscillatorType": "basic", "fatCount": 1, "fatSpread": 0 },
-        { "frequency": 165, "waveform": "sawtooth", "volume": -18, "pan": 0, "oscillatorType": "basic", "fatCount": 1, "fatSpread": 0 }
+        {
+          "frequency": 110,
+          "waveform": "square",
+          "volume": -8,
+          "pan": -0.3,
+          "oscillatorType": "basic",
+          "fatCount": 1,
+          "fatSpread": 0
+        },
+        {
+          "frequency": 146.67,
+          "waveform": "square",
+          "volume": -10,
+          "pan": 0.3,
+          "oscillatorType": "basic",
+          "fatCount": 1,
+          "fatSpread": 0
+        },
+        {
+          "frequency": 183.33,
+          "waveform": "sawtooth",
+          "volume": -12,
+          "pan": 0,
+          "oscillatorType": "basic",
+          "fatCount": 1,
+          "fatSpread": 0
+        },
+        {
+          "frequency": 128.33,
+          "waveform": "square",
+          "volume": -12,
+          "pan": -0.5,
+          "oscillatorType": "basic",
+          "fatCount": 1,
+          "fatSpread": 0
+        },
+        {
+          "frequency": 201.67,
+          "waveform": "triangle",
+          "volume": -15,
+          "pan": 0.5,
+          "oscillatorType": "basic",
+          "fatCount": 1,
+          "fatSpread": 0
+        },
+        {
+          "frequency": 165,
+          "waveform": "sawtooth",
+          "volume": -18,
+          "pan": 0,
+          "oscillatorType": "basic",
+          "fatCount": 1,
+          "fatSpread": 0
+        }
       ],
       "sequences": [
         {
           "frequency": 110,
-          "steps": [true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false]
+          "steps": [
+            true,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false
+          ]
         },
         {
           "frequency": 146.67,
-          "steps": [false, false, true, false, false, false, true, false, false, false, true, false, false, false, true, false]
+          "steps": [
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            true,
+            false
+          ]
         },
         {
           "frequency": 183.33,
-          "steps": [false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true]
+          "steps": [
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true
+          ]
         },
         {
           "frequency": 128.33,
-          "steps": [true, false, false, true, false, false, true, false, false, true, false, false, true, false, false, false]
+          "steps": [
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false
+          ]
         },
         {
           "frequency": 201.67,
-          "steps": [false, false, false, false, false, false, false, true, false, false, false, false, false, false, false, true]
+          "steps": [
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true
+          ]
         },
         {
           "frequency": 165,
-          "steps": [false, false, true, false, false, false, false, false, false, false, true, false, false, false, false, false]
+          "steps": [
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false
+          ]
         }
       ]
     },

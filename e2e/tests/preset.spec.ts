@@ -61,7 +61,9 @@ test.describe("Preset Management", () => {
     ).not.toBeVisible();
   });
 
-  test("should apply effects bus send value when loading preset", async ({ page }) => {
+  test("should apply effects bus send value when loading preset", async ({
+    page,
+  }) => {
     // Load a preset that has a specific bus send value
     await presetPage.loadFactoryPreset("factory-the-ending-world");
 
@@ -100,7 +102,9 @@ test.describe("Preset Management", () => {
     await presetPage.expectModifiedIndicator();
   });
 
-  test("should show modified indicator when sequence steps change", async ({ page }) => {
+  test("should show modified indicator when sequence steps change", async ({
+    page,
+  }) => {
     // Load a preset
     await presetPage.loadFactoryPreset("factory-init");
 
@@ -117,7 +121,9 @@ test.describe("Preset Management", () => {
     await presetPage.expectModifiedIndicator();
   });
 
-  test("should show modified indicator when effects parameters change", async ({ page }) => {
+  test("should show modified indicator when effects parameters change", async ({
+    page,
+  }) => {
     // Load a preset
     await presetPage.loadFactoryPreset("factory-init");
 
@@ -176,7 +182,9 @@ test.describe("Preset Management", () => {
 
     // Reload the preset
     await presetPage.openPresetMenu();
-    const presetItem = page.getByTestId(/^preset-user-/).filter({ hasText: "Test BPM Preset" });
+    const presetItem = page
+      .getByTestId(/^preset-user-/)
+      .filter({ hasText: "Test BPM Preset" });
     await presetItem.click();
 
     // Verify BPM is restored to 180 (using Playwright's built-in auto-waiting)
@@ -224,7 +232,9 @@ test.describe("Preset Share", () => {
     await presetPage.shareCurrentPreset();
 
     // Verify share modal is open by checking for the copy button
-    await expect(page.getByRole("button", { name: /copy url to clipboard/i })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /copy url to clipboard/i })
+    ).toBeVisible();
   });
 
   test("should generate shareable URL", async ({ page }) => {
@@ -245,7 +255,10 @@ test.describe("Preset Share", () => {
     expect(shareUrl).toContain("tone-drone");
   });
 
-  test("should preserve BPM when sharing via URL", async ({ page, context }) => {
+  test("should preserve BPM when sharing via URL", async ({
+    page,
+    context,
+  }) => {
     // Load a preset
     await presetPage.loadFactoryPreset("factory-init");
 

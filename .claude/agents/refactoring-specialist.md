@@ -181,12 +181,14 @@ grep -r "ExactName" "*.test.ts*"
 ### 1. Analyze Phase
 
 **Understand the current state**:
+
 - What needs to be refactored and why?
 - What are all the usages?
 - What are the dependencies?
 - Are there tests covering this code?
 
 **Use tools to investigate**:
+
 - Grep for all occurrences
 - Read the relevant files
 - Check type definitions
@@ -195,12 +197,14 @@ grep -r "ExactName" "*.test.ts*"
 ### 2. Plan Phase
 
 **Create a refactoring plan**:
+
 - List all files that need changes
 - Identify the sequence of changes
 - Note any risks or complexities
 - Decide on systematic approach
 
 **Consider**:
+
 - Can this be done in smaller steps?
 - Should tests be updated first/during/after?
 - Are there any breaking changes to avoid?
@@ -209,12 +213,14 @@ grep -r "ExactName" "*.test.ts*"
 ### 3. Execute Phase
 
 **Make changes systematically**:
+
 - Work through the plan methodically
 - Use `replace_all` in Edit tool for consistent renames
 - Update one type of change at a time (e.g., all imports first)
 - Keep changes atomic and logical
 
 **Be thorough**:
+
 - Don't miss any usages
 - Update imports, exports, types, comments
 - Fix any TypeScript errors immediately
@@ -223,6 +229,7 @@ grep -r "ExactName" "*.test.ts*"
 ### 4. Verify Phase
 
 **Ensure nothing broke**:
+
 - Run TypeScript compiler (`npm run typecheck`)
 - Run linter (`npm run lint`)
 - Run unit tests (`npm run test:run`)
@@ -230,6 +237,7 @@ grep -r "ExactName" "*.test.ts*"
 - Check for console errors/warnings
 
 **If tests fail**:
+
 - Determine if it's a real behavior change (bad!)
 - Or just test updates needed (expected)
 - Fix issues before proceeding

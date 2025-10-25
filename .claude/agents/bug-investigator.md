@@ -55,32 +55,27 @@ You are an expert debugger specializing in root cause analysis for complex issue
 ### Common Bug Patterns in This Project
 
 1. **Ref timing issues**:
-
    - Refs may be null when presets load from URL
    - BPM control ref needs special retry logic
    - Solution: Check for null, add retry logic, or wait for refs
 
 2. **Parameter update propagation**:
-
    - `onParameterChange` callback chain must be connected
    - Missing callback means modified indicator won't update
    - Check entire chain from effect → component → DroneSynth → PresetManager
 
 3. **Imperative handle issues**:
-
    - `getParams()` must return current state, not stale values
    - Need `paramsRef` pattern to avoid stale closures
    - `setParams()` must update both state and Tone.js objects
 
 4. **Preset system bugs**:
-
    - Serialization/deserialization mismatches
    - Missing validation causes silent failures
    - URL encoding issues (base64, compression)
    - Migration logic not handling old presets
 
 5. **Audio issues**:
-
    - Audio context not initialized (needs user interaction)
    - Signal parameters need `.value`, regular params don't
    - Transport BPM changes not propagating

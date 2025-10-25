@@ -29,7 +29,10 @@ export class FatOscillatorPage extends BasePage {
     // Waveform selector - radio buttons within the oscillator section
     // The waveform options come first
     const section = this.getOscillatorSection(index);
-    return section.getByRole("radio").and(section.locator("input[type='radio']")).first();
+    return section
+      .getByRole("radio")
+      .and(section.locator("input[type='radio']"))
+      .first();
   }
 
   getVoicesSlider(index: number): Locator {
@@ -46,14 +49,22 @@ export class FatOscillatorPage extends BasePage {
     return section.getByLabel(/detune/i);
   }
 
-  getWaveformSelector(index: number, waveform: "sine" | "square" | "triangle" | "sawtooth"): Locator {
+  getWaveformSelector(
+    index: number,
+    waveform: "sine" | "square" | "triangle" | "sawtooth"
+  ): Locator {
     // Get the specific radio button for the waveform
     const section = this.getOscillatorSection(index);
-    return section.getByRole("radio", { name: new RegExp(`^${waveform}$`, "i") });
+    return section.getByRole("radio", {
+      name: new RegExp(`^${waveform}$`, "i"),
+    });
   }
 
   // Actions
-  async setWaveform(index: number, waveform: "sine" | "square" | "triangle" | "sawtooth"): Promise<void> {
+  async setWaveform(
+    index: number,
+    waveform: "sine" | "square" | "triangle" | "sawtooth"
+  ): Promise<void> {
     const radio = this.getWaveformSelector(index, waveform);
     await radio.click();
     // Wait for the radio to be checked
@@ -79,13 +90,19 @@ export class FatOscillatorPage extends BasePage {
    * Assert oscillator type based on voices value
    * Voices = 1 → "basic", Voices > 1 → "fat"
    */
-  async expectOscillatorType(index: number, type: "basic" | "fat"): Promise<void> {
+  async expectOscillatorType(
+    index: number,
+    type: "basic" | "fat"
+  ): Promise<void> {
     const voices = await this.getVoices(index);
     const expectedVoices = type === "basic" ? 1 : voices > 1 ? voices : 2;
     await this.expectVoices(index, expectedVoices);
   }
 
-  async expectWaveform(index: number, waveform: "sine" | "square" | "triangle" | "sawtooth"): Promise<void> {
+  async expectWaveform(
+    index: number,
+    waveform: "sine" | "square" | "triangle" | "sawtooth"
+  ): Promise<void> {
     const radio = this.getWaveformSelector(index, waveform);
     await expect(radio).toBeChecked();
   }

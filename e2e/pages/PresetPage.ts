@@ -12,7 +12,11 @@ export class PresetPage extends BasePage {
   // Locators - Mix of semantic and data-testid
   get presetButton() {
     // Button with text "Presets" or preset name, has aria-haspopup
-    return this.page.getByRole("button", { expanded: false }).or(this.page.getByRole("button", { expanded: true })).filter({ hasText: /preset|▾/i }).first();
+    return this.page
+      .getByRole("button", { expanded: false })
+      .or(this.page.getByRole("button", { expanded: true }))
+      .filter({ hasText: /preset|▾/i })
+      .first();
   }
 
   get newButton() {

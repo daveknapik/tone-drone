@@ -120,9 +120,21 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
         <Recorder recorder={recorder} />
 
         <Effects>
-          <AutoFilter filter={beforeFilter} ref={autoFilterRef} onParameterChange={onParameterChange} />
-          <BitCrusher bitCrusher={bitCrusher} ref={bitCrusherRef} onParameterChange={onParameterChange} />
-          <Chebyshev chebyshev={chebyshev} ref={chebyshevRef} onParameterChange={onParameterChange} />
+          <AutoFilter
+            filter={beforeFilter}
+            ref={autoFilterRef}
+            onParameterChange={onParameterChange}
+          />
+          <BitCrusher
+            bitCrusher={bitCrusher}
+            ref={bitCrusherRef}
+            onParameterChange={onParameterChange}
+          />
+          <Chebyshev
+            chebyshev={chebyshev}
+            ref={chebyshevRef}
+            onParameterChange={onParameterChange}
+          />
           <Delay
             delay={microlooper}
             label="Microlooper"
@@ -131,12 +143,33 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             ref={microlooperRef}
             onParameterChange={onParameterChange}
           />
-          <Filter filter={afterFilter} ref={afterFilterRef} onParameterChange={onParameterChange} />
-          <Delay delay={delay} ref={delayRef} onParameterChange={onParameterChange} />
-          <EffectsBusSendControl bus={mainAudioEffectsBus} ref={effectsBusSendRef} onParameterChange={onParameterChange} />
+          <Filter
+            filter={afterFilter}
+            ref={afterFilterRef}
+            onParameterChange={onParameterChange}
+          />
+          <Delay
+            delay={delay}
+            ref={delayRef}
+            onParameterChange={onParameterChange}
+          />
+          <EffectsBusSendControl
+            bus={mainAudioEffectsBus}
+            ref={effectsBusSendRef}
+            onParameterChange={onParameterChange}
+          />
         </Effects>
-        <PolySynths polysynths={polysynths} ref={polysynthsRef} onParameterChange={onParameterChange} />
-        <Oscillators bus={mainAudioEffectsBus} ref={oscillatorsRef} onParameterChange={onParameterChange} bpmControlRef={bpmControlRef} />
+        <PolySynths
+          polysynths={polysynths}
+          ref={polysynthsRef}
+          onParameterChange={onParameterChange}
+        />
+        <Oscillators
+          bus={mainAudioEffectsBus}
+          ref={oscillatorsRef}
+          onParameterChange={onParameterChange}
+          bpmControlRef={bpmControlRef}
+        />
       </div>
     </div>
   );

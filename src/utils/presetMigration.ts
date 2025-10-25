@@ -15,7 +15,11 @@ export function migratePreset(preset: Preset): Preset {
   let migrated = { ...preset };
 
   // Run migrations sequentially from preset version to current
-  for (let version = preset.version; version < CURRENT_PRESET_VERSION; version++) {
+  for (
+    let version = preset.version;
+    version < CURRENT_PRESET_VERSION;
+    version++
+  ) {
     migrated = runMigration(migrated, version);
   }
 
@@ -85,9 +89,10 @@ function migrateV3ToV4(preset: Preset): Preset {
   const currentPolysynths = preset.state.polysynths?.polysynths ?? [];
 
   // If there's only 1 polysynth, add a second one
-  const updatedPolysynths = currentPolysynths.length === 1
-    ? [...currentPolysynths, DEFAULT_POLYSYNTHS_STATE.polysynths[1]]
-    : currentPolysynths;
+  const updatedPolysynths =
+    currentPolysynths.length === 1
+      ? [...currentPolysynths, DEFAULT_POLYSYNTHS_STATE.polysynths[1]]
+      : currentPolysynths;
 
   return {
     ...preset,

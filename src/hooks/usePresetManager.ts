@@ -112,7 +112,9 @@ export function usePresetManager(refs: PresetComponentRefs) {
       !afterFilterParams ||
       !delayParams
     ) {
-      throw new Error("Cannot capture state: some component refs are not available");
+      throw new Error(
+        "Cannot capture state: some component refs are not available"
+      );
     }
 
     return {

@@ -10,7 +10,10 @@ export function encodePresetToUrl(preset: Preset): string {
   // Use btoa for base64 encoding in browser
   const base64 = btoa(json);
   // Convert to URL-safe base64
-  const urlSafe = base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  const urlSafe = base64
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
   return urlSafe;
 }
 

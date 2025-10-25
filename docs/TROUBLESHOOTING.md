@@ -20,13 +20,11 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Audio Context Not Started**
-
    - **Cause**: Browsers require user interaction before audio can play
    - **Solution**: Click anywhere on the page to initialize audio
    - **Check**: Look for any "Click to Start Audio" messages
 
 2. **System Volume/Mute**
-
    - **Cause**: System or browser audio is muted
    - **Solution**:
      - Check system volume settings
@@ -34,7 +32,6 @@ Common issues and solutions for Tone Drone users.
      - Check that your audio output device is working
 
 3. **All Oscillators Muted**
-
    - **Cause**: All oscillators have been toggled off or have volume at minimum
    - **Solution**:
      - Press Q, W, A, S, Z, X to unmute oscillators
@@ -42,7 +39,6 @@ Common issues and solutions for Tone Drone users.
      - Expand the Oscillators section to see their states
 
 4. **Effects Bus Send Too Low**
-
    - **Cause**: Effects bus send is set to -80 dB or very low, routing minimal/no audio to output
    - **Solution**: Check Effects Bus Send slider is set to at least -40 dB (default is -15 dB)
 
@@ -57,7 +53,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **CPU Overload**
-
    - **Cause**: Too much processing for your device
    - **Solution**:
      - Close other applications
@@ -66,7 +61,6 @@ Common issues and solutions for Tone Drone users.
      - Lower browser zoom level
 
 2. **Excessive Gain**
-
    - **Cause**: Multiple oscillators at full volume with high feedback effects
    - **Solution**:
      - Lower individual oscillator volumes (-5 dB is default)
@@ -87,7 +81,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Browser Audio Latency**
-
    - **Cause**: Browser's default audio buffer size
    - **Solution**:
      - Use Chrome or Edge (generally lower latency)
@@ -105,12 +98,10 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Browser Tab Throttling**
-
    - **Cause**: Browser throttles inactive tabs to save CPU
    - **Solution**: Keep the Tone Drone tab active and visible
 
 2. **Power Saving Mode**
-
    - **Cause**: Device enters power saving mode
    - **Solution**:
      - Plug in your device
@@ -133,7 +124,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **High CPU Usage**
-
    - **Check**: Open browser dev tools (F12) → Performance tab
    - **Solution**:
      - Reduce active oscillators
@@ -141,7 +131,6 @@ Common issues and solutions for Tone Drone users.
      - Close other applications
 
 2. **Browser Extensions**
-
    - **Cause**: Extensions interfering with performance
    - **Solution**: Try in incognito/private mode
 
@@ -156,7 +145,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Too Many Audio Processes**
-
    - **Solution**:
      - Reduce number of oscillators
      - Use fewer effects
@@ -230,7 +218,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **localStorage Blocked**
-
    - **Cause**: Browser privacy settings blocking localStorage
    - **Solution**: Allow localStorage for this site
 
@@ -245,12 +232,10 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Browser Zoom**
-
    - **Cause**: Browser zoom set too high or low
    - **Solution**: Reset zoom to 100% (Cmd/Ctrl + 0)
 
 2. **Window Too Small**
-
    - **Cause**: Browser window is too narrow
    - **Solution**: Expand window or switch to mobile layout
 
@@ -265,7 +250,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **React State Issue**
-
    - **Solution**: Refresh the page
    - **Prevention**: Report this bug if it persists
 
@@ -282,11 +266,9 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Audio Context Not Started**
-
    - **Solution**: Ensure audio is playing before recording
 
 2. **Browser Permissions**
-
    - **Solution**: Grant audio recording permission when prompted
 
 3. **Unsupported Browser**
@@ -300,7 +282,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Recording Format**
-
    - **Note**: Recordings are exported as WAV (uncompressed)
    - **Expected**: Large file sizes for long recordings
 
@@ -315,7 +296,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Browser Download Settings**
-
    - **Solution**: Check browser download permissions
    - **Check**: Downloads folder for existing file
 
@@ -330,7 +310,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Node Version**
-
    - **Check**: `node --version` (should be v18+)
    - **Solution**: Update Node.js
 
@@ -343,7 +322,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Port Already in Use**
-
    - **Symptom**: Error about port 5173 being in use
    - **Solution**: Kill the process using that port or change the port in vite.config.ts
 
@@ -355,7 +333,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **TypeScript Errors**
-
    - **Solution**: Run `npm run lint` to see all errors
    - **Fix**: Address type errors before building
 
@@ -367,7 +344,6 @@ Common issues and solutions for Tone Drone users.
 **Causes & Solutions**:
 
 1. **Missing Test Setup**
-
    - **Solution**: Ensure `src/test/setup.ts` exists
 
 2. **Tone.js Mock Issues**
@@ -378,20 +354,17 @@ Common issues and solutions for Tone Drone users.
 If your issue isn't listed here:
 
 1. **Check the Browser Console**
-
    - Open DevTools (F12)
    - Look for error messages in the Console tab
    - Note the error message and stack trace
 
 2. **Try Basic Troubleshooting**
-
    - Hard refresh the page (Cmd/Ctrl + Shift + R)
    - Clear browser cache
    - Try a different browser
    - Try incognito/private mode
 
 3. **Report the Issue**
-
    - Open an issue on GitHub
    - Include:
      - Browser and version

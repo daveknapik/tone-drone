@@ -14,7 +14,15 @@ describe("presetUrl", () => {
       minFreq: 440,
       maxFreq: 454,
       oscillators: [
-        { frequency: 440, waveform: "sine", volume: -5, pan: 0, oscillatorType: "basic", fatCount: 3, fatSpread: 12 },
+        {
+          frequency: 440,
+          waveform: "sine",
+          volume: -5,
+          pan: 0,
+          oscillatorType: "basic",
+          fatCount: 3,
+          fatSpread: 12,
+        },
       ],
       sequences: [
         {

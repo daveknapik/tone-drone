@@ -19,9 +19,18 @@ interface PolysynthProps {
   onParameterChange?: () => void;
 }
 
-function PolySynth({ polySynth, panner, keyboardShortcuts, initialParams, ref, onParameterChange }: PolysynthProps) {
+function PolySynth({
+  polySynth,
+  panner,
+  keyboardShortcuts,
+  initialParams,
+  ref,
+  onParameterChange,
+}: PolysynthProps) {
   const [frequency, setFrequency] = useState(initialParams?.frequency ?? 666);
-  const [waveform, setWaveform] = useState<OscillatorType>(initialParams?.waveform ?? "sine");
+  const [waveform, setWaveform] = useState<OscillatorType>(
+    initialParams?.waveform ?? "sine"
+  );
   const [volume, setVolume] = useState(initialParams?.volume ?? -5);
   const [pan, setPan] = useState(initialParams?.pan ?? 0);
   const [attack, setAttack] = useState(initialParams?.attack ?? 0.5);

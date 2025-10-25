@@ -51,7 +51,9 @@ test.describe("Theme Toggle", () => {
     // Instead, we rely on element-based waiting which is more reliable
 
     // Wait for the theme toggle button to be ready
-    await page.getByRole("button", { name: /theme:/i }).waitFor({ state: "visible" });
+    await page
+      .getByRole("button", { name: /theme:/i })
+      .waitFor({ state: "visible" });
 
     // Theme should still be dark
     themePage = new ThemePage(page); // Reinitialize after reload
@@ -66,8 +68,8 @@ test.describe("Theme Toggle", () => {
     await button.waitFor({ state: "visible" });
 
     // The button should have dark mode border color (sky-300)
-    const borderColor = await button.evaluate((el) =>
-      window.getComputedStyle(el).borderColor
+    const borderColor = await button.evaluate(
+      (el) => window.getComputedStyle(el).borderColor
     );
 
     // Sky-300 is the dark mode color

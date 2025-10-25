@@ -258,7 +258,9 @@ test.describe("FatOscillator - Preset Integration", () => {
     presetPage = new PresetPage(page);
   });
 
-  test("should save and load fat oscillator settings in preset", async ({ page }) => {
+  test("should save and load fat oscillator settings in preset", async ({
+    page,
+  }) => {
     // Arrange - load a factory preset to have a starting state
     await presetPage.loadFactoryPreset("factory-init");
 
@@ -285,7 +287,9 @@ test.describe("FatOscillator - Preset Integration", () => {
     await fatOscPage.expectDetune(0, 55);
   });
 
-  test("should reload fat oscillator settings from saved preset", async ({ page }) => {
+  test("should reload fat oscillator settings from saved preset", async ({
+    page,
+  }) => {
     // Arrange - create and save a preset with fat oscillator settings
     await presetPage.loadFactoryPreset("factory-init");
     await fatOscPage.setWaveform(0, "sawtooth");
@@ -317,7 +321,9 @@ test.describe("FatOscillator - Preset Integration", () => {
     });
 
     await presetPage.openPresetMenu();
-    const presetItem = page.getByTestId(/^preset-user-/).filter({ hasText: "Fat Osc Reload Test" });
+    const presetItem = page
+      .getByTestId(/^preset-user-/)
+      .filter({ hasText: "Fat Osc Reload Test" });
     await presetItem.click();
 
     // Assert - original values should be restored
@@ -334,7 +340,9 @@ test.describe("FatOscillator - Preset Integration", () => {
     await fatOscPage.expectDetuneDisabled(0);
   });
 
-  test("should support mix of basic and fat oscillators in same preset", async ({ page }) => {
+  test("should support mix of basic and fat oscillators in same preset", async ({
+    page,
+  }) => {
     // Arrange - load factory preset
     await presetPage.loadFactoryPreset("factory-init");
 
@@ -365,7 +373,9 @@ test.describe("FatOscillator - Preset Integration", () => {
     await fatOscPage.expectDetuneDisabled(1);
   });
 
-  test("should handle multiple oscillators with different fat settings", async ({ page }) => {
+  test("should handle multiple oscillators with different fat settings", async ({
+    page,
+  }) => {
     // Arrange - load factory preset
     await presetPage.loadFactoryPreset("factory-init");
 

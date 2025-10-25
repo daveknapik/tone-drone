@@ -8,7 +8,13 @@ interface StepProps {
   stepIndex: number;
 }
 
-function Step({ handleClick, isCurrentBeat, step, oscIndex, stepIndex }: StepProps) {
+function Step({
+  handleClick,
+  isCurrentBeat,
+  step,
+  oscIndex,
+  stepIndex,
+}: StepProps) {
   return (
     <div>
       <button

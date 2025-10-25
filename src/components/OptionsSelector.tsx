@@ -3,7 +3,11 @@ import { clsx } from "clsx";
 import { useId } from "react";
 import { OscillatorType as OscTypeEnum } from "../types/OscillatorParams";
 
-type OptionType = OscillatorType | BiquadFilterType | Tone.FilterRollOff | OscTypeEnum;
+type OptionType =
+  | OscillatorType
+  | BiquadFilterType
+  | Tone.FilterRollOff
+  | OscTypeEnum;
 
 interface OptionsSelectorProps<T extends OptionType> {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;

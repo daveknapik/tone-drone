@@ -82,6 +82,7 @@ export function useSomeEffect() {
 ```
 
 Notes:
+
 - Effects are created once in the `useRef` initializer
 - **No disposal cleanup** - effects persist for app lifetime
 - **Why this works**: This is a single-page app where the main `DroneSynth` component never unmounts
@@ -91,6 +92,7 @@ Notes:
   ```
 
 **IMPORTANT**: If you add routes, modals, or conditionally rendered audio components in the future, you MUST add disposal:
+
 ```typescript
 useEffect(() => {
   return () => {
@@ -98,10 +100,12 @@ useEffect(() => {
   };
 }, []);
 ```
+
 This prevents memory leaks when components unmount. The ref vs state choice doesn't matter - what matters is whether the component can unmount.
 
 **2. Imperative Handle Pattern**:
 Effects expose controls via `useImperativeHandle` for preset management:
+
 ```typescript
 export interface SomeEffectHandle {
   getParams: () => SomeEffectParams;
@@ -109,17 +113,20 @@ export interface SomeEffectHandle {
 }
 
 useImperativeHandle(ref, () => ({
-  getParams: () => ({ /* current values */ }),
+  getParams: () => ({
+    /* current values */
+  }),
   applyParams: (params) => {
     if (effect.current) {
       effect.current.someParam.value = params.someValue;
     }
-  }
+  },
 }));
 ```
 
 **3. Connection Pattern**:
 Effects are connected through the audio graph via component integration:
+
 ```typescript
 // Effects connect to the effects bus
 // Oscillators connect to channels, which connect to the bus
@@ -130,6 +137,7 @@ Effects are connected through the audio graph via component integration:
 
 **4. Parameter Updates**:
 Use `.value` for Tone.Signal parameters, direct assignment for regular params:
+
 ```typescript
 // ✅ CORRECT
 oscillator.frequency.value = 440;
@@ -191,6 +199,7 @@ oscillator.frequency = 440; // Won't work - frequency is a Signal
 ## Parameter Ranges and Audio Values
 
 Common parameter ranges used in this project:
+
 - **Frequency**: 20-20000 Hz (human hearing range)
 - **Delay time**: 0-10 seconds (maxDelay: 10 in this app)
 - **Feedback**: 0-1.0 (1.0 allows infinite looping/freeze delay)
@@ -202,6 +211,7 @@ Common parameter ranges used in this project:
 ## Output Format
 
 For each audio feature you implement:
+
 - **Files modified**: List hooks, components, types changed
 - **Signal flow**: Explain how audio routes through nodes
 - **Preset integration**: Confirm getParams/applyParams work

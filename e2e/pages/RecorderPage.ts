@@ -26,7 +26,10 @@ export class RecorderPage extends BasePage {
     if (!isRecording) {
       await this.recorderToggle.click();
       // Wait for aria-label to change to "Stop Recording"
-      await expect(this.recorderToggle).toHaveAttribute("aria-label", "Stop Recording");
+      await expect(this.recorderToggle).toHaveAttribute(
+        "aria-label",
+        "Stop Recording"
+      );
     }
   }
 
@@ -35,7 +38,10 @@ export class RecorderPage extends BasePage {
     if (isRecording) {
       await this.recorderToggle.click();
       // Wait for aria-label to change to "Start Recording" and download link to appear
-      await expect(this.recorderToggle).toHaveAttribute("aria-label", "Start Recording");
+      await expect(this.recorderToggle).toHaveAttribute(
+        "aria-label",
+        "Start Recording"
+      );
       await expect(this.downloadLink).toBeVisible();
     }
   }
@@ -45,7 +51,10 @@ export class RecorderPage extends BasePage {
     await this.recorderToggle.click();
     // Wait for aria-label to change
     const expectedLabel = wasRecording ? "Start Recording" : "Stop Recording";
-    await expect(this.recorderToggle).toHaveAttribute("aria-label", expectedLabel);
+    await expect(this.recorderToggle).toHaveAttribute(
+      "aria-label",
+      expectedLabel
+    );
   }
 
   async recordFor(durationMs: number): Promise<void> {
@@ -57,11 +66,17 @@ export class RecorderPage extends BasePage {
 
   // Assertions
   async expectRecording(): Promise<void> {
-    await expect(this.recorderToggle).toHaveAttribute("aria-label", "Stop Recording");
+    await expect(this.recorderToggle).toHaveAttribute(
+      "aria-label",
+      "Stop Recording"
+    );
   }
 
   async expectNotRecording(): Promise<void> {
-    await expect(this.recorderToggle).toHaveAttribute("aria-label", "Start Recording");
+    await expect(this.recorderToggle).toHaveAttribute(
+      "aria-label",
+      "Start Recording"
+    );
   }
 
   async expectDownloadAvailable(): Promise<void> {

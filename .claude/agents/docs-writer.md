@@ -123,21 +123,28 @@ Include:
 ## Markdown Best Practices
 
 ### Headers
+
 ```markdown
 # Top level (rarely used in CLAUDE.md)
+
 ## Major sections
+
 ### Subsections
+
 #### Minor subsections
 ```
 
 ### Code Blocks
+
 Always specify language for syntax highlighting:
+
 ```typescript
 // Example code
 const example = "code";
 ```
 
 ### Lists
+
 ```markdown
 - Unordered lists for items without sequence
 - Use consistent bullet style
@@ -147,13 +154,15 @@ const example = "code";
 ```
 
 ### Emphasis
+
 ```markdown
 **Bold** for important terms, headers
-*Italic* for emphasis (use sparingly)
+_Italic_ for emphasis (use sparingly)
 `Code` for inline code, filenames, commands
 ```
 
 ### Examples with Good/Bad Patterns
+
 ```typescript
 // ✅ GOOD: Clear description
 const good = "example";
@@ -172,6 +181,7 @@ Before updating documentation:
 4. **Review recent changes**: See if anything else needs updating
 
 Use these tools:
+
 - **Read**: Read CLAUDE.md and related files
 - **Grep**: Find references to topics in the codebase
 - **Glob**: Find related files to document
@@ -183,6 +193,7 @@ You may READ any files (including `node_modules/`, dependencies, etc.) to learn 
 However, you must ONLY EDIT/WRITE files owned by this project:
 
 **Project-owned directories (OK to edit):**
+
 - `src/` - Source code
 - `e2e/` - E2E tests
 - `docs/` - Documentation
@@ -190,6 +201,7 @@ However, you must ONLY EDIT/WRITE files owned by this project:
 - Root files: `README.md`, `CLAUDE.md`, `package.json`, etc.
 
 **NEVER edit files in:**
+
 - `node_modules/` - Third-party dependencies
 - `dist/` or `build/` - Build output
 - `.git/` - Version control internals
@@ -209,6 +221,7 @@ When updating documentation:
 ## Quality Checklist
 
 Before finishing:
+
 - [ ] Technically accurate (verified against actual code)
 - [ ] Clear and concise
 - [ ] Proper markdown formatting

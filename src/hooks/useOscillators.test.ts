@@ -83,7 +83,9 @@ describe("useOscillators", () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const mockOscillator = vi.mocked(Tone.Oscillator).mock.results[0].value;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(mockOscillator.connect).toHaveBeenCalledWith(oscillators[0].channel);
+      expect(mockOscillator.connect).toHaveBeenCalledWith(
+        oscillators[0].channel
+      );
     });
 
     it("should dispose of oscillators on unmount", () => {
@@ -115,7 +117,9 @@ describe("useOscillators", () => {
     });
 
     it("should support mixed basic and fat oscillators", () => {
-      const { result } = renderHook(() => useOscillators(3, ["basic", "fat", "basic"]));
+      const { result } = renderHook(() =>
+        useOscillators(3, ["basic", "fat", "basic"])
+      );
       const [oscillators] = result.current;
 
       expect(oscillators).toHaveLength(3);
@@ -135,7 +139,9 @@ describe("useOscillators", () => {
     });
 
     it("should recreate oscillators when types are updated", () => {
-      const { result, rerender } = renderHook(() => useOscillators(2, ["basic", "basic"]));
+      const { result, rerender } = renderHook(() =>
+        useOscillators(2, ["basic", "basic"])
+      );
 
       // Initial state
       const [initialOscillators] = result.current;

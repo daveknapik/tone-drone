@@ -33,28 +33,29 @@ This project uses:
 
 ```typescript
 // ✅ Best: Accessible to everyone, including screen readers
-page.getByRole("button", { name: "Save" })
-page.getByRole("slider", { name: /bpm/i })
+page.getByRole("button", { name: "Save" });
+page.getByRole("slider", { name: /bpm/i });
 
 // ✅ Good: Form inputs with labels
-page.getByLabel("Email address")
-page.getByPlaceholder("Enter your name")
+page.getByLabel("Email address");
+page.getByPlaceholder("Enter your name");
 
 // ✅ Good: Visible text content
-page.getByText("Welcome back")
+page.getByText("Welcome back");
 ```
 
 **2. Test IDs (STABLE FALLBACK)**
 Use when semantic locators aren't reliable:
+
 ```typescript
 // ✅ Use for dynamic lists with duplicate names
-page.getByTestId(`preset-user-${id}`)
+page.getByTestId(`preset-user-${id}`);
 
 // ✅ Use for multiple similar elements needing unique identification
-page.getByTestId(`oscillator-step-${oscId}-${stepId}`)
+page.getByTestId(`oscillator-step-${oscId}-${stepId}`);
 
 // ✅ Use for i18n/localized text that changes by locale
-page.getByTestId("welcome-message")
+page.getByTestId("welcome-message");
 ```
 
 **3. CSS/XPath (LAST RESORT)**
@@ -63,19 +64,22 @@ Only when nothing else works - these are fragile.
 ### When to Add data-testid
 
 **DO use data-testid for:**
+
 - Dynamic lists where items may have duplicate visible text
 - i18n/localized content that changes by locale
 - Non-interactive elements lacking semantic meaning
 
 **DON'T use data-testid for:**
+
 - Interactive elements with clear labels (buttons, links, inputs)
 - Elements with unique text that won't change frequently
 - Standard semantic HTML (headings, navigation, forms)
-- State assertions (use aria-* attributes instead)
+- State assertions (use aria-\* attributes instead)
 
 ### Test ID Best Practices
 
 **Naming**: Use stable, semantic, kebab-case names:
+
 ```typescript
 // ✅ GOOD: Stable, semantic
 data-testid="preset-user-123"
@@ -89,23 +93,25 @@ data-testid="panel-expanded"
 ```
 
 **Scoping**: Prefer scoping within semantic containers:
+
 ```typescript
 // ✅ GOOD
-const oscPanel = page.getByRole('region', { name: /oscillator/i });
-await oscPanel.getByTestId('step-3').click();
+const oscPanel = page.getByRole("region", { name: /oscillator/i });
+await oscPanel.getByTestId("step-3").click();
 
 // Instead of globally unique IDs
-await page.getByTestId('oscillator-0-step-3').click();
+await page.getByTestId("oscillator-0-step-3").click();
 ```
 
 **State Assertions**: Use accessibility attributes:
+
 ```typescript
 // ✅ GOOD: Assert accessible state
 await expect(button).toHaveAccessibleName(/play/i);
-await expect(panel).toHaveAttribute('aria-expanded', 'true');
+await expect(panel).toHaveAttribute("aria-expanded", "true");
 
 // ❌ BAD: Encode state in test IDs
-await expect(page.getByTestId('panel-expanded')).toBeVisible();
+await expect(page.getByTestId("panel-expanded")).toBeVisible();
 ```
 
 ## When You're Invoked
@@ -144,6 +150,7 @@ await expect(page.getByTestId('panel-expanded')).toBeVisible();
 ## Output Format
 
 For each test you write:
+
 - **Test file location**: Where the test lives
 - **Page object changes**: Any new/modified page objects
 - **Component changes**: Any data-testid attributes added (explain why)

@@ -20,19 +20,17 @@ describe("AudioContext", () => {
   });
 
   it("should initialize with audio disabled and transport stopped", () => {
-    const { result } = renderHook(
-      () => useContext(AudioContext),
-      { wrapper: AudioContextProvider }
-    );
+    const { result } = renderHook(() => useContext(AudioContext), {
+      wrapper: AudioContextProvider,
+    });
 
     expect(result.current?.isTransportRunning).toBe(false);
   });
 
   it("should enable browser audio when handleBrowserAudioStart is called", async () => {
-    const { result } = renderHook(
-      () => useContext(AudioContext),
-      { wrapper: AudioContextProvider }
-    );
+    const { result } = renderHook(() => useContext(AudioContext), {
+      wrapper: AudioContextProvider,
+    });
 
     await act(async () => {
       await result.current?.handleBrowserAudioStart();
@@ -51,10 +49,9 @@ describe("AudioContext", () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     vi.mocked(Tone.getTransport).mockReturnValue(mockTransport as any);
 
-    const { result } = renderHook(
-      () => useContext(AudioContext),
-      { wrapper: AudioContextProvider }
-    );
+    const { result } = renderHook(() => useContext(AudioContext), {
+      wrapper: AudioContextProvider,
+    });
 
     // Start transport
     act(() => {

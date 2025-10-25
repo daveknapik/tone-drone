@@ -100,15 +100,15 @@ These mirror how users and screen readers interact with your app:
 
 ```typescript
 // ✅ Best: Accessible to everyone, including screen readers
-page.getByRole("button", { name: "Save" })
-page.getByRole("slider", { name: /bpm/i })
+page.getByRole("button", { name: "Save" });
+page.getByRole("slider", { name: /bpm/i });
 
 // ✅ Good: Form inputs with labels
-page.getByLabel("Email address")
-page.getByPlaceholder("Enter your name")
+page.getByLabel("Email address");
+page.getByPlaceholder("Enter your name");
 
 // ✅ Good: Visible text content
-page.getByText("Welcome back")
+page.getByText("Welcome back");
 ```
 
 **2. Test IDs (STABLE FALLBACK)**
@@ -117,11 +117,11 @@ Use when semantic locators aren't reliable or unique:
 ```typescript
 // ✅ Appropriate use cases:
 // - Dynamic lists with duplicate names
-page.getByTestId(`preset-user-${id}`)
+page.getByTestId(`preset-user-${id}`);
 // - Multiple similar elements that need unique identification
-page.getByTestId(`oscillator-step-${oscId}-${stepId}`)
+page.getByTestId(`oscillator-step-${oscId}-${stepId}`);
 // - i18n/localized text that changes by locale
-page.getByTestId("welcome-message")
+page.getByTestId("welcome-message");
 ```
 
 **3. CSS/XPath (LAST RESORT)**
@@ -129,18 +129,20 @@ Only when nothing else works:
 
 ```typescript
 // ⚠️ Fragile: Breaks when implementation changes
-page.locator(".some-class > div:nth-child(2)")
-page.locator("//div[@class='specific']")
+page.locator(".some-class > div:nth-child(2)");
+page.locator("//div[@class='specific']");
 ```
 
 #### When to Use data-testid
 
 **DO use `data-testid` for:**
+
 - **Dynamic lists** where items may have duplicate visible text (e.g., presets, oscillator steps)
 - **i18n/localized content** where text changes by locale or is highly dynamic
 - **Non-interactive elements** that lack semantic meaning (e.g., status indicators)
 
 **DON'T use `data-testid` for:**
+
 - **Interactive elements** with clear labels (buttons, links, form inputs)
 - **Elements with unique text** that won't change frequently
 - **Standard semantic HTML** (headings, navigation, forms)
@@ -174,11 +176,11 @@ data-testid="div-wrapper"
 
 ```typescript
 // ✅ GOOD: Scope within a semantic region
-const oscPanel = page.getByRole('region', { name: /oscillator/i });
-await oscPanel.getByTestId('step-3').click();
+const oscPanel = page.getByRole("region", { name: /oscillator/i });
+await oscPanel.getByTestId("step-3").click();
 
 // Instead of requiring globally unique test IDs
-await page.getByTestId('oscillator-0-step-3').click();
+await page.getByTestId("oscillator-0-step-3").click();
 ```
 
 **State Assertions**: Prefer accessibility assertions over test IDs for state checking:
@@ -186,14 +188,15 @@ await page.getByTestId('oscillator-0-step-3').click();
 ```typescript
 // ✅ GOOD: Assert accessible state
 await expect(button).toHaveAccessibleName(/play/i);
-await expect(panel).toHaveAttribute('aria-expanded', 'true');
-await expect(toggle).toHaveAttribute('aria-label', 'Stop Recording');
+await expect(panel).toHaveAttribute("aria-expanded", "true");
+await expect(toggle).toHaveAttribute("aria-label", "Stop Recording");
 
 // ❌ BAD: Encode state in test IDs
-await expect(page.getByTestId('panel-expanded')).toBeVisible();
+await expect(page.getByTestId("panel-expanded")).toBeVisible();
 ```
 
 **Important Constraints**:
+
 - **Never use `[data-testid=...]` in CSS** - test IDs are for tests only, not styling
 - **Configuration**: Playwright defaults to `data-testid`. If you change it, update `playwright.config.ts` with `test.use({ testIdAttribute: 'your-attribute' })`
 

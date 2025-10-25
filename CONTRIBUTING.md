@@ -159,37 +159,42 @@ npm run test:e2e:report
 **Locator Strategy** (follow this hierarchy from best to worst):
 
 1. **User-facing locators** (PREFERRED - most robust):
+
    ```typescript
-   page.getByRole("button", { name: "Save" })
-   page.getByRole("slider", { name: /bpm/i })
-   page.getByLabel("Email address")
-   page.getByPlaceholder("Enter your name")
-   page.getByText("Welcome back")
+   page.getByRole("button", { name: "Save" });
+   page.getByRole("slider", { name: /bpm/i });
+   page.getByLabel("Email address");
+   page.getByPlaceholder("Enter your name");
+   page.getByText("Welcome back");
    ```
 
 2. **Test IDs** (stable fallback for dynamic content):
+
    ```typescript
-   page.getByTestId(`preset-user-${id}`)
-   page.getByTestId(`oscillator-step-${oscId}-${stepId}`)
+   page.getByTestId(`preset-user-${id}`);
+   page.getByTestId(`oscillator-step-${oscId}-${stepId}`);
    ```
 
 3. **CSS/XPath** (last resort - fragile):
    ```typescript
-   page.locator(".some-class > div:nth-child(2)")
+   page.locator(".some-class > div:nth-child(2)");
    ```
 
 **When to use `data-testid`:**
+
 - Dynamic lists with duplicate names
 - Elements lacking semantic meaning (status indicators)
 - i18n/localized content that changes by locale
 
 **When NOT to use `data-testid`:**
+
 - Interactive elements with clear labels (use semantic locators instead)
 - Unique text content
 - Standard semantic HTML elements
 - State assertions (use `aria-*` attributes instead)
 
 **Test ID Naming Convention:**
+
 ```typescript
 // ✅ GOOD: Stable, semantic, kebab-case
 data-testid="preset-user-123"
@@ -250,6 +255,7 @@ test("should save and load preset", async ({ page }) => {
 #### Test Isolation
 
 Each test starts with:
+
 - Clean localStorage
 - Initialized audio context
 - Fresh page state

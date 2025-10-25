@@ -20,9 +20,7 @@ describe("presetMigration", () => {
       oscillators: {
         minFreq: 440,
         maxFreq: 454,
-        oscillators: [
-          { frequency: 440, waveform: "sine", volume: -5, pan: 0 },
-        ],
+        oscillators: [{ frequency: 440, waveform: "sine", volume: -5, pan: 0 }],
         sequences: [
           {
             frequency: 440,
@@ -82,9 +80,7 @@ describe("presetMigration", () => {
       oscillators: {
         minFreq: 440,
         maxFreq: 454,
-        oscillators: [
-          { frequency: 440, waveform: "sine", volume: -5, pan: 0 },
-        ],
+        oscillators: [{ frequency: 440, waveform: "sine", volume: -5, pan: 0 }],
         sequences: [
           {
             frequency: 440,

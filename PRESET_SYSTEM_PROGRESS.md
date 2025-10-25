@@ -47,13 +47,13 @@ function Effect({ effect, ref }: EffectProps) {
 
 ### Components Completed
 
-| Component | Parameters | Tests | Status |
-|-----------|-----------|-------|--------|
+| Component  | Parameters                                                                 | Tests  | Status   |
+| ---------- | -------------------------------------------------------------------------- | ------ | -------- |
 | AutoFilter | 8 (baseFrequency, depth, frequency, rolloff, Q, wet, type, oscillatorType) | 4/4 ✅ | Complete |
-| BitCrusher | 2 (bits, wet) | 4/4 ✅ | Complete |
-| Chebyshev | 2 (order, wet) | 4/4 ✅ | Complete |
-| Delay | 3 (time, feedback, wet) | 4/4 ✅ | Complete |
-| Filter | 4 (frequency, rolloff, Q, type) | 4/4 ✅ | Complete |
+| BitCrusher | 2 (bits, wet)                                                              | 4/4 ✅ | Complete |
+| Chebyshev  | 2 (order, wet)                                                             | 4/4 ✅ | Complete |
+| Delay      | 3 (time, feedback, wet)                                                    | 4/4 ✅ | Complete |
+| Filter     | 4 (frequency, rolloff, Q, type)                                            | 4/4 ✅ | Complete |
 
 **Total:** 5 components, 19 parameters, 20/20 tests passing ✅
 
@@ -67,6 +67,7 @@ function Effect({ effect, ref }: EffectProps) {
 ### Files Created/Modified
 
 **Type Definitions:**
+
 - `src/types/AutoFilterParams.ts`
 - `src/types/BitCrusherParams.ts`
 - `src/types/ChebyshevParams.ts`
@@ -74,6 +75,7 @@ function Effect({ effect, ref }: EffectProps) {
 - `src/types/FilterParams.ts`
 
 **Component Implementations:**
+
 - `src/components/AutoFilter.tsx` (modified)
 - `src/components/BitCrusher.tsx` (modified)
 - `src/components/Chebyshev.tsx` (modified)
@@ -81,6 +83,7 @@ function Effect({ effect, ref }: EffectProps) {
 - `src/components/Filter.tsx` (modified)
 
 **Test Files:**
+
 - `src/components/AutoFilter.test.tsx`
 - `src/components/BitCrusher.test.tsx`
 - `src/components/Chebyshev.test.tsx`

@@ -12,7 +12,7 @@ export function useOscillators(
 ): [
   OscillatorWithChannel[],
   Dispatch<SetStateAction<OscillatorWithChannel[]>>,
-  Dispatch<SetStateAction<OscillatorType[]>>
+  Dispatch<SetStateAction<OscillatorType[]>>,
 ] {
   const [oscillators, setOscillators] = useState<OscillatorWithChannel[]>([]);
   const [types, setTypes] = useState<OscillatorType[]>(
