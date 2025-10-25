@@ -105,14 +105,7 @@ function Oscillator({
 
   const toggleAudio = (): void => {
     void handleBrowserAudioStart();
-
-    if (isPlaying) {
-      oscillator?.stop();
-      setIsPlaying(false);
-    } else {
-      oscillator?.start();
-      setIsPlaying(true);
-    }
+    setIsPlaying((prev) => !prev);
   };
 
   useKeyDown(() => {
@@ -135,9 +128,8 @@ function Oscillator({
     channel?.pan.setTargetAtTime(pan, Tone.now(), 0.01);
   }, [channel, volume, pan]);
 
-  // Apply oscillator properties and ensure correct order on instance changes
+  // Apply oscillator properties when instance or params change (no start/stop here)
   useEffect(() => {
-    // Set core properties first
     oscillator.frequency.setValueAtTime(frequency, Tone.now());
     oscillator.type = waveform as Tone.ToneOscillatorType;
 
@@ -145,11 +137,22 @@ function Oscillator({
       oscillator.count = fatCount;
       oscillator.spread = fatSpread;
     }
+  }, [oscillator, frequency, waveform, fatCount, fatSpread]);
 
+  // Safari-safe start/stop scheduling (avoid same-time scheduling errors)
+  const lastStartAtRef = useRef<number>(0);
+  useEffect(() => {
+    if (!oscillator) return;
+    const now = Tone.now();
     if (isPlaying) {
-      oscillator.start();
+      const startAt = Math.max(now + 0.01, lastStartAtRef.current + 0.01);
+      oscillator.start(startAt);
+      lastStartAtRef.current = startAt;
+    } else {
+      const stopAt = Math.max(now + 0.01, lastStartAtRef.current + 0.015);
+      oscillator.stop(stopAt);
     }
-  }, [oscillator, frequency, waveform, fatCount, fatSpread, isPlaying]);
+  }, [oscillator, isPlaying]);
 
   const handleFrequencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFrequency = parseFloat(e.target.value);
