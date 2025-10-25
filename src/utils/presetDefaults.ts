@@ -1,9 +1,12 @@
 import type { AutoFilterParams } from "../types/AutoFilterParams";
 import type { BitCrusherParams } from "../types/BitCrusherParams";
-import type { ChebyshevParams} from "../types/ChebyshevParams";
+import type { ChebyshevParams } from "../types/ChebyshevParams";
 import type { DelayParams } from "../types/DelayParams";
 import type { FilterParams } from "../types/FilterParams";
-import type { PolySynthParams, PolySynthsState } from "../types/PolySynthParams";
+import type {
+  PolySynthParams,
+  PolySynthsState,
+} from "../types/PolySynthParams";
 import type { OscillatorParams } from "../types/OscillatorParams";
 import type { OscillatorsState } from "../types/OscillatorsParams";
 import type { Sequence } from "../types/Sequence";
@@ -40,11 +43,13 @@ export const DEFAULT_SEQUENCE: Sequence = {
 export const DEFAULT_OSCILLATORS_STATE: OscillatorsState = {
   minFreq: 440,
   maxFreq: 454,
-  oscillators: Array(6).fill(null).map(() => ({ ...DEFAULT_OSCILLATOR_PARAMS })) as OscillatorParams[],
-  sequences: Array(6).fill(null).map(() => ({
+  oscillators: Array.from({ length: 6 }, () => ({
+    ...DEFAULT_OSCILLATOR_PARAMS,
+  })),
+  sequences: Array.from({ length: 6 }, () => ({
     ...DEFAULT_SEQUENCE,
     steps: [...DEFAULT_SEQUENCE.steps],
-  })) as Sequence[],
+  })),
 };
 
 // ============================================================================
