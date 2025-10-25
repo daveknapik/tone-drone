@@ -4,7 +4,8 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { SynthWithPanner } from "../types/SynthWithPanner";
 
 export function useSynths(
-  synthCount = 6
+  synthCount = 6,
+  bus?: Tone.Channel
 ): [SynthWithPanner[], Dispatch<SetStateAction<SynthWithPanner[]>>] {
   const [synths, setSynths] = useState<SynthWithPanner[]>([]);
 
@@ -16,6 +17,9 @@ export function useSynths(
       const panner = new Tone.Panner();
 
       synth.connect(panner);
+      if (bus) {
+        panner.connect(bus);
+      }
 
       newSynths.push({ synth, panner });
     }
@@ -30,7 +34,7 @@ export function useSynths(
 
       setSynths([]);
     };
-  }, [synthCount]);
+  }, [synthCount, bus]);
 
   return [synths, setSynths];
 }
