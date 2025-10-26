@@ -321,6 +321,11 @@ function Oscillator({
           }}
         />
       </div>
+      <div className="text-center mt-3">
+        <Button handleClick={toggleAudio} isActive={isPlaying}>
+          {isPlaying ? "Stop" : "Start"}
+        </Button>
+      </div>
       <div className="text-center mt-4">
         <Sequencer
           currentBeat={currentBeat}
@@ -346,11 +351,6 @@ function Oscillator({
         {onRandomizePattern && (
           <Button handleClick={onRandomizePattern}>Randomize</Button>
         )}
-      </div>
-      <div className="text-center mt-2">
-        <Button handleClick={toggleAudio} isActive={isPlaying}>
-          {isPlaying ? "Stop" : "Start"}
-        </Button>
       </div>
     </div>
   );

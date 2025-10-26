@@ -388,14 +388,21 @@ function Oscillators({
               ref={bpmControlRef}
             />
             <PlayPauseSequencerButton />
-            <RandomizeFrequencyButton onClick={handleRandomizeFrequencies} />
-            <PatternDensitySlider
-              value={patternDensity}
-              onChange={setPatternDensity}
-            />
-            <RandomizeAllPatternsButton
-              onClick={handleRandomizeAllPatterns}
-            />
+            <div className="mt-3 p-3 border-2 rounded border-sky-300 dark:border-sky-500">
+              <div className="text-sm mb-2 text-sky-300 dark:text-sky-500">
+                Randomization
+              </div>
+              <RandomizeFrequencyButton
+                onClick={handleRandomizeFrequencies}
+              />
+              <PatternDensitySlider
+                value={patternDensity}
+                onChange={setPatternDensity}
+              />
+              <RandomizeAllPatternsButton
+                onClick={handleRandomizeAllPatterns}
+              />
+            </div>
           </div>
           <button onClick={addOscillator}>+</button>
         </div>
