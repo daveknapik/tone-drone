@@ -50,6 +50,7 @@ export const DEFAULT_OSCILLATORS_STATE: OscillatorsState = {
     ...DEFAULT_SEQUENCE,
     steps: [...DEFAULT_SEQUENCE.steps],
   })),
+  mutedSequences: Array(6).fill(false) as boolean[],
 };
 
 // ============================================================================

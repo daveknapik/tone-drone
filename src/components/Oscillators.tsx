@@ -38,7 +38,10 @@ import { BpmControlHandle } from "../types/BpmParams";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 import RandomizeFrequencyButton from "../components/RandomizeFrequencyButton";
+import RandomizeAllPatternsButton from "../components/RandomizeAllPatternsButton";
+import PatternDensitySlider from "../components/PatternDensitySlider";
 import { randomizeToScale } from "../utils/musicTheory";
+import { randomizePattern, clearPattern } from "../utils/patternUtils";
 
 interface OscillatorsProps {
   bus: React.RefObject<Tone.Channel>;
@@ -61,6 +64,10 @@ function Oscillators({
   const [maxFreq, setMaxFreq] = useState(DEFAULT_OSCILLATORS_STATE.maxFreq);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
+  const [patternDensity, setPatternDensity] = useState(50);
+  const [mutedSequences, setMutedSequences] = useState<boolean[]>(
+    DEFAULT_OSCILLATORS_STATE.mutedSequences ?? Array(oscillatorCount).fill(false)
+  );
 
   const [oscillators, setOscillators, setOscillatorTypes] = useOscillators(
     oscillatorCount,
@@ -94,12 +101,16 @@ function Oscillators({
         maxFreq,
         oscillators: oscillatorParams,
         sequences,
+        mutedSequences,
       };
     },
     setState: (state: OscillatorsState) => {
       setMinFreq(state.minFreq);
       setMaxFreq(state.maxFreq);
       setSequences(state.sequences);
+      setMutedSequences(
+        state.mutedSequences ?? Array(oscillatorCount).fill(false)
+      );
 
       // Set params on each oscillator child component
       state.oscillators.forEach((oscParams, index) => {
@@ -116,9 +127,10 @@ function Oscillators({
         frequency: sequence.frequency,
         isActive: sequence.steps[beat.current],
         synthIndex: i,
+        isMuted: mutedSequences[i],
       }))
-      .filter(({ isActive }) => isActive);
-  }, [sequences]);
+      .filter(({ isActive, isMuted }) => isActive && !isMuted);
+  }, [sequences, mutedSequences]);
 
   // set up the loop on first render
   useEffect(() => {
@@ -250,6 +262,9 @@ function Oscillators({
     };
 
     setSequences((prevSequences: Sequence[]) => [...prevSequences, sequence]);
+
+    // Add unmuted state for the new oscillator
+    setMutedSequences((prevMuted) => [...prevMuted, false]);
   };
 
   const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {
@@ -304,6 +319,49 @@ function Oscillators({
     console.log(`Randomized to ${result.scaleName}`);
   };
 
+  const handleRandomizeAllPatterns = (): void => {
+    setSequences((prevSequences) =>
+      prevSequences.map((sequence) => ({
+        ...sequence,
+        steps: randomizePattern(stepCount, patternDensity),
+      }))
+    );
+    onParameterChange?.();
+  };
+
+  const handleRandomizePattern = (index: number): void => {
+    setSequences((prevSequences) => {
+      const newSequences = [...prevSequences];
+      newSequences[index] = {
+        ...newSequences[index],
+        steps: randomizePattern(stepCount, patternDensity),
+      };
+      return newSequences;
+    });
+    onParameterChange?.();
+  };
+
+  const handleClearPattern = (index: number): void => {
+    setSequences((prevSequences) => {
+      const newSequences = [...prevSequences];
+      newSequences[index] = {
+        ...newSequences[index],
+        steps: clearPattern(stepCount),
+      };
+      return newSequences;
+    });
+    onParameterChange?.();
+  };
+
+  const handleMuteSequence = (index: number): void => {
+    setMutedSequences((prevMuted) => {
+      const newMuted = [...prevMuted];
+      newMuted[index] = !newMuted[index];
+      return newMuted;
+    });
+    onParameterChange?.();
+  };
+
   return (
     <Fragment>
       <Heading
@@ -331,6 +389,13 @@ function Oscillators({
             />
             <PlayPauseSequencerButton />
             <RandomizeFrequencyButton onClick={handleRandomizeFrequencies} />
+            <PatternDensitySlider
+              value={patternDensity}
+              onChange={setPatternDensity}
+            />
+            <RandomizeAllPatternsButton
+              onClick={handleRandomizeAllPatterns}
+            />
           </div>
           <button onClick={addOscillator}>+</button>
         </div>
@@ -366,6 +431,10 @@ function Oscillators({
                     return newTypes;
                   });
                 }}
+                isSequenceMuted={mutedSequences[i]}
+                onMuteSequence={() => handleMuteSequence(i)}
+                onClearPattern={() => handleClearPattern(i)}
+                onRandomizePattern={() => handleRandomizePattern(i)}
               />
             );
           })}

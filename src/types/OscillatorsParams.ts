@@ -9,6 +9,7 @@ export interface OscillatorsState {
   maxFreq: number;
   oscillators: OscillatorParams[];
   sequences: Sequence[];
+  mutedSequences?: boolean[];
 }
 
 /**

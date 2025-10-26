@@ -28,6 +28,10 @@ interface OscillatorProps {
   ref?: React.Ref<OscillatorHandle>;
   onParameterChange?: () => void;
   onOscillatorTypeChange?: (type: "basic" | "fat") => void;
+  isSequenceMuted?: boolean;
+  onMuteSequence?: () => void;
+  onClearPattern?: () => void;
+  onRandomizePattern?: () => void;
 }
 
 function hasCancelScheduledValues(
@@ -55,6 +59,10 @@ function Oscillator({
   ref,
   onParameterChange,
   onOscillatorTypeChange,
+  isSequenceMuted = false,
+  onMuteSequence,
+  onClearPattern,
+  onRandomizePattern,
 }: OscillatorProps) {
   // Tone.Oscillator properties
   const [frequency, setFrequency] = useState(DEFAULT_OSCILLATOR_PARAMS.frequency);
@@ -325,6 +333,19 @@ function Oscillator({
           volume={volume}
           waveform={waveform}
         />
+      </div>
+      <div className="flex justify-center gap-2 mt-2">
+        {onMuteSequence && (
+          <Button handleClick={onMuteSequence} isActive={isSequenceMuted}>
+            {isSequenceMuted ? "Unmute Seq" : "Mute Seq"}
+          </Button>
+        )}
+        {onClearPattern && (
+          <Button handleClick={onClearPattern}>Clear</Button>
+        )}
+        {onRandomizePattern && (
+          <Button handleClick={onRandomizePattern}>Randomize</Button>
+        )}
       </div>
       <div className="text-center mt-2">
         <Button handleClick={toggleAudio} isActive={isPlaying}>
