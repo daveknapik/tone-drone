@@ -84,7 +84,7 @@ Example from `useOscillators`:
 
 ```typescript
 useEffect(() => {
-  const newOscillators = Array.from({ length: count }, () => {
+  const newOscillators = Array.from({ length: OSCILLATOR_COUNT }, () => {
     const oscillator = new Tone.Oscillator(440, "sine");
     const channel = new Tone.Channel(-5, 0);
     oscillator.connect(channel);
@@ -101,7 +101,7 @@ useEffect(() => {
       channel.dispose();
     });
   };
-}, [count]);
+}, []);
 ```
 
 ## Component Hierarchy
@@ -146,8 +146,7 @@ Main synthesizer component that:
 
 Container component that:
 
-- Manages oscillator count (default 6)
-- Creates oscillators, synths, and sequences
+- Creates 6 oscillators, synths, and sequences
 - Handles step sequencer loop timing
 - Controls frequency range boundaries
 - Manages BPM settings
@@ -226,16 +225,16 @@ const useAudioEffect = () => {
 
 #### useOscillators
 
-- Creates and manages Tone.Oscillator instances
+- Creates and manages 6 Tone.Oscillator instances (fixed count)
 - Pairs each oscillator with a Tone.Channel for volume/pan
-- Returns array of `OscillatorWithChannel` objects
+- Returns array of 6 `OscillatorWithChannel` objects
 - Handles cleanup on unmount
 
 #### useSynths
 
-- Creates monophonic Tone.Synth instances for the step sequencer
+- Creates 6 monophonic Tone.Synth instances for the step sequencer (fixed count)
 - Pairs each synth with a Tone.Panner
-- Returns array of `SynthWithPanner` objects
+- Returns array of 6 `SynthWithPanner` objects
 - Used for triggered notes on each step (not continuous drones)
 
 #### usePolysynths
@@ -248,7 +247,7 @@ const useAudioEffect = () => {
 
 #### useSequences
 
-- Manages step patterns for the sequencer
+- Manages 6 step patterns for the sequencer (fixed count)
 - Each sequence has a frequency and array of boolean steps
 - Persists to local storage
 - Returns sequences and setter function

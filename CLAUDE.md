@@ -284,9 +284,9 @@ Located in `src/utils/musicTheory.ts`:
 
 ### Key Hooks
 
-- `useOscillators`: Creates and manages Tone.Oscillator or Tone.FatOscillator instances for continuous drone sounds. Returns oscillators array, setOscillators setter, and setTypes setter for switching between basic and fat modes. Accepts optional oscillatorTypes array to initialize with specific types
-- `useSequences`: Manages step sequencer patterns and frequencies
-- `useSynths`: Creates monophonic Tone.Synth instances for step sequencer note triggering
+- `useOscillators`: Creates and manages Tone.Oscillator or Tone.FatOscillator instances for continuous drone sounds. Fixed at 6 oscillators. Returns oscillators array, setOscillators setter, and setTypes setter for switching between basic and fat modes. Accepts optional oscillatorTypes array to initialize with specific types
+- `useSequences`: Manages step sequencer patterns and frequencies for 6 sequences
+- `useSynths`: Creates 6 monophonic Tone.Synth instances for step sequencer note triggering
 - `usePolysynths`: Creates polyphonic synthesizers (currently 2 instances for melodic elements)
 - `useConnectChannelsToBus`: Automatically connects audio channels to the effects bus
 - `useRecorder`: Handles audio recording functionality
