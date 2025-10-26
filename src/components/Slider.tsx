@@ -63,7 +63,8 @@ function Slider({
   return (
     <div
       className={
-        "flex space-x-2 " + (disabled ? "opacity-50 cursor-not-allowed" : "")
+        "flex items-center space-x-2 " +
+        (disabled ? "opacity-50 cursor-not-allowed" : "")
       }
     >
       <label
@@ -86,7 +87,12 @@ function Slider({
         disabled={disabled}
         aria-disabled={disabled}
       />
-      <div className="w-6 md:w-8 basis-1/8">{value}</div>
+      <div
+        className="w-12 md:w-16 basis-1/8 text-right"
+        title={value.toString()}
+      >
+        {Number.isInteger(value) ? value : value.toFixed(2)}
+      </div>
     </div>
   );
 }

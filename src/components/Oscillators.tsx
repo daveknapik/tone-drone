@@ -377,35 +377,48 @@ function Oscillators({
           !expandOscillators && "hidden"
         )}
       >
-        <div className="flex items-start justify-between">
-          <div className="space-y-3">
-            <FrequencyRangeControl
-              handleFormSubmit={updateFrequencyRange}
-              maxFreq={maxFreq}
-              minFreq={minFreq}
-            />
-            <BpmControl
-              onParameterChange={onParameterChange}
-              ref={bpmControlRef}
-            />
-            <PlayPauseSequencerButton />
-            <fieldset className="mt-3 p-3 border-2 rounded border-pink-500 dark:border-sky-300">
-              <legend className="px-2 text-sm text-pink-500 dark:text-sky-300">
+        <div className="space-y-3">
+          <FrequencyRangeControl
+            handleFormSubmit={updateFrequencyRange}
+            maxFreq={maxFreq}
+            minFreq={minFreq}
+          />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
+            <fieldset className="p-3 border-2 rounded border-pink-500 dark:border-sky-300 min-w-0">
+              <legend className="px-2 text-pink-500 dark:text-sky-300">
+                Sequencers
+              </legend>
+              <div className="grid grid-cols-[auto_1fr] items-center gap-2 mt-2 min-w-0">
+                <PlayPauseSequencerButton />
+                <div className="min-w-0">
+                  <BpmControl
+                    onParameterChange={onParameterChange}
+                    ref={bpmControlRef}
+                  />
+                </div>
+              </div>
+            </fieldset>
+            <fieldset className="p-3 border-2 rounded border-pink-500 dark:border-sky-300 min-w-0">
+              <legend className="px-2 text-pink-500 dark:text-sky-300">
                 Randomization
               </legend>
-              <RandomizeFrequencyButton onClick={handleRandomizeFrequencies} />
-              <div className="flex items-center gap-2 mt-2">
+              <div className="grid grid-cols-[auto_1fr] items-center gap-2 mt-2 min-w-0">
+                <RandomizeFrequencyButton
+                  onClick={handleRandomizeFrequencies}
+                />
+                <div></div>
                 <RandomizeAllPatternsButton
                   onClick={handleRandomizeAllPatterns}
                 />
-                <PatternDensitySlider
-                  value={patternDensity}
-                  onChange={setPatternDensity}
-                />
+                <div className="min-w-0">
+                  <PatternDensitySlider
+                    value={patternDensity}
+                    onChange={setPatternDensity}
+                  />
+                </div>
               </div>
             </fieldset>
           </div>
-          <button onClick={addOscillator}>+</button>
         </div>
         <hr className="mt-8 border-pink-500 dark:border-sky-300 " />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">
