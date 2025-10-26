@@ -37,6 +37,8 @@ import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
 import { BpmControlHandle } from "../types/BpmParams";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
+import RandomizeFrequencyButton from "../components/RandomizeFrequencyButton";
+import { randomizeToScale } from "../utils/musicTheory";
 
 interface OscillatorsProps {
   bus: React.RefObject<Tone.Channel>;
@@ -272,6 +274,36 @@ function Oscillators({
     setExpandOscillators((prev) => !prev);
   };
 
+  const handleRandomizeFrequencies = (): void => {
+    const result = randomizeToScale(minFreq, maxFreq, oscillatorCount);
+
+    // Update each oscillator's frequency via refs
+    result.frequencies.forEach((frequency, index) => {
+      if (oscillatorRefs.current[index]) {
+        const currentParams = oscillatorRefs.current[index].getParams();
+        oscillatorRefs.current[index].setParams({
+          ...currentParams,
+          frequency,
+        });
+      }
+    });
+
+    // Update all sequences at once (can't call updateSequenceFrequency in a loop
+    // because React batches state updates and they overwrite each other)
+    setSequences((prevSequences) =>
+      prevSequences.map((sequence, index) => ({
+        ...sequence,
+        frequency: result.frequencies[index],
+      }))
+    );
+
+    // Trigger parameter change callback to mark preset as modified
+    onParameterChange?.();
+
+    // Log the scale for debugging/future display
+    console.log(`Randomized to ${result.scaleName}`);
+  };
+
   return (
     <Fragment>
       <Heading
@@ -298,6 +330,7 @@ function Oscillators({
               ref={bpmControlRef}
             />
             <PlayPauseSequencerButton />
+            <RandomizeFrequencyButton onClick={handleRandomizeFrequencies} />
           </div>
           <button onClick={addOscillator}>+</button>
         </div>
