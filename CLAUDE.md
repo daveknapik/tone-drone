@@ -255,10 +255,12 @@ test("should do something", async ({ page }) => {
 - **Tone.js Integration**: All audio synthesis handled through Tone.js library
 - **Oscillator Types**: Supports both Tone.Oscillator (basic, single voice) and Tone.FatOscillator (fat mode with multiple detuned voices). Type switching properly disposes and recreates oscillator instances while preserving playing state
 - **Fat Oscillator Parameters**: Auto-switches between basic (voices=1) and fat (voices>1) modes. When switching to fat mode, detune is automatically set to minimum of 1 cent to prevent silence. Voices slider is always visible (1-10 range). Detune slider is always visible but disabled when voices=1
-- **Step Sequencer**: 16-step sequencer with visual beat indication and real-time step editing
+- **Step Sequencer**: 16-step sequencer with visual beat indication and real-time step editing. Supports per-oscillator pattern manipulation with mute, clear, and randomize controls
 - **Effects Chain**: Linear effects chain with send control for the main effects bus
 - **Recording**: Built-in recording functionality via `useRecorder` hook
 - **Theme Support**: Dark/light theme toggle using `useDarkMode` hook
+- **Musical Frequency Randomization**: Oscillator frequencies can be randomized to conform to musical scales from a library of 38 scales organized in 8 categories
+- **Sequencer Pattern Randomization**: Sequencer patterns can be randomized based on a global density control, with per-oscillator pattern manipulation
 
 ### Type Definitions
 
@@ -271,6 +273,14 @@ Located in `src/types/`:
 - `Sequence`: Defines step pattern with frequency and boolean steps array
 - `AudioEffect`: Base interface for audio effects
 - `Step`: Represents individual sequencer steps
+- `OscillatorsState`: Contains minFreq, maxFreq, array of OscillatorParams, array of Sequences, and optional mutedSequences boolean array
+- `OscillatorsHandle`: Imperative handle interface with getState() and setState() methods for reading/writing all oscillator state
+
+Located in `src/utils/musicTheory.ts`:
+
+- `ScaleType`: Union type of all available scale names (38 scales total)
+- `ScaleCategory`: Union type of the 8 scale categories (e.g., "Western Classical", "Jazz & Advanced Harmony")
+- `RandomizeToScaleResult`: Result interface containing frequencies array, scaleName string, rootNote string, and scaleType
 
 ### Key Hooks
 
@@ -306,6 +316,104 @@ E2E tests are fully linted but with adjusted rules to accommodate Playwright pat
 
 Run `npm run lint` to lint both source code and e2e tests.
 
+## Randomization Features
+
+The synthesizer includes two independent randomization systems for creating varied and musical sequences:
+
+### Musical Frequency Randomization
+
+Located in `src/utils/musicTheory.ts`, the frequency randomization system provides a library of 38 musical scales organized into 8 categories:
+
+**Scale Library (38 scales)**:
+
+- **Western Classical** (5 scales): Major, Natural Minor, Harmonic Minor, Melodic Minor, Harmonic Major
+- **Western Pentatonic** (3 scales): Pentatonic Major, Pentatonic Minor, Blues
+- **Church Modes** (5 scales): Dorian, Phrygian, Lydian, Mixolydian, Locrian
+- **Melodic Minor Modes** (3 scales): Lydian Dominant, Lydian Augmented, Dorian ♯4
+- **Jazz & Advanced Harmony** (4 scales): Altered Scale, Diminished (W-H), Diminished (H-W), Augmented
+- **Exotic/World** (5 scales): Phrygian Dominant, Hungarian Minor, Double Harmonic, Enigmatic, Spanish 8-Tone
+- **Japanese Pentatonic** (5 scales): Hirajoshi, In Sen, Iwato, Kumoi, Yo
+- **Other World** (2 scales): Balinese, Egyptian
+- **Symmetric** (2 scales): Whole Tone, Chromatic
+
+**How It Works**:
+
+1. User clicks "Randomize" button (dice icon) in Oscillators top bar
+2. `randomizeToScale()` function:
+   - Selects a random scale from the 38 available scales
+   - Selects a random root note (C through B)
+   - Generates all notes from that scale within the current min/max frequency range
+   - Randomly selects 6 frequencies from the available scale notes (allowing duplicates)
+3. Returns metadata including scale name, root note, and scale type for display
+4. Respects the user's frequency range constraints (default 30-1000 Hz)
+
+**Key Functions**:
+
+```typescript
+// Main randomization function
+export function randomizeToScale(
+  minFreq: number,
+  maxFreq: number,
+  count = 6
+): RandomizeToScaleResult
+
+// Helper conversions for working with scales
+export function midiToFrequency(midiNote: number): number
+export function frequencyToMidi(frequency: number): number
+export function midiToNoteName(midiNote: number): string
+```
+
+### Sequencer Pattern Randomization
+
+Located in `src/utils/patternUtils.ts`, the pattern randomization system provides flexible control over 16-step sequencer patterns:
+
+**Global Controls** (in Oscillators top bar):
+
+- **Pattern Density Slider** (0-100%): Controls the probability that any given step is active during randomization. 50% density means approximately half the steps will be active. This is UI state only (not saved in presets, defaults to 50%)
+- **"Randomize All Patterns" Button**: Randomizes all 6 oscillator patterns simultaneously using the current density setting
+
+**Per-Oscillator Controls** (below each sequencer):
+
+- **"Mute Seq" Button**: Mutes only the sequence playback for that oscillator (synth notes stop triggering). The oscillator drone continues playing unaffected
+- **"Clear" Button**: Deactivates all 16 steps in the pattern (sets all to false)
+- **"Randomize" Button**: Randomizes that oscillator's pattern using the global density setting
+
+**Key Functions**:
+
+```typescript
+// Generate random pattern based on density (0-100%)
+export function randomizePattern(
+  stepCount: number,
+  density: number
+): boolean[]
+
+// Clear all steps in a pattern
+export function clearPattern(stepCount: number): boolean[]
+```
+
+**How Mute Works**:
+
+- Mute state is saved in presets via the `mutedSequences` boolean array
+- When a sequence is muted, `getActiveSteps()` filters out that synth
+- Oscillators continue their drone sound regardless of mute state
+- Mute is independent from clearing the pattern (muted patterns can be re-enabled)
+
+**Implementation Details**:
+
+- Pattern density is stored in component state (`patternDensity`), not in preset state
+- `randomizePattern()` clamps density to 0-100 and uses Math.random() to decide step activation
+- All pattern operations maintain the boolean array structure of sequences
+- Pattern randomization respects the current pattern density at the time of randomization
+
+### Preset Compatibility
+
+Both randomization features integrate seamlessly with the preset system:
+
+- Oscillator frequencies set by frequency randomization are saved normally
+- Sequencer patterns set by pattern randomization are saved normally
+- Muted sequence state is saved in presets (backwards compatible - missing mutedSequences defaults to all unmuted)
+- Pattern density is UI-only and intentionally NOT saved (users set it when they randomize)
+
 ## Preset System
 
 The app includes a comprehensive preset management system:
@@ -320,6 +428,8 @@ Preset state includes:
 
 - Oscillator settings (frequency, waveform, volume, pan, oscillator type, fat count, fat spread)
 - Sequencer patterns (16 steps per oscillator)
+- Sequence mute state (boolean array indicating which sequences are muted)
 - All audio effect parameters
 - Effects bus send level
 - PolySynth settings (2 polysynths with independent parameters)
+- Min/max frequency range
