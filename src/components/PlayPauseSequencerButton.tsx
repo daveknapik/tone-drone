@@ -21,7 +21,7 @@ function PlayPauseSequencerButton() {
       isActive={isTransportRunning}
       testId="play-pause-button"
     >
-      {isTransportRunning ? "Pause Sequences" : "Play Sequences"}
+      {isTransportRunning ? "Pause" : "Play"}
     </Button>
   );
 }
