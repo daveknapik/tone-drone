@@ -49,7 +49,7 @@ function RandomizeAllPatternsButton({
       data-testid="randomize-all-patterns-button"
     >
       <DiceIcon size={16} />
-      <span>Randomize All Patterns</span>
+      <span>Patterns</span>
     </button>
   );
 }

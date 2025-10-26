@@ -49,7 +49,7 @@ function RandomizeFrequencyButton({
       data-testid="randomize-frequency-button"
     >
       <DiceIcon size={16} />
-      <span>Randomize</span>
+      <span>Frequencies</span>
     </button>
   );
 }
