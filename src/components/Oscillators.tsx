@@ -66,7 +66,8 @@ function Oscillators({
   const [expandOscillators, setExpandOscillators] = useState(true);
   const [patternDensity, setPatternDensity] = useState(50);
   const [mutedSequences, setMutedSequences] = useState<boolean[]>(
-    DEFAULT_OSCILLATORS_STATE.mutedSequences ?? Array(oscillatorCount).fill(false)
+    DEFAULT_OSCILLATORS_STATE.mutedSequences ??
+      Array(oscillatorCount).fill(false)
   );
 
   const [oscillators, setOscillators, setOscillatorTypes] = useOscillators(
@@ -388,21 +389,21 @@ function Oscillators({
               ref={bpmControlRef}
             />
             <PlayPauseSequencerButton />
-            <div className="mt-3 p-3 border-2 rounded border-sky-300 dark:border-sky-500">
-              <div className="text-sm mb-2 text-sky-300 dark:text-sky-500">
+            <fieldset className="mt-3 p-3 border-2 rounded border-pink-500 dark:border-sky-300">
+              <legend className="px-2 text-sm text-pink-500 dark:text-sky-300">
                 Randomization
+              </legend>
+              <RandomizeFrequencyButton onClick={handleRandomizeFrequencies} />
+              <div className="flex items-center gap-2 mt-2">
+                <RandomizeAllPatternsButton
+                  onClick={handleRandomizeAllPatterns}
+                />
+                <PatternDensitySlider
+                  value={patternDensity}
+                  onChange={setPatternDensity}
+                />
               </div>
-              <RandomizeFrequencyButton
-                onClick={handleRandomizeFrequencies}
-              />
-              <PatternDensitySlider
-                value={patternDensity}
-                onChange={setPatternDensity}
-              />
-              <RandomizeAllPatternsButton
-                onClick={handleRandomizeAllPatterns}
-              />
-            </div>
+            </fieldset>
           </div>
           <button onClick={addOscillator}>+</button>
         </div>

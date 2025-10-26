@@ -13,7 +13,7 @@ function PatternDensitySlider({ value, onChange }: PatternDensitySliderProps) {
   return (
     <Slider
       inputName="patternDensity"
-      labelText="Pattern Density"
+      labelText="Density"
       min={0}
       max={100}
       step={1}
