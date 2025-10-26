@@ -6,8 +6,9 @@ import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { OscillatorType } from "../types/OscillatorParams";
 import { DEFAULT_OSCILLATOR_PARAMS } from "../utils/presetDefaults";
 
+const OSCILLATOR_COUNT = 6;
+
 export function useOscillators(
-  oscillatorCount = 6,
   oscillatorTypes?: OscillatorType[],
   bus?: Tone.Channel
 ): [
@@ -17,7 +18,7 @@ export function useOscillators(
 ] {
   const [oscillators, setOscillators] = useState<OscillatorWithChannel[]>([]);
   const [types, setTypes] = useState<OscillatorType[]>(
-    oscillatorTypes ?? Array(oscillatorCount).fill("basic")
+    oscillatorTypes ?? Array(OSCILLATOR_COUNT).fill("basic")
   );
   const oscillatorsRef = useRef<OscillatorWithChannel[]>([]);
   const initializedRef = useRef<boolean>(false);
@@ -38,7 +39,7 @@ export function useOscillators(
   // Mount/unmount: create initial set and dispose everything on unmount
   useEffect(() => {
     const initial: OscillatorWithChannel[] = Array.from(
-      { length: oscillatorCount },
+      { length: OSCILLATOR_COUNT },
       (_, i) => createOscillator(types[i] ?? "basic")
     );
     oscillatorsRef.current = initial;
@@ -61,18 +62,10 @@ export function useOscillators(
 
     const current = oscillatorsRef.current;
 
-    // Handle updates for existing indices and additions
-    // Derive target length from current list and types only (component controls additions)
-    const targetLength = Math.max(current.length, types.length);
-    for (let i = 0; i < targetLength; i++) {
+    // Update oscillator types for all 6 oscillators
+    for (let i = 0; i < OSCILLATOR_COUNT; i++) {
       const desiredType = types[i] ?? "basic";
       const existing = current[i];
-
-      if (!existing) {
-        // Create new at the end
-        current[i] = createOscillator(desiredType);
-        continue;
-      }
 
       if (existing.type !== desiredType) {
         // Dispose and replace when type changes
@@ -86,21 +79,5 @@ export function useOscillators(
     setOscillators([...current]);
   }, [types]);
 
-  // Expose a setter that keeps the ref in sync for external mutations (e.g., addOscillator)
-  const setOscillatorsSync: Dispatch<
-    SetStateAction<OscillatorWithChannel[]>
-  > = (updater) => {
-    setOscillators((prev) => {
-      const next =
-        typeof updater === "function"
-          ? (
-              updater as (p: OscillatorWithChannel[]) => OscillatorWithChannel[]
-            )(prev)
-          : updater;
-      oscillatorsRef.current = next;
-      return next;
-    });
-  };
-
-  return [oscillators, setOscillatorsSync, setTypes];
+  return [oscillators, setOscillators, setTypes];
 }

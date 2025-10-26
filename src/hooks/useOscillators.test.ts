@@ -43,7 +43,7 @@ describe("useOscillators", () => {
   });
 
   describe("default behavior", () => {
-    it("should create the default number of oscillators (6)", () => {
+    it("should create exactly 6 oscillators", () => {
       const { result } = renderHook(() => useOscillators());
       const [oscillators] = result.current;
 
@@ -52,15 +52,8 @@ describe("useOscillators", () => {
       expect(Tone.Channel).toHaveBeenCalledTimes(6);
     });
 
-    it("should create custom number of oscillators", () => {
-      const { result } = renderHook(() => useOscillators(3));
-      const [oscillators] = result.current;
-
-      expect(oscillators).toHaveLength(3);
-    });
-
     it("should initialize oscillators with correct defaults", () => {
-      renderHook(() => useOscillators(1));
+      renderHook(() => useOscillators());
 
       expect(Tone.Oscillator).toHaveBeenCalledWith(
         DEFAULT_OSCILLATOR_PARAMS.frequency,
@@ -70,7 +63,7 @@ describe("useOscillators", () => {
     });
 
     it("should create basic oscillators by default", () => {
-      const { result } = renderHook(() => useOscillators(2));
+      const { result } = renderHook(() => useOscillators());
       const [oscillators] = result.current;
 
       oscillators.forEach((osc) => {
@@ -79,7 +72,7 @@ describe("useOscillators", () => {
     });
 
     it("should connect oscillators to their channels", () => {
-      const { result } = renderHook(() => useOscillators(1));
+      const { result } = renderHook(() => useOscillators());
       const [oscillators] = result.current;
 
       // The connect method was already called during hook execution
@@ -93,7 +86,7 @@ describe("useOscillators", () => {
     });
 
     it("should dispose of oscillators on unmount", () => {
-      const { unmount } = renderHook(() => useOscillators(2));
+      const { unmount } = renderHook(() => useOscillators());
 
       unmount();
 
@@ -110,11 +103,13 @@ describe("useOscillators", () => {
 
   describe("oscillator type support", () => {
     it("should create FatOscillators when type array includes 'fat'", () => {
-      const { result } = renderHook(() => useOscillators(2, ["fat", "fat"]));
+      const { result } = renderHook(() =>
+        useOscillators(["fat", "fat", "fat", "fat", "fat", "fat"])
+      );
       const [oscillators] = result.current;
 
-      expect(oscillators).toHaveLength(2);
-      expect(Tone.FatOscillator).toHaveBeenCalledTimes(2);
+      expect(oscillators).toHaveLength(6);
+      expect(Tone.FatOscillator).toHaveBeenCalledTimes(6);
       oscillators.forEach((osc) => {
         expect(osc.type).toBe("fat");
       });
@@ -122,21 +117,31 @@ describe("useOscillators", () => {
 
     it("should support mixed basic and fat oscillators", () => {
       const { result } = renderHook(() =>
-        useOscillators(3, ["basic", "fat", "basic"])
+        useOscillators([
+          "basic",
+          "fat",
+          "basic",
+          "fat",
+          "basic",
+          "fat",
+        ])
       );
       const [oscillators] = result.current;
 
-      expect(oscillators).toHaveLength(3);
+      expect(oscillators).toHaveLength(6);
       expect(oscillators[0].type).toBe("basic");
       expect(oscillators[1].type).toBe("fat");
       expect(oscillators[2].type).toBe("basic");
+      expect(oscillators[3].type).toBe("fat");
+      expect(oscillators[4].type).toBe("basic");
+      expect(oscillators[5].type).toBe("fat");
 
-      expect(Tone.Oscillator).toHaveBeenCalledTimes(2);
-      expect(Tone.FatOscillator).toHaveBeenCalledTimes(1);
+      expect(Tone.Oscillator).toHaveBeenCalledTimes(3);
+      expect(Tone.FatOscillator).toHaveBeenCalledTimes(3);
     });
 
     it("should return a type setter function", () => {
-      const { result } = renderHook(() => useOscillators(2));
+      const { result } = renderHook(() => useOscillators());
       const [, , setTypes] = result.current;
 
       expect(setTypes).toBeInstanceOf(Function);
@@ -144,7 +149,14 @@ describe("useOscillators", () => {
 
     it("should recreate oscillators when types are updated", () => {
       const { result, rerender } = renderHook(() =>
-        useOscillators(2, ["basic", "basic"])
+        useOscillators([
+          "basic",
+          "basic",
+          "basic",
+          "basic",
+          "basic",
+          "basic",
+        ])
       );
 
       // Initial state
@@ -153,7 +165,7 @@ describe("useOscillators", () => {
 
       // Change types via setter
       const [, , setTypes] = result.current;
-      setTypes(["fat", "basic"]);
+      setTypes(["fat", "basic", "basic", "basic", "basic", "basic"]);
 
       // Trigger re-render
       rerender();

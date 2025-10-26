@@ -16,19 +16,14 @@ import FrequencyRangeControl from "./FrequencyRangeControl";
 import Heading from "./Heading";
 import Oscillator from "./Oscillator";
 
-import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
-import { Sequence } from "../types/Sequence";
-
 // import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import {
   DEFAULT_OSCILLATOR_PARAMS,
   DEFAULT_OSCILLATORS_STATE,
-  DEFAULT_SEQUENCE,
 } from "../utils/presetDefaults";
 import { useOscillators } from "../hooks/useOscillators";
 import { useSequences } from "../hooks/useSequences";
 import { useSynths } from "../hooks/useSynths";
-import { SynthWithPanner } from "../types/SynthWithPanner";
 import {
   OscillatorsHandle,
   OscillatorsState,
@@ -43,9 +38,10 @@ import PatternDensitySlider from "../components/PatternDensitySlider";
 import { randomizeToScale } from "../utils/musicTheory";
 import { randomizePattern, clearPattern } from "../utils/patternUtils";
 
+const OSCILLATOR_COUNT = 6;
+
 interface OscillatorsProps {
   bus: React.RefObject<Tone.Channel>;
-  oscillatorCount?: number;
   stepCount?: number;
   ref?: React.Ref<OscillatorsHandle>;
   onParameterChange?: () => void;
@@ -54,7 +50,6 @@ interface OscillatorsProps {
 
 function Oscillators({
   bus,
-  oscillatorCount = 6,
   stepCount = 16,
   ref,
   onParameterChange,
@@ -67,19 +62,15 @@ function Oscillators({
   const [patternDensity, setPatternDensity] = useState(50);
   const [mutedSequences, setMutedSequences] = useState<boolean[]>(
     DEFAULT_OSCILLATORS_STATE.mutedSequences ??
-      Array(oscillatorCount).fill(false)
+      Array(OSCILLATOR_COUNT).fill(false)
   );
 
-  const [oscillators, setOscillators, setOscillatorTypes] = useOscillators(
-    oscillatorCount,
+  const [oscillators, , setOscillatorTypes] = useOscillators(
     undefined,
     bus.current ?? undefined
   );
-  const [synths, setSynths] = useSynths(
-    oscillatorCount,
-    bus.current ?? undefined
-  );
-  const [sequences, setSequences] = useSequences(oscillatorCount, stepCount);
+  const [synths] = useSynths(bus.current ?? undefined);
+  const [sequences, setSequences] = useSequences(stepCount);
 
   const beat = useRef(0);
   const [currentBeat, setCurrentBeat] = useState(0);
@@ -110,7 +101,7 @@ function Oscillators({
       setMaxFreq(state.maxFreq);
       setSequences(state.sequences);
       setMutedSequences(
-        state.mutedSequences ?? Array(oscillatorCount).fill(false)
+        state.mutedSequences ?? Array(OSCILLATOR_COUNT).fill(false)
       );
 
       // Set params on each oscillator child component
@@ -219,55 +210,6 @@ function Oscillators({
     500
   );
 
-  const createOscillator = (): OscillatorWithChannel => {
-    const oscillator = new Tone.Oscillator(
-      DEFAULT_OSCILLATOR_PARAMS.frequency,
-      "sine"
-    );
-    const channel = new Tone.Channel(-5, 0);
-    oscillator.connect(channel);
-    channel.connect(bus.current);
-
-    return { oscillator, channel, type: "basic" };
-  };
-
-  const createSynth = (): SynthWithPanner => {
-    const synth = new Tone.Synth();
-    const panner = new Tone.Panner();
-
-    synth.connect(panner);
-    if (bus.current) {
-      panner.connect(bus.current);
-    }
-
-    return { synth, panner };
-  };
-
-  const addOscillator = (): void => {
-    // Create new oscillator and add to oscillators
-    setOscillators((prevOscillators: OscillatorWithChannel[]) => [
-      ...prevOscillators,
-      createOscillator(),
-    ]);
-
-    // Create new synth and add to synths
-    setSynths((prevSynths: SynthWithPanner[]) => [
-      ...prevSynths,
-      createSynth(),
-    ]);
-
-    // Create new sequence with steps and add to sequences
-    const sequence: Sequence = {
-      ...DEFAULT_SEQUENCE,
-      steps: Array(stepCount).fill(false) as boolean[],
-    };
-
-    setSequences((prevSequences: Sequence[]) => [...prevSequences, sequence]);
-
-    // Add unmuted state for the new oscillator
-    setMutedSequences((prevMuted) => [...prevMuted, false]);
-  };
-
   const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
@@ -291,7 +233,7 @@ function Oscillators({
   };
 
   const handleRandomizeFrequencies = (): void => {
-    const result = randomizeToScale(minFreq, maxFreq, oscillatorCount);
+    const result = randomizeToScale(minFreq, maxFreq, OSCILLATOR_COUNT);
 
     // Update each oscillator's frequency via refs
     result.frequencies.forEach((frequency, index) => {
@@ -383,8 +325,8 @@ function Oscillators({
             maxFreq={maxFreq}
             minFreq={minFreq}
           />
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3">
-            <fieldset className="p-3 border-2 rounded border-pink-500 dark:border-sky-300 min-w-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-3 items-stretch">
+            <fieldset className="p-3 border-2 rounded border-pink-500 dark:border-sky-300 min-w-0 flex flex-col justify-center">
               <legend className="px-2 text-pink-500 dark:text-sky-300">
                 Sequencers
               </legend>
