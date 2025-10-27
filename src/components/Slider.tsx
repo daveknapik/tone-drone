@@ -63,18 +63,18 @@ function Slider({
   return (
     <div
       className={
-        "flex items-center space-x-2 " +
+        "flex items-center gap-2 " +
         (disabled ? "opacity-50 cursor-not-allowed" : "")
       }
     >
       <label
         htmlFor={id}
-        className={labelText ? "w-18 md:w-24 basis-1/4" : "basis-2/8"}
+        className={labelText ? "flex-shrink-0 w-20" : "flex-shrink-0"}
       >
         {labelText ?? inputName.charAt(0).toUpperCase()}
       </label>
       <input
-        className="w-36 md:w-48 basis-5/8"
+        className="flex-1 min-w-0"
         id={id}
         max={logarithmic ? toLogarithmic(max) : max}
         min={logarithmic ? toLogarithmic(min) : min}
@@ -87,10 +87,7 @@ function Slider({
         disabled={disabled}
         aria-disabled={disabled}
       />
-      <div
-        className="w-12 md:w-16 basis-1/8 text-right"
-        title={value.toString()}
-      >
+      <div className="flex-shrink-0 w-12 text-right" title={value.toString()}>
         {Number.isInteger(value) ? value : value.toFixed(2)}
       </div>
     </div>

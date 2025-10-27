@@ -330,7 +330,7 @@ function Oscillators({
               <legend className="px-2 text-pink-500 dark:text-sky-300">
                 Sequencers
               </legend>
-              <div className="grid grid-cols-[auto_1fr] items-center gap-2 mt-2 min-w-0">
+              <div className="grid grid-cols-[1fr_3fr] items-center gap-2 mt-2 min-w-0">
                 <PlayPauseSequencerButton />
                 <div className="min-w-0">
                   <BpmControl
