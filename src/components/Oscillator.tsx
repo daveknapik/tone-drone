@@ -65,7 +65,9 @@ function Oscillator({
   onRandomizePattern,
 }: OscillatorProps) {
   // Tone.Oscillator properties
-  const [frequency, setFrequency] = useState(DEFAULT_OSCILLATOR_PARAMS.frequency);
+  const [frequency, setFrequency] = useState(
+    DEFAULT_OSCILLATOR_PARAMS.frequency
+  );
   const [waveform, setWaveform] = useState("sine");
 
   // Tone.Channel properties
@@ -223,7 +225,10 @@ function Oscillator({
   };
 
   return (
-    <div data-testid={`osc-${sequenceIndex}-type`}>
+    <div
+      className="border-2 rounded border-pink-500 dark:border-sky-300 p-6"
+      data-testid={`osc-${sequenceIndex}-type`}
+    >
       <Slider
         inputName="frequency"
         labelText="Freq (Hz)"
@@ -321,9 +326,13 @@ function Oscillator({
           }}
         />
       </div>
-      <div className="text-center mt-3">
-        <Button handleClick={toggleAudio} isActive={isPlaying}>
-          {isPlaying ? "Stop" : "Start"}
+      <div className="text-center mt-4">
+        <Button
+          handleClick={toggleAudio}
+          isActive={isPlaying}
+          className="w-full"
+        >
+          {isPlaying ? "Drone Off" : "Drone On"}
         </Button>
       </div>
       <div className="text-center mt-4">
@@ -341,15 +350,23 @@ function Oscillator({
       </div>
       <div className="flex justify-center gap-2 mt-2">
         {onMuteSequence && (
-          <Button handleClick={onMuteSequence} isActive={isSequenceMuted}>
+          <Button
+            handleClick={onMuteSequence}
+            isActive={isSequenceMuted}
+            className="flex-1"
+          >
             {isSequenceMuted ? "Unmute Seq" : "Mute Seq"}
           </Button>
         )}
         {onClearPattern && (
-          <Button handleClick={onClearPattern}>Clear</Button>
+          <Button handleClick={onClearPattern} className="flex-1">
+            Clear
+          </Button>
         )}
         {onRandomizePattern && (
-          <Button handleClick={onRandomizePattern}>Randomize</Button>
+          <Button handleClick={onRandomizePattern} className="flex-1">
+            Randomize
+          </Button>
         )}
       </div>
     </div>
