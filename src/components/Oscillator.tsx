@@ -354,14 +354,14 @@ function Oscillator({
           waveform={waveform}
         />
       </div>
-      <div className="flex justify-center gap-2 mt-2">
+      <div className="flex gap-2 mt-2">
         {onMuteSequence && (
           <Button
             handleClick={onMuteSequence}
             isActive={isSequenceMuted}
             className="flex-1"
           >
-            {isSequenceMuted ? "Unmute Seq" : "Mute Seq"}
+            {isSequenceMuted ? "Unmute" : "Mute"}
           </Button>
         )}
         {onClearPattern && (

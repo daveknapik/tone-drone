@@ -331,7 +331,7 @@ function Oscillators({
               <legend className="px-2 text-pink-500 dark:text-sky-300">
                 Sequencers
               </legend>
-              <div className="grid grid-cols-[1fr_3fr] items-center gap-2 mt-2 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_3fr] items-center gap-2 mt-2 min-w-0">
                 <PlayPauseSequencerButton />
                 <div className="min-w-0">
                   <BpmControl
@@ -345,11 +345,11 @@ function Oscillators({
               <legend className="px-2 text-pink-500 dark:text-sky-300">
                 Randomization
               </legend>
-              <div className="grid grid-cols-[auto_1fr] items-center gap-2 mt-2 min-w-0">
+              <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr] items-center gap-2 mt-2 min-w-0">
                 <RandomizeFrequencyButton
                   onClick={handleRandomizeFrequencies}
                 />
-                <div></div>
+                <div className="hidden sm:block"></div>
                 <RandomizeAllPatternsButton
                   onClick={handleRandomizeAllPatterns}
                 />
