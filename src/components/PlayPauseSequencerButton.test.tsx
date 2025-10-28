@@ -18,19 +18,19 @@ describe("PlayPauseSequencerButton", () => {
     vi.clearAllMocks();
   });
 
-  it("should render with 'Play Sequences' text initially", () => {
+  it("should render with 'Play' text initially", () => {
     render(<PlayPauseSequencerButton />);
-    expect(screen.getByText("Play Sequences")).toBeInTheDocument();
+    expect(screen.getByText("Play")).toBeInTheDocument();
   });
 
-  it("should toggle to 'Pause Sequences' when clicked", async () => {
+  it("should toggle to 'Pause' when clicked", async () => {
     const user = userEvent.setup();
     render(<PlayPauseSequencerButton />);
 
-    const button = screen.getByText("Play Sequences");
+    const button = screen.getByText("Play");
     await user.click(button);
 
-    expect(screen.getByText("Pause Sequences")).toBeInTheDocument();
+    expect(screen.getByText("Pause")).toBeInTheDocument();
   });
 
   it("should start transport when clicked", async () => {
@@ -44,7 +44,7 @@ describe("PlayPauseSequencerButton", () => {
     const user = userEvent.setup();
     render(<PlayPauseSequencerButton />);
 
-    const button = screen.getByText("Play Sequences");
+    const button = screen.getByText("Play");
     await user.click(button);
 
     expect(mockTransport.start).toHaveBeenCalledTimes(1);
@@ -62,13 +62,13 @@ describe("PlayPauseSequencerButton", () => {
     const user = userEvent.setup();
     render(<PlayPauseSequencerButton />);
 
-    const playButton = screen.getByText("Play Sequences");
+    const playButton = screen.getByText("Play");
     await user.click(playButton);
 
-    const pauseButton = screen.getByText("Pause Sequences");
+    const pauseButton = screen.getByText("Pause");
     await user.click(pauseButton);
 
     expect(mockTransport.stop).toHaveBeenCalledTimes(1);
-    expect(screen.getByText("Play Sequences")).toBeInTheDocument();
+    expect(screen.getByText("Play")).toBeInTheDocument();
   });
 });
