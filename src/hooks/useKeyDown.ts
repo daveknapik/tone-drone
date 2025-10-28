@@ -18,6 +18,12 @@ export function useKeyDown(
         return;
       }
 
+      // Ignore shortcuts when any modifier key is pressed
+      // This allows browser shortcuts like Cmd+R, Cmd+W, Ctrl+R, etc. to work
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) {
+        return;
+      }
+
       const targetKeyPressed = keys.some((key) => e.key === key);
 
       if (targetKeyPressed) {
