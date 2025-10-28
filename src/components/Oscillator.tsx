@@ -21,6 +21,7 @@ interface OscillatorProps {
   oscillator: Tone.Oscillator | Tone.FatOscillator;
   panner: Tone.Panner;
   playPauseKey: string;
+  muteSequenceKey: string;
   sequence: Sequence;
   sequenceIndex: number;
   synth: Tone.Synth;
@@ -52,6 +53,7 @@ function Oscillator({
   oscillator,
   panner,
   playPauseKey,
+  muteSequenceKey,
   sequence,
   sequenceIndex,
   synth,
@@ -133,6 +135,10 @@ function Oscillator({
   useKeyDown(() => {
     toggleAudio();
   }, [playPauseKey]);
+
+  useKeyDown(() => {
+    onMuteSequence?.();
+  }, [muteSequenceKey]);
 
   // Clamp frequency within the min/max range
   useEffect(() => {

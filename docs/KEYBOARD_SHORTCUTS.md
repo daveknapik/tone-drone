@@ -39,95 +39,157 @@ Complete guide to keyboard shortcuts available in Tone Drone.
 
 **Usage Tip**: Use this to add harmonic countermelody or higher-pitched accents to your soundscapes.
 
-## Oscillator Toggle Keys
+## Oscillator Drone Toggle Keys
 
-Each oscillator can be toggled on/off using dedicated keyboard shortcuts. When an oscillator is toggled off, its volume is set to -Infinity (muted).
+Each oscillator's continuous drone sound can be toggled on/off using dedicated keyboard shortcuts. When an oscillator is toggled off, its volume is set to -Infinity (muted).
 
-### q - Toggle Oscillator 1
+### q - Toggle Oscillator 1 Drone
 
 - **Key**: `q`
 - **Oscillator**: 1 (top-left)
 - **Action**: Starts/stops oscillator 1 drone
 
-### w - Toggle Oscillator 2
+### w - Toggle Oscillator 2 Drone
 
 - **Key**: `w`
 - **Oscillator**: 2
 - **Action**: Starts/stops oscillator 2 drone
 
-### a - Toggle Oscillator 3
+### a - Toggle Oscillator 3 Drone
 
 - **Key**: `a`
 - **Oscillator**: 3
 - **Action**: Starts/stops oscillator 3 drone
 
-### s - Toggle Oscillator 4
+### s - Toggle Oscillator 4 Drone
 
 - **Key**: `s`
 - **Oscillator**: 4
 - **Action**: Starts/stops oscillator 4 drone
 
-### z - Toggle Oscillator 5
+### z - Toggle Oscillator 5 Drone
 
 - **Key**: `z`
 - **Oscillator**: 5
 - **Action**: Starts/stops oscillator 5 drone
 
-### x - Toggle Oscillator 6
+### x - Toggle Oscillator 6 Drone
 
 - **Key**: `x`
 - **Oscillator**: 6 (bottom-right)
 - **Action**: Starts/stops oscillator 6 drone
 
+## Sequence Mute Toggle Keys
+
+Each oscillator's step sequencer can be muted/unmuted independently of the drone. When a sequence is muted, the synth notes stop triggering, but the oscillator drone continues playing.
+
+### e - Toggle Sequence 1 Mute
+
+- **Key**: `e`
+- **Oscillator**: 1 (top-left)
+- **Action**: Mutes/unmutes the step sequencer for oscillator 1
+
+### r - Toggle Sequence 2 Mute
+
+- **Key**: `r`
+- **Oscillator**: 2
+- **Action**: Mutes/unmutes the step sequencer for oscillator 2
+
+### d - Toggle Sequence 3 Mute
+
+- **Key**: `d`
+- **Oscillator**: 3
+- **Action**: Mutes/unmutes the step sequencer for oscillator 3
+
+### f - Toggle Sequence 4 Mute
+
+- **Key**: `f`
+- **Oscillator**: 4
+- **Action**: Mutes/unmutes the step sequencer for oscillator 4
+
+### c - Toggle Sequence 5 Mute
+
+- **Key**: `c`
+- **Oscillator**: 5
+- **Action**: Mutes/unmutes the step sequencer for oscillator 5
+
+### v - Toggle Sequence 6 Mute
+
+- **Key**: `v`
+- **Oscillator**: 6 (bottom-right)
+- **Action**: Mutes/unmutes the step sequencer for oscillator 6
+
 ## Keyboard Layout
 
-The oscillator keys are arranged in two rows, mirroring a typical QWERTY keyboard layout:
+The oscillator and sequence keys are arranged in two rows, mirroring a typical QWERTY keyboard layout:
 
 ```
-Row 1:  q  w  (e  r  t  y)
-Row 2:  a  s  (d  f  g  h)
-Row 3:  z  x  (c  v  b  n)
+Row 1:  q  w  e  r  (t  y)
+Row 2:  a  s  d  f  (g  h)
+Row 3:  z  x  c  v  (b  n)
 ```
 
 Active keys for oscillators 1-6:
 
+**Drone Toggle (qwaszx):**
 ```
-q  w     → Oscillators 1, 2
-a  s     → Oscillators 3, 4
-z  x     → Oscillators 5, 6
+q  w     → Oscillator Drone 1, 2
+a  s     → Oscillator Drone 3, 4
+z  x     → Oscillator Drone 5, 6
 ```
 
-**Design Note**: This left-hand layout allows you to control oscillators with your left hand while using your right hand for mouse/trackpad to adjust parameters.
+**Sequence Mute Toggle (erdfcv):**
+```
+e  r     → Sequence Mute 1, 2
+d  f     → Sequence Mute 3, 4
+c  v     → Sequence Mute 5, 6
+```
+
+**Design Note**: This left-hand layout allows you to control oscillators and sequences with your left hand while using your right hand for mouse/trackpad to adjust parameters. The sequence mute keys (erdfcv) are positioned directly above the drone toggle keys (qwaszx), making them easy to reach with the same finger positions.
 
 ## Visual Feedback
 
 All keyboard shortcuts provide visual feedback:
 
 - **Play/Pause**: Button state changes
-- **Oscillator Toggle**: Key letter on oscillator UI updates to show muted state
+- **Oscillator Drone Toggle**: "Drone On" / "Drone Off" button state changes
+- **Sequence Mute Toggle**: "Mute Seq" button state changes
 
 ## Usage Tips
 
 ### Performance Mode
 
 1. Start the sequencer with `Space`
-2. Use Q/W/A/S/Z/X to mute/unmute oscillators in real-time
-3. Create dynamic arrangements by bringing oscillators in and out
+2. Use **qwaszx** to toggle oscillator drones on/off in real-time
+3. Use **erdfcv** to mute/unmute sequences independently
+4. Create dynamic arrangements by bringing oscillators and sequences in and out
 
 ### Live Mixing
 
+**Drone Control (qwaszx):**
 - Toggle multiple oscillators rapidly for stuttering effects
 - Gradually add oscillators for build-ups
 - Remove oscillators for breakdowns
+
+**Sequence Control (erdfcv):**
+- Mute sequences while keeping drones active for texture changes
+- Create call-and-response patterns by alternating sequence mutes
+- Build rhythmic variation by selectively muting/unmuting sequences
 
 ### Practice Patterns
 
 Try these patterns to get comfortable:
 
+**Drone Toggle Patterns:**
 - **All On**: Press q, w, a, s, z, x in sequence
 - **Alternating**: Toggle q and s together, then w and z
 - **Build Up**: q → w → a → s → z → x (add one at a time)
 - **Break Down**: x → z → s → a → w → q (remove one at a time)
+
+**Sequence Mute Patterns:**
+- **Isolate Drone**: Press e to mute sequence 1, keeping only the drone
+- **Rhythmic Contrast**: Mute sequences 1, 3, 5 (e, d, c) for sparse rhythm
+- **Complementary**: Toggle e+r together for paired sequence control
 
 ## Limitations
 
@@ -160,7 +222,7 @@ Potential keyboard shortcuts being considered:
 - Shift + keys for alternative functions
 - Record/stop recording shortcuts
 - Effect bypass shortcuts
-- Preset loading shortcuts (0-9)
+- Preset loading shortcuts
 
 ## Accessibility
 
@@ -185,7 +247,7 @@ Keyboard shortcuts are implemented using:
 ### Event Handling
 
 - Shortcuts use `key` property (not `keyCode`)
-- Case-sensitive (lowercase keys only: q, w, a, s, z, x, p)
+- Case-sensitive (lowercase keys only: q, w, a, s, z, x, e, r, d, f, c, v, o, p)
 - Prevents default browser behavior where appropriate
 
 ### Code Reference
@@ -212,18 +274,29 @@ Keyboard shortcuts work consistently across platforms:
 Print or save this quick reference:
 
 ```
-┌──────────────────────────────────────┐
-│     TONE DRONE KEYBOARD SHORTCUTS    │
-├──────────────────────────────────────┤
-│  Space  │  Play/Pause Sequencer      │
-│    o    │  Play PolySynth 1 (666 Hz) │
-│    p    │  Play PolySynth 2 (999 Hz) │
-├─────────┼────────────────────────────┤
-│    q    │  Toggle Oscillator 1       │
-│    w    │  Toggle Oscillator 2       │
-│    a    │  Toggle Oscillator 3       │
-│    s    │  Toggle Oscillator 4       │
-│    z    │  Toggle Oscillator 5       │
-│    x    │  Toggle Oscillator 6       │
-└─────────┴────────────────────────────┘
+┌─────────────────────────────────────────┐
+│      TONE DRONE KEYBOARD SHORTCUTS      │
+├─────────────────────────────────────────┤
+│  Space  │  Play/Pause Sequencer         │
+│    o    │  Play PolySynth 1 (666 Hz)    │
+│    p    │  Play PolySynth 2 (999 Hz)    │
+├─────────┼───────────────────────────────┤
+│ OSCILLATOR DRONE TOGGLE (qwaszx)        │
+├─────────┼───────────────────────────────┤
+│    q    │  Toggle Oscillator 1 Drone    │
+│    w    │  Toggle Oscillator 2 Drone    │
+│    a    │  Toggle Oscillator 3 Drone    │
+│    s    │  Toggle Oscillator 4 Drone    │
+│    z    │  Toggle Oscillator 5 Drone    │
+│    x    │  Toggle Oscillator 6 Drone    │
+├─────────┼───────────────────────────────┤
+│ SEQUENCE MUTE TOGGLE (erdfcv)           │
+├─────────┼───────────────────────────────┤
+│    e    │  Toggle Sequence 1 Mute       │
+│    r    │  Toggle Sequence 2 Mute       │
+│    d    │  Toggle Sequence 3 Mute       │
+│    f    │  Toggle Sequence 4 Mute       │
+│    c    │  Toggle Sequence 5 Mute       │
+│    v    │  Toggle Sequence 6 Mute       │
+└─────────┴───────────────────────────────┘
 ```
