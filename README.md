@@ -76,7 +76,7 @@ The app will open at `http://localhost:5173` (or another port if 5173 is in use)
 - **Waveform Selector**: Choose sine, square, triangle or sawtooth
 - **Pan Slider**: Position oscillator in the stereo field
 - **Step Grid**: Click boxes to program which steps trigger notes
-- **Start Button**: Controls drone on/off. Works independently of the step sequencers.
+- **Drone On/Off Button**: Controls drone on/off. Works independently of the step sequencers.
 
 ### Effects Bus
 
