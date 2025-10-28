@@ -58,6 +58,7 @@ function Oscillators({
   const [minFreq, setMinFreq] = useState(DEFAULT_OSCILLATORS_STATE.minFreq);
   const [maxFreq, setMaxFreq] = useState(DEFAULT_OSCILLATORS_STATE.maxFreq);
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
+  const [muteKeys] = useState<string[]>(["e", "r", "d", "f", "c", "v"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
   const [patternDensity, setPatternDensity] = useState(50);
   const [mutedSequences, setMutedSequences] = useState<boolean[]>(
@@ -379,6 +380,7 @@ function Oscillators({
                 oscillator={oscillator.oscillator}
                 panner={synths[i].panner}
                 playPauseKey={playKeys[i]}
+                muteSequenceKey={muteKeys[i]}
                 sequence={sequences[i]}
                 sequenceIndex={i}
                 synth={synths[i].synth}
