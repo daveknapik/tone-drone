@@ -11,8 +11,8 @@ export class TransportPage extends BasePage {
 
   // Locators - Using semantic selectors
   get playPauseButton() {
-    // Button text changes between "Play Sequences" and "Pause Sequences"
-    return this.page.getByRole("button", { name: /sequences/i });
+    // Button text changes between "Play" and "Pause"
+    return this.page.getByRole("button", { name: /^(play|pause)$/i });
   }
 
   get bpmSlider() {
@@ -25,8 +25,8 @@ export class TransportPage extends BasePage {
     const isPlaying = await this.isPlaying();
     if (!isPlaying) {
       await this.playPauseButton.click();
-      // Wait for UI to update to "Pause Sequences"
-      await expect(this.playPauseButton).toContainText("Pause Sequences");
+      // Wait for UI to update to "Pause"
+      await expect(this.playPauseButton).toContainText("Pause");
     }
   }
 
@@ -34,8 +34,8 @@ export class TransportPage extends BasePage {
     const isPlaying = await this.isPlaying();
     if (isPlaying) {
       await this.playPauseButton.click();
-      // Wait for UI to update to "Play Sequences"
-      await expect(this.playPauseButton).toContainText("Play Sequences");
+      // Wait for UI to update to "Play"
+      await expect(this.playPauseButton).toContainText("Play");
     }
   }
 
@@ -43,7 +43,7 @@ export class TransportPage extends BasePage {
     const wasPlaying = await this.isPlaying();
     await this.playPauseButton.click();
     // Wait for button text to change
-    const expectedText = wasPlaying ? "Play Sequences" : "Pause Sequences";
+    const expectedText = wasPlaying ? "Play" : "Pause";
     await expect(this.playPauseButton).toContainText(expectedText);
   }
 
@@ -57,17 +57,17 @@ export class TransportPage extends BasePage {
     const wasPlaying = await this.isPlaying();
     await this.page.keyboard.press("Space");
     // Wait for button text to toggle
-    const expectedText = wasPlaying ? "Play Sequences" : "Pause Sequences";
+    const expectedText = wasPlaying ? "Play" : "Pause";
     await expect(this.playPauseButton).toContainText(expectedText);
   }
 
   // Assertions
   async expectPlaying(): Promise<void> {
-    await expect(this.playPauseButton).toContainText("Pause Sequences");
+    await expect(this.playPauseButton).toContainText("Pause");
   }
 
   async expectPaused(): Promise<void> {
-    await expect(this.playPauseButton).toContainText("Play Sequences");
+    await expect(this.playPauseButton).toContainText("Play");
   }
 
   async expectBpm(bpm: number): Promise<void> {
@@ -77,7 +77,7 @@ export class TransportPage extends BasePage {
   // Helpers
   async isPlaying(): Promise<boolean> {
     const text = await this.playPauseButton.textContent();
-    return text?.includes("Pause Sequences") ?? false;
+    return text?.includes("Pause") ?? false;
   }
 
   async getBpm(): Promise<number> {
