@@ -140,7 +140,7 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
           onParameterChange?.();
         }}
       />
-      <div className="mt-3">
+      <div className="mt-3 space-y-2">
         <OptionsSelector<BiquadFilterType>
           handleChange={(e) => {
             setType(e.target.value as BiquadFilterType);
@@ -148,6 +148,8 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
           }}
           value={type}
           options={["highpass", "lowpass", "bandpass", "notch"]}
+          useDropdownOnSmall={true}
+          label="Type"
         />
         <OptionsSelector<Tone.FilterRollOff>
           handleChange={(e) => {
@@ -156,6 +158,8 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
           }}
           value={rolloff}
           options={[-12, -24, -48, -96]}
+          useDropdownOnSmall={true}
+          label="Rolloff"
         />
         <OptionsSelector<OscillatorType>
           handleChange={(e) => {
@@ -164,6 +168,8 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
           }}
           value={oscillatorType}
           options={["sine", "square", "triangle", "sawtooth"]}
+          useDropdownOnSmall={true}
+          label="Wave"
         />
       </div>
     </div>

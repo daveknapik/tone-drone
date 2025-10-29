@@ -87,7 +87,7 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
         }}
       />
 
-      <div className="mt-3">
+      <div className="mt-3 space-y-2">
         <OptionsSelector<BiquadFilterType>
           handleChange={(e) => {
             setType(e.target.value as BiquadFilterType);
@@ -95,6 +95,8 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
           }}
           value={type}
           options={["highpass", "lowpass", "bandpass", "notch"]}
+          useDropdownOnSmall={true}
+          label="Type"
         />
         <OptionsSelector<Tone.FilterRollOff>
           handleChange={(e) => {
@@ -103,6 +105,8 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
           }}
           value={rolloff}
           options={[-12, -24, -48, -96]}
+          useDropdownOnSmall={true}
+          label="Rolloff"
         />
       </div>
     </div>

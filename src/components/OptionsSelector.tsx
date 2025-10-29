@@ -15,6 +15,8 @@ interface OptionsSelectorProps<T extends OptionType> {
   options: T[];
   value: string | number;
   renderLabel?: (option: T) => React.ReactNode;
+  useDropdownOnSmall?: boolean;
+  label?: string;
 }
 
 function OptionsSelector<T extends OptionType>({
@@ -23,6 +25,8 @@ function OptionsSelector<T extends OptionType>({
   options,
   value,
   renderLabel,
+  useDropdownOnSmall = false,
+  label,
 }: OptionsSelectorProps<T>) {
   const id = useId();
 
@@ -34,11 +38,23 @@ function OptionsSelector<T extends OptionType>({
     }
   };
 
-  return (
+  const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    // Create a synthetic event compatible with the radio input handler
+    const syntheticEvent = {
+      target: {
+        value: event.target.value,
+      },
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleChange(syntheticEvent);
+  };
+
+  // Radio buttons version (always shown on large screens, conditionally on small)
+  const radioButtons = (
     <div
       className={clsx(
         "flex flex-wrap space-x-2",
-        justifyBetween && "justify-between"
+        justifyBetween && "justify-between",
+        useDropdownOnSmall && "hidden sm:flex"
       )}
     >
       {options.map((option) => (
@@ -57,6 +73,31 @@ function OptionsSelector<T extends OptionType>({
         </div>
       ))}
     </div>
+  );
+
+  // Dropdown version (only shown on small screens if useDropdownOnSmall is true)
+  const dropdown = useDropdownOnSmall && (
+    <div className="sm:hidden">
+      {label && <label className="text-sm mr-2">{label}:</label>}
+      <select
+        value={value}
+        onChange={handleSelectChange}
+        className="bg-slate-700 dark:bg-slate-800 border border-pink-500 dark:border-sky-300 rounded px-2 py-1 text-sm w-full"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {renderLabel ? renderLabel(option) : buildLabelText(option)}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  return (
+    <>
+      {dropdown}
+      {radioButtons}
+    </>
   );
 }
 
