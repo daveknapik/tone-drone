@@ -370,37 +370,41 @@ function Oscillators({
             if (!sequences[i] || !synths[i]) return null;
 
             return (
-              <Oscillator
-                key={i}
-                channel={oscillator.channel}
-                currentBeat={currentBeat}
-                handleStepClick={handleStepClick}
-                maxFreq={maxFreq}
-                minFreq={minFreq}
-                oscillator={oscillator.oscillator}
-                panner={synths[i].panner}
-                playPauseKey={playKeys[i]}
-                muteSequenceKey={muteKeys[i]}
-                sequence={sequences[i]}
-                sequenceIndex={i}
-                synth={synths[i].synth}
-                updateSequenceFrequency={updateSequenceFrequencyDebounced}
-                ref={(el) => {
-                  oscillatorRefs.current[i] = el;
-                }}
-                onParameterChange={onParameterChange}
-                onOscillatorTypeChange={(type) => {
-                  setOscillatorTypes((prev) => {
-                    const newTypes = [...prev];
-                    newTypes[i] = type;
-                    return newTypes;
-                  });
-                }}
-                isSequenceMuted={mutedSequences[i]}
-                onMuteSequence={() => handleMuteSequence(i)}
-                onClearPattern={() => handleClearPattern(i)}
-                onRandomizePattern={() => handleRandomizePattern(i)}
-              />
+              <Fragment key={i}>
+                <Oscillator
+                  channel={oscillator.channel}
+                  currentBeat={currentBeat}
+                  handleStepClick={handleStepClick}
+                  maxFreq={maxFreq}
+                  minFreq={minFreq}
+                  oscillator={oscillator.oscillator}
+                  panner={synths[i].panner}
+                  playPauseKey={playKeys[i]}
+                  muteSequenceKey={muteKeys[i]}
+                  sequence={sequences[i]}
+                  sequenceIndex={i}
+                  synth={synths[i].synth}
+                  updateSequenceFrequency={updateSequenceFrequencyDebounced}
+                  ref={(el) => {
+                    oscillatorRefs.current[i] = el;
+                  }}
+                  onParameterChange={onParameterChange}
+                  onOscillatorTypeChange={(type) => {
+                    setOscillatorTypes((prev) => {
+                      const newTypes = [...prev];
+                      newTypes[i] = type;
+                      return newTypes;
+                    });
+                  }}
+                  isSequenceMuted={mutedSequences[i]}
+                  onMuteSequence={() => handleMuteSequence(i)}
+                  onClearPattern={() => handleClearPattern(i)}
+                  onRandomizePattern={() => handleRandomizePattern(i)}
+                />
+                {i < oscillators.length - 1 && (
+                  <hr className="sm:hidden w-full border-pink-500 dark:border-sky-300" />
+                )}
+              </Fragment>
             );
           })}
         </div>

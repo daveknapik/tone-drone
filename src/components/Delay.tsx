@@ -59,7 +59,7 @@ function Delay({
   });
 
   return (
-    <div className="place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5">
+    <div className="place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
       <div className="col-span-full mb-1">{label}</div>
       <Slider
         inputName="time"

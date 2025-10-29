@@ -9,6 +9,9 @@ function Effects({ children }: React.PropsWithChildren) {
     setExpandEffects((prev) => !prev);
   };
 
+  // Convert children to array for mapping
+  const childrenArray = Array.isArray(children) ? children : [children];
+
   return (
     <Fragment>
       <Heading expanded={expandEffects} toggleExpanded={toggleExpandEffects}>
@@ -16,11 +19,18 @@ function Effects({ children }: React.PropsWithChildren) {
       </Heading>
       <div
         className={clsx(
-          "grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 border-2 rounded border-pink-500 dark:border-sky-300 p-5",
+          "grid grid-cols-1 gap-x-2 gap-y-3 md:grid-cols-2 my-5 p-5",
           !expandEffects && "hidden"
         )}
       >
-        {children}
+        {childrenArray.map((child, i) => (
+          <Fragment key={i}>
+            {child}
+            {i < childrenArray.length - 1 && (
+              <hr className="sm:hidden w-full border-pink-500 dark:border-sky-300" />
+            )}
+          </Fragment>
+        ))}
       </div>
     </Fragment>
   );

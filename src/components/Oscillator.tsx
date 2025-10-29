@@ -232,7 +232,7 @@ function Oscillator({
 
   return (
     <div
-      className="border-2 rounded border-pink-500 dark:border-sky-300 p-6"
+      className="sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-6"
       data-testid={`osc-${sequenceIndex}-type`}
     >
       <Slider
