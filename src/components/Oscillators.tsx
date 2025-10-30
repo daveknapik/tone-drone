@@ -316,7 +316,7 @@ function Oscillators({
       </Heading>
       <div
         className={clsx(
-          "border-2 rounded border-pink-500 dark:border-sky-300 p-5 mb-3",
+          "sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5 mb-3",
           !expandOscillators && "hidden"
         )}
       >
