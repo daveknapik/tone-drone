@@ -234,6 +234,12 @@ function Oscillators({
     500
   );
 
+  // Debounce Tone.js synth envelope updates to reduce excessive set() calls during slider drags
+  const updateSynthEnvelopeDebounced = useDebounceCallback(
+    updateSynthEnvelope,
+    50 // 50ms provides responsive feel while avoiding excessive Tone.js updates
+  );
+
   const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     const form = e.currentTarget as HTMLFormElement;
@@ -330,8 +336,8 @@ function Oscillators({
   };
 
   const handleEnvelopeChange = (envelope: SynthEnvelopeParams): void => {
-    setSynthEnvelope(envelope);
-    updateSynthEnvelope(envelope);
+    setSynthEnvelope(envelope); // Update UI state immediately for responsive feel
+    updateSynthEnvelopeDebounced(envelope); // Debounce Tone.js updates to avoid churn
   };
 
   return (
