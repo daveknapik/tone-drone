@@ -102,6 +102,53 @@ export class PresetPage extends BasePage {
     await this.shareButton.click();
   }
 
+  // Simplified Save As API for tests
+  async openSaveAsDialog(): Promise<void> {
+    await this.openPresetMenu();
+
+    // Set up dialog handler to be ready
+    const dialogPromise = this.page.waitForEvent("dialog", { timeout: 5000 });
+    await this.saveAsButton.click();
+
+    // Wait for and store the dialog reference
+    const dialog = await dialogPromise;
+    expect(dialog.type()).toBe("prompt");
+
+    // Store dialog for subsequent calls
+    (this as any)._pendingDialog = dialog;
+  }
+
+  async typePresetName(name: string): Promise<void> {
+    // The dialog is already open from openSaveAsDialog
+    // We just need to accept it with the name
+    const dialog = (this as any)._pendingDialog;
+    if (!dialog) {
+      throw new Error(
+        "No pending dialog. Call openSaveAsDialog() first."
+      );
+    }
+    await dialog.accept(name);
+    delete (this as any)._pendingDialog;
+  }
+
+  async confirmSaveAs(): Promise<void> {
+    // Dialog is already accepted in typePresetName
+    // Wait for menu to close
+    await expect(this.newButton).not.toBeVisible();
+  }
+
+  // Simplified Share API for tests
+  async sharePreset(): Promise<void> {
+    await this.shareCurrentPreset();
+  }
+
+  async getSharedUrl(): Promise<string | null> {
+    // Wait for URL to be generated and displayed
+    const urlElement = this.page.getByTestId("share-url-display");
+    await urlElement.waitFor({ state: "visible", timeout: 5000 });
+    return await urlElement.textContent();
+  }
+
   async openPresetBrowser(): Promise<void> {
     await this.openPresetMenu();
     await this.browseAllButton.click();
