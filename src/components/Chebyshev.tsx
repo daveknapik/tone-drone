@@ -44,8 +44,8 @@ function Chebyshev({ chebyshev, ref, onParameterChange }: ChebyshevProps) {
   });
 
   return (
-    <div className="place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
-      <div className="col-span-full mb-1">Chebyshev</div>
+    <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
+      <div className="col-span-full mb-1 text-center">Chebyshev</div>
       <Slider
         handleChange={(e) => {
           setOrder(parseInt(e.target.value));

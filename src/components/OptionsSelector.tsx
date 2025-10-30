@@ -77,12 +77,12 @@ function OptionsSelector<T extends OptionType>({
 
   // Dropdown version (only shown on small screens if useDropdownOnSmall is true)
   const dropdown = useDropdownOnSmall && (
-    <div className="sm:hidden">
-      {label && <label className="text-sm mr-2">{label}:</label>}
+    <div className="sm:hidden w-full">
+      {label && <label className="mr-2">{label}:</label>}
       <select
         value={value}
         onChange={handleSelectChange}
-        className="bg-slate-700 dark:bg-slate-800 border border-pink-500 dark:border-sky-300 rounded px-2 py-1 text-sm w-full"
+        className="bg-slate-700 dark:bg-slate-800 border border-pink-500 dark:border-sky-300 rounded px-2 py-1 w-full"
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -94,10 +94,10 @@ function OptionsSelector<T extends OptionType>({
   );
 
   return (
-    <>
+    <div className={clsx(useDropdownOnSmall && "w-full")}>
       {dropdown}
       {radioButtons}
-    </>
+    </div>
   );
 }
 

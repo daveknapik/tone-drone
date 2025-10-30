@@ -44,8 +44,8 @@ function BitCrusher({ bitCrusher, ref, onParameterChange }: BitCrusherProps) {
   });
 
   return (
-    <div className="place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
-      <div className="col-span-full mb-1">Bitcrusher</div>
+    <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
+      <div className="col-span-full mb-1 text-center">Bitcrusher</div>
       <Slider
         inputName="bits"
         min={2}

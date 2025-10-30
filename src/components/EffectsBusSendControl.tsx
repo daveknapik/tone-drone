@@ -38,7 +38,7 @@ function EffectsBusSendControl({
   bus.current?.volume.setTargetAtTime(mainAudioEffectsBusVolume, 0, 0.01);
 
   return (
-    <div className="col-start-1 md:col-start-1 md:col-end-3 place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
+    <div className="col-start-1 md:col-start-1 md:col-end-3 sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
       <Slider
         inputName="bus"
         labelText="Effects Send"
