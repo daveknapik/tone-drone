@@ -11,6 +11,7 @@ import type { OscillatorParams } from "../types/OscillatorParams";
 import type { OscillatorsState } from "../types/OscillatorsParams";
 import type { Sequence } from "../types/Sequence";
 import type { PresetState } from "../types/Preset";
+import type { SynthEnvelopeParams } from "../types/SynthParams";
 
 /**
  * Centralized default values for all preset components
@@ -51,6 +52,23 @@ export const DEFAULT_OSCILLATORS_STATE: OscillatorsState = {
     steps: [...DEFAULT_SEQUENCE.steps],
   })),
   mutedSequences: Array(6).fill(false) as boolean[],
+  synthEnvelope: {
+    attack: 0.01,
+    decay: 0.1,
+    sustain: 0.5,
+    release: 0.1,
+  },
+};
+
+// ============================================================================
+// Synth (Step Sequencer) Defaults
+// ============================================================================
+
+export const DEFAULT_SYNTH_ENVELOPE_PARAMS: SynthEnvelopeParams = {
+  attack: 0.01, // Fast attack for percussive sequencer notes
+  decay: 0.1,
+  sustain: 0.5, // Medium sustain
+  release: 0.1, // Short release for staccato notes
 };
 
 // ============================================================================

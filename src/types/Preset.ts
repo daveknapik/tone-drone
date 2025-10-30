@@ -6,6 +6,7 @@ import { FilterParams } from "./FilterParams";
 import { Sequence } from "./Sequence";
 import { PolySynthsState } from "./PolySynthParams";
 import { OscillatorParams } from "./OscillatorParams";
+import { SynthEnvelopeParams } from "./SynthParams";
 
 /**
  * Global oscillator settings and all oscillator instances
@@ -15,6 +16,8 @@ export interface OscillatorsState {
   maxFreq: number;
   oscillators: OscillatorParams[];
   sequences: Sequence[];
+  mutedSequences?: boolean[];
+  synthEnvelope: SynthEnvelopeParams;
 }
 
 /**

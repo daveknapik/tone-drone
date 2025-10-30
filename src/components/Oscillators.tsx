@@ -15,11 +15,13 @@ import BpmControl from "./BpmControl";
 import FrequencyRangeControl from "./FrequencyRangeControl";
 import Heading from "./Heading";
 import Oscillator from "./Oscillator";
+import SynthEnvelopeControl from "./SynthEnvelopeControl";
 
 // import { useConnectChannelsToBus } from "../hooks/useConnectChannelsToBus";
 import {
   DEFAULT_OSCILLATOR_PARAMS,
   DEFAULT_OSCILLATORS_STATE,
+  DEFAULT_SYNTH_ENVELOPE_PARAMS,
 } from "../utils/presetDefaults";
 import { useOscillators } from "../hooks/useOscillators";
 import { useSequences } from "../hooks/useSequences";
@@ -30,6 +32,10 @@ import {
 } from "../types/OscillatorsParams";
 import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
 import { BpmControlHandle } from "../types/BpmParams";
+import {
+  SynthEnvelopeHandle,
+  SynthEnvelopeParams,
+} from "../types/SynthParams";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 import RandomizeFrequencyButton from "../components/RandomizeFrequencyButton";
@@ -65,12 +71,18 @@ function Oscillators({
     DEFAULT_OSCILLATORS_STATE.mutedSequences ??
       Array(OSCILLATOR_COUNT).fill(false)
   );
+  const [synthEnvelope, setSynthEnvelope] = useState<SynthEnvelopeParams>(
+    DEFAULT_SYNTH_ENVELOPE_PARAMS
+  );
 
   const [oscillators, , setOscillatorTypes] = useOscillators(
     undefined,
     bus.current ?? undefined
   );
-  const [synths] = useSynths(bus.current ?? undefined);
+  const [synths, , updateSynthEnvelope] = useSynths(
+    bus.current ?? undefined,
+    synthEnvelope
+  );
   const [sequences, setSequences] = useSequences(stepCount);
 
   const beat = useRef(0);
@@ -80,6 +92,7 @@ function Oscillators({
 
   // Create refs for each oscillator component
   const oscillatorRefs = useRef<(OscillatorHandle | null)[]>([]);
+  const synthEnvelopeRef = useRef<SynthEnvelopeHandle | null>(null);
 
   // Expose state to parent via ref
   useImperativeHandle(ref, () => ({
@@ -95,6 +108,9 @@ function Oscillators({
         oscillators: oscillatorParams,
         sequences,
         mutedSequences,
+        synthEnvelope:
+          synthEnvelopeRef.current?.getParams() ??
+          DEFAULT_SYNTH_ENVELOPE_PARAMS,
       };
     },
     setState: (state: OscillatorsState) => {
@@ -104,6 +120,12 @@ function Oscillators({
       setMutedSequences(
         state.mutedSequences ?? Array(OSCILLATOR_COUNT).fill(false)
       );
+
+      // Set synth envelope
+      const envelope = state.synthEnvelope ?? DEFAULT_SYNTH_ENVELOPE_PARAMS;
+      synthEnvelopeRef.current?.setParams(envelope);
+      setSynthEnvelope(envelope);
+      updateSynthEnvelope(envelope);
 
       // Set params on each oscillator child component
       state.oscillators.forEach((oscParams, index) => {
@@ -306,6 +328,11 @@ function Oscillators({
     onParameterChange?.();
   };
 
+  const handleEnvelopeChange = (envelope: SynthEnvelopeParams): void => {
+    setSynthEnvelope(envelope);
+    updateSynthEnvelope(envelope);
+  };
+
   return (
     <Fragment>
       <Heading
@@ -339,6 +366,18 @@ function Oscillators({
                     ref={bpmControlRef}
                   />
                 </div>
+              </div>
+
+              <div className="mt-4">
+                <h4 className="text-sm font-semibold mb-2 text-pink-500 dark:text-sky-300">
+                  Sequencer Note Envelope
+                </h4>
+                <SynthEnvelopeControl
+                  initialParams={synthEnvelope}
+                  onChange={handleEnvelopeChange}
+                  onParameterChange={onParameterChange}
+                  ref={synthEnvelopeRef}
+                />
               </div>
             </fieldset>
             <fieldset className="p-3 border-2 rounded border-pink-500 dark:border-sky-300 min-w-0">
