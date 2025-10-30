@@ -364,7 +364,7 @@ function Oscillators({
           </div>
         </div>
         <hr className="mt-8 border-pink-500 dark:border-sky-300 " />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 place-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8 mb-3 sm:place-items-center">
           {oscillators.map((oscillator, i) => {
             // Safety check: only render if we have corresponding sequence and synth
             if (!sequences[i] || !synths[i]) return null;

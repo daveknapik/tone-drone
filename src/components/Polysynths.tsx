@@ -67,7 +67,7 @@ function PolySynths({ polysynths, ref, onParameterChange }: PolySynthsProps) {
       </Heading>
       <div
         className={clsx(
-          "grid grid-cols-1 gap-12 my-5 place-items-center border-2 rounded border-pink-500 dark:border-sky-300 p-5",
+          "grid grid-cols-1 gap-12 my-5 sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5",
           !expandPolysynths && "hidden",
           polysynths.length > 1 && "md:grid-cols-2"
         )}
