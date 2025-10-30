@@ -371,9 +371,9 @@ function Oscillators({
                 </div>
               </div>
 
-              <div className="mt-4">
-                <h4 className="text-sm font-semibold mb-2 text-pink-500 dark:text-sky-300">
-                  Sequencer Note Envelope
+              <div className="mt-8">
+                <h4 className="mb-2 text-pink-500 dark:text-sky-300">
+                  Note Envelope
                 </h4>
                 <SynthEnvelopeControl
                   initialParams={synthEnvelope}
