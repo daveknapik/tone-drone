@@ -32,10 +32,7 @@ import {
 } from "../types/OscillatorsParams";
 import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
 import { BpmControlHandle } from "../types/BpmParams";
-import {
-  SynthEnvelopeHandle,
-  SynthEnvelopeParams,
-} from "../types/SynthParams";
+import { SynthEnvelopeHandle, SynthEnvelopeParams } from "../types/SynthParams";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 import RandomizeFrequencyButton from "../components/RandomizeFrequencyButton";
@@ -122,8 +119,7 @@ function Oscillators({
       );
 
       // Set synth envelope (fallback to default for backward compatibility)
-      const envelope = (state.synthEnvelope ??
-        DEFAULT_SYNTH_ENVELOPE_PARAMS);
+      const envelope = state.synthEnvelope ?? DEFAULT_SYNTH_ENVELOPE_PARAMS;
       synthEnvelopeRef.current?.setParams(envelope);
       setSynthEnvelope(envelope);
       updateSynthEnvelope(envelope);

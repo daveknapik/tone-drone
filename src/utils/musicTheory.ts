@@ -8,7 +8,7 @@
  */
 export const SCALE_PATTERNS = {
   // Western Classical Scales
-  "Major": [0, 2, 4, 5, 7, 9, 11],
+  Major: [0, 2, 4, 5, 7, 9, 11],
   "Natural Minor": [0, 2, 3, 5, 7, 8, 10],
   "Harmonic Minor": [0, 2, 3, 5, 7, 8, 11],
   "Melodic Minor": [0, 2, 3, 5, 7, 9, 11],
@@ -17,14 +17,14 @@ export const SCALE_PATTERNS = {
   // Western Pentatonic Scales
   "Pentatonic Major": [0, 2, 4, 7, 9],
   "Pentatonic Minor": [0, 3, 5, 7, 10],
-  "Blues": [0, 3, 5, 6, 7, 10],
+  Blues: [0, 3, 5, 6, 7, 10],
 
   // Church Modes
-  "Dorian": [0, 2, 3, 5, 7, 9, 10],
-  "Phrygian": [0, 1, 3, 5, 7, 8, 10],
-  "Lydian": [0, 2, 4, 6, 7, 9, 11],
-  "Mixolydian": [0, 2, 4, 5, 7, 9, 10],
-  "Locrian": [0, 1, 3, 5, 6, 8, 10],
+  Dorian: [0, 2, 3, 5, 7, 9, 10],
+  Phrygian: [0, 1, 3, 5, 7, 8, 10],
+  Lydian: [0, 2, 4, 6, 7, 9, 11],
+  Mixolydian: [0, 2, 4, 5, 7, 9, 10],
+  Locrian: [0, 1, 3, 5, 6, 8, 10],
 
   // Melodic Minor Modes
   "Lydian Dominant": [0, 2, 4, 6, 7, 9, 10],
@@ -35,29 +35,29 @@ export const SCALE_PATTERNS = {
   "Altered Scale": [0, 1, 3, 4, 6, 8, 10],
   "Diminished (W-H)": [0, 2, 3, 5, 6, 8, 9, 11],
   "Diminished (H-W)": [0, 1, 3, 4, 6, 7, 9, 10],
-  "Augmented": [0, 3, 4, 7, 8, 11],
+  Augmented: [0, 3, 4, 7, 8, 11],
 
   // Exotic/World Scales
   "Phrygian Dominant": [0, 1, 4, 5, 7, 8, 10],
   "Hungarian Minor": [0, 2, 3, 6, 7, 8, 11],
   "Double Harmonic": [0, 1, 4, 5, 7, 8, 11],
-  "Enigmatic": [0, 1, 4, 6, 8, 10, 11],
+  Enigmatic: [0, 1, 4, 6, 8, 10, 11],
   "Spanish 8-Tone": [0, 1, 3, 4, 5, 7, 8, 10],
 
   // Japanese Pentatonic Scales
-  "Hirajoshi": [0, 2, 3, 7, 8],
+  Hirajoshi: [0, 2, 3, 7, 8],
   "In Sen": [0, 1, 5, 7, 10],
-  "Iwato": [0, 1, 5, 6, 10],
-  "Kumoi": [0, 2, 3, 7, 9],
-  "Yo": [0, 2, 5, 7, 9],
+  Iwato: [0, 1, 5, 6, 10],
+  Kumoi: [0, 2, 3, 7, 9],
+  Yo: [0, 2, 5, 7, 9],
 
   // Other World Scales
-  "Balinese": [0, 1, 3, 7, 8],
-  "Egyptian": [0, 2, 5, 7, 10],
+  Balinese: [0, 1, 3, 7, 8],
+  Egyptian: [0, 2, 5, 7, 10],
 
   // Symmetric Scales
   "Whole Tone": [0, 2, 4, 6, 8, 10],
-  "Chromatic": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+  Chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
 } as const;
 
 export type ScaleType = keyof typeof SCALE_PATTERNS;
@@ -91,7 +91,7 @@ export const SCALE_CATEGORIES = {
   ],
   "Japanese Pentatonic": ["Hirajoshi", "In Sen", "Iwato", "Kumoi", "Yo"],
   "Other World": ["Balinese", "Egyptian"],
-  "Symmetric": ["Whole Tone", "Chromatic"],
+  Symmetric: ["Whole Tone", "Chromatic"],
 } as const satisfies Record<string, readonly ScaleType[]>;
 
 export type ScaleCategory = keyof typeof SCALE_CATEGORIES;
@@ -99,7 +99,20 @@ export type ScaleCategory = keyof typeof SCALE_CATEGORIES;
 /**
  * Note names for chromatic scale
  */
-const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] as const;
+const NOTE_NAMES = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+] as const;
 
 /**
  * Converts MIDI note number to frequency in Hz

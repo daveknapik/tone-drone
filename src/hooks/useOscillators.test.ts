@@ -117,14 +117,7 @@ describe("useOscillators", () => {
 
     it("should support mixed basic and fat oscillators", () => {
       const { result } = renderHook(() =>
-        useOscillators([
-          "basic",
-          "fat",
-          "basic",
-          "fat",
-          "basic",
-          "fat",
-        ])
+        useOscillators(["basic", "fat", "basic", "fat", "basic", "fat"])
       );
       const [oscillators] = result.current;
 
@@ -149,14 +142,7 @@ describe("useOscillators", () => {
 
     it("should recreate oscillators when types are updated", () => {
       const { result, rerender } = renderHook(() =>
-        useOscillators([
-          "basic",
-          "basic",
-          "basic",
-          "basic",
-          "basic",
-          "basic",
-        ])
+        useOscillators(["basic", "basic", "basic", "basic", "basic", "basic"])
       );
 
       // Initial state

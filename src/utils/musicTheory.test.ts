@@ -82,8 +82,18 @@ describe("musicTheory", () => {
 
     it("should handle all chromatic notes", () => {
       const octave4Notes = [
-        "C4", "C#4", "D4", "D#4", "E4", "F4",
-        "F#4", "G4", "G#4", "A4", "A#4", "B4"
+        "C4",
+        "C#4",
+        "D4",
+        "D#4",
+        "E4",
+        "F4",
+        "F#4",
+        "G4",
+        "G#4",
+        "A4",
+        "A#4",
+        "B4",
       ];
       octave4Notes.forEach((noteName, index) => {
         expect(midiToNoteName(60 + index)).toBe(noteName);
@@ -120,14 +130,14 @@ describe("musicTheory", () => {
         "Chromatic",
       ];
 
-      expectedScales.forEach(scale => {
+      expectedScales.forEach((scale) => {
         expect(SCALE_PATTERNS[scale]).toBeDefined();
         expect(Array.isArray(SCALE_PATTERNS[scale])).toBe(true);
       });
     });
 
     it("should have all scales start with 0", () => {
-      Object.values(SCALE_PATTERNS).forEach(pattern => {
+      Object.values(SCALE_PATTERNS).forEach((pattern) => {
         expect(pattern[0]).toBe(0);
       });
     });
@@ -142,7 +152,9 @@ describe("musicTheory", () => {
 
     it("should have chromatic scale with 12 notes", () => {
       expect(SCALE_PATTERNS.Chromatic.length).toBe(12);
-      expect(SCALE_PATTERNS.Chromatic).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+      expect(SCALE_PATTERNS.Chromatic).toEqual([
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+      ]);
     });
   });
 
@@ -157,7 +169,7 @@ describe("musicTheory", () => {
       const maxFreq = 400;
       const result = randomizeToScale(minFreq, maxFreq, 6);
 
-      result.frequencies.forEach(freq => {
+      result.frequencies.forEach((freq) => {
         expect(freq).toBeGreaterThanOrEqual(minFreq);
         expect(freq).toBeLessThanOrEqual(maxFreq);
       });
@@ -187,7 +199,7 @@ describe("musicTheory", () => {
     it("should handle narrow frequency ranges", () => {
       const result = randomizeToScale(440, 450, 6);
 
-      result.frequencies.forEach(freq => {
+      result.frequencies.forEach((freq) => {
         expect(freq).toBeGreaterThanOrEqual(440);
         expect(freq).toBeLessThanOrEqual(450);
       });
@@ -196,7 +208,7 @@ describe("musicTheory", () => {
     it("should handle wide frequency ranges", () => {
       const result = randomizeToScale(30, 1000, 6);
 
-      result.frequencies.forEach(freq => {
+      result.frequencies.forEach((freq) => {
         expect(freq).toBeGreaterThanOrEqual(30);
         expect(freq).toBeLessThanOrEqual(1000);
       });
@@ -208,7 +220,8 @@ describe("musicTheory", () => {
 
       // Extremely unlikely to be identical (but possible, so we check multiple properties)
       const identical =
-        JSON.stringify(result1.frequencies) === JSON.stringify(result2.frequencies) &&
+        JSON.stringify(result1.frequencies) ===
+          JSON.stringify(result2.frequencies) &&
         result1.scaleName === result2.scaleName;
 
       // This test might occasionally fail due to randomness, but it's very unlikely
@@ -220,7 +233,7 @@ describe("musicTheory", () => {
       const result = randomizeToScale(440, 441, 6);
 
       // All frequencies should be very close
-      result.frequencies.forEach(freq => {
+      result.frequencies.forEach((freq) => {
         expect(freq).toBeGreaterThanOrEqual(440);
         expect(freq).toBeLessThanOrEqual(441);
       });
@@ -232,11 +245,24 @@ describe("musicTheory", () => {
       // Convert frequencies to MIDI notes
       const midiNotes = result.frequencies.map(frequencyToMidi);
       const scalePattern = SCALE_PATTERNS[result.scaleType];
-      const rootNoteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+      const rootNoteNames = [
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B",
+      ];
       const rootIndex = rootNoteNames.indexOf(result.rootNote);
 
       // Each MIDI note modulo 12 should match (rootIndex + scaleInterval) modulo 12
-      midiNotes.forEach(midi => {
+      midiNotes.forEach((midi) => {
         const noteInOctave = midi % 12;
         const offsetFromRoot = (noteInOctave - rootIndex + 12) % 12;
         expect(scalePattern).toContain(offsetFromRoot);
@@ -248,7 +274,7 @@ describe("musicTheory", () => {
       const result = randomizeToScale(20, 25, 6);
 
       expect(result.frequencies).toHaveLength(6);
-      result.frequencies.forEach(freq => {
+      result.frequencies.forEach((freq) => {
         expect(freq).toBeGreaterThanOrEqual(20);
         expect(freq).toBeLessThanOrEqual(25);
       });

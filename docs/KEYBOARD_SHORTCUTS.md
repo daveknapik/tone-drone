@@ -132,6 +132,7 @@ Row 3:  z  x  c  v  (b  n)
 Active keys for oscillators 1-6:
 
 **Drone Toggle (qwaszx):**
+
 ```
 q  w     → Oscillator Drone 1, 2
 a  s     → Oscillator Drone 3, 4
@@ -139,6 +140,7 @@ z  x     → Oscillator Drone 5, 6
 ```
 
 **Sequence Mute Toggle (erdfcv):**
+
 ```
 e  r     → Sequence Mute 1, 2
 d  f     → Sequence Mute 3, 4
@@ -167,11 +169,13 @@ All keyboard shortcuts provide visual feedback:
 ### Live Mixing
 
 **Drone Control (qwaszx):**
+
 - Toggle multiple oscillators rapidly for stuttering effects
 - Gradually add oscillators for build-ups
 - Remove oscillators for breakdowns
 
 **Sequence Control (erdfcv):**
+
 - Mute sequences while keeping drones active for texture changes
 - Create call-and-response patterns by alternating sequence mutes
 - Build rhythmic variation by selectively muting/unmuting sequences
@@ -181,12 +185,14 @@ All keyboard shortcuts provide visual feedback:
 Try these patterns to get comfortable:
 
 **Drone Toggle Patterns:**
+
 - **All On**: Press q, w, a, s, z, x in sequence
 - **Alternating**: Toggle q and s together, then w and z
 - **Build Up**: q → w → a → s → z → x (add one at a time)
 - **Break Down**: x → z → s → a → w → q (remove one at a time)
 
 **Sequence Mute Patterns:**
+
 - **Isolate Drone**: Press e to mute sequence 1, keeping only the drone
 - **Rhythmic Contrast**: Mute sequences 1, 3, 5 (e, d, c) for sparse rhythm
 - **Complementary**: Toggle e+r together for paired sequence control

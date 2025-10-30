@@ -15,7 +15,9 @@ export async function startAudioContext(page: Page): Promise<void> {
   // Click anywhere on the page to initialize audio context
   await page.click("body");
   // Wait for app to be ready by checking that transport controls are visible
-  await expect(page.getByRole("button", { name: /^(play|pause)$/i })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /^(play|pause)$/i })
+  ).toBeVisible();
 }
 
 /**
