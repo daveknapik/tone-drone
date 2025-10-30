@@ -9,21 +9,21 @@ export class SynthEnvelopePage extends BasePage {
     super(page);
   }
 
-  // Locators - Using semantic selectors
+  // Locators - Using name attributes to differentiate from PolySynth envelope controls
   get attackSlider() {
-    return this.page.getByLabel(/^attack$/i);
+    return this.page.locator('input[name="synth-attack"]');
   }
 
   get decaySlider() {
-    return this.page.getByLabel(/^decay$/i);
+    return this.page.locator('input[name="synth-decay"]');
   }
 
   get sustainSlider() {
-    return this.page.getByLabel(/^sustain$/i);
+    return this.page.locator('input[name="synth-sustain"]');
   }
 
   get releaseSlider() {
-    return this.page.getByLabel(/^release$/i);
+    return this.page.locator('input[name="synth-release"]');
   }
 
   get envelopeHeading() {
