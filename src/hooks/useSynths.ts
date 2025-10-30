@@ -1,20 +1,40 @@
 import * as Tone from "tone";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState, useRef } from "react";
 import { SynthWithPanner } from "../types/SynthWithPanner";
+import { SynthEnvelopeParams } from "../types/SynthParams";
+import { DEFAULT_SYNTH_ENVELOPE_PARAMS } from "../utils/presetDefaults";
 
 const SYNTH_COUNT = 6;
 
 export function useSynths(
-  bus?: Tone.Channel
-): [SynthWithPanner[], Dispatch<SetStateAction<SynthWithPanner[]>>] {
+  bus?: Tone.Channel,
+  initialEnvelope: SynthEnvelopeParams = DEFAULT_SYNTH_ENVELOPE_PARAMS
+): [
+  SynthWithPanner[],
+  Dispatch<SetStateAction<SynthWithPanner[]>>,
+  (envelope: SynthEnvelopeParams) => void
+] {
   const [synths, setSynths] = useState<SynthWithPanner[]>([]);
+  const initialEnvelopeRef = useRef(initialEnvelope);
 
+  // Create synths only once on mount or when bus changes
+  // DO NOT recreate on envelope changes - use updateEnvelope instead!
   useEffect(() => {
     const newSynths: SynthWithPanner[] = [];
 
     for (let i = 0; i < SYNTH_COUNT; i++) {
-      const synth = new Tone.Synth();
+      const synth = new Tone.Synth({
+        envelope: {
+          attack: initialEnvelopeRef.current.attack,
+          decay: initialEnvelopeRef.current.decay,
+          sustain: initialEnvelopeRef.current.sustain,
+          release: initialEnvelopeRef.current.release,
+          attackCurve: "linear",
+          decayCurve: "exponential",
+          releaseCurve: "exponential",
+        },
+      });
       const panner = new Tone.Panner();
 
       synth.connect(panner);
@@ -35,7 +55,21 @@ export function useSynths(
 
       setSynths([]);
     };
-  }, [bus]);
+  }, [bus]); // Only recreate when bus changes, NOT on envelope changes!
 
-  return [synths, setSynths];
+  // Function to update envelope on all synths without recreating them
+  const updateEnvelope = (envelope: SynthEnvelopeParams) => {
+    synths.forEach(({ synth }) => {
+      synth.set({
+        envelope: {
+          attack: envelope.attack,
+          decay: envelope.decay,
+          sustain: envelope.sustain,
+          release: envelope.release,
+        },
+      });
+    });
+  };
+
+  return [synths, setSynths, updateEnvelope];
 }

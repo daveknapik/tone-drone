@@ -73,6 +73,7 @@ E2E tests are located in `e2e/tests/` and cover:
 - **Theme Toggle** (`theme.spec.ts`): Dark/light mode switching, persistence
 - **Transport Controls** (`transport.spec.ts`): Play/pause, BPM control, keyboard shortcuts
 - **Recording** (`recording.spec.ts`): Start/stop recording, download functionality
+- **Synth Envelope** (`synth-envelope.spec.ts`): ADSR envelope controls, preset integration, edge cases
 
 #### E2E Test Architecture
 
@@ -90,6 +91,7 @@ Key page objects:
 - `ThemePage`: Theme toggle interactions
 - `TransportPage`: Play/pause and BPM controls
 - `RecorderPage`: Recording functionality
+- `SynthEnvelopePage`: Synth envelope ADSR controls
 
 #### Playwright Locator Strategy
 
@@ -232,7 +234,7 @@ test("should do something", async ({ page }) => {
 - **Effects Bus**: Central audio routing through `useAudioEffectsBus` hook - connects all audio sources through a chain of effects
 - **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, etc.) has its own custom hook in `src/hooks/`
 - **Oscillators**: Created with Tone.Oscillator or Tone.FatOscillator, each paired with a Tone.Channel for individual volume/pan control. Users can toggle between basic and fat oscillator types for thicker, chorus-like sounds
-- **Synths**: Monophonic synthesizers for step sequencer note triggering, managed via `useSynths` hook
+- **Synths**: Monophonic synthesizers for step sequencer note triggering, managed via `useSynths` hook. Each synth has a configurable ADSR envelope for shaping the amplitude of triggered notes
 - **PolySynths**: Two polyphonic synthesizers for melodic elements, managed via `usePolysynths` hook
 
 ### Component Structure
@@ -256,6 +258,7 @@ test("should do something", async ({ page }) => {
 - **Oscillator Types**: Supports both Tone.Oscillator (basic, single voice) and Tone.FatOscillator (fat mode with multiple detuned voices). Type switching properly disposes and recreates oscillator instances while preserving playing state
 - **Fat Oscillator Parameters**: Auto-switches between basic (voices=1) and fat (voices>1) modes. When switching to fat mode, detune is automatically set to minimum of 1 cent to prevent silence. Voices slider is always visible (1-10 range). Detune slider is always visible but disabled when voices=1
 - **Step Sequencer**: 16-step sequencer with visual beat indication and real-time step editing. Supports per-oscillator pattern manipulation with mute, clear, and randomize controls
+- **Synth Envelope Controls**: Global ADSR envelope controls for all step sequencer synths. Controls attack (0-2s), decay (0-2s), sustain (0-1), and release (0-5s) parameters. Default values provide percussive notes (fast attack/release), but can be adjusted for pad-like sustained sounds
 - **Effects Chain**: Linear effects chain with send control for the main effects bus
 - **Recording**: Built-in recording functionality via `useRecorder` hook
 - **Theme Support**: Dark/light theme toggle using `useDarkMode` hook
@@ -270,10 +273,12 @@ Located in `src/types/`:
 - `OscillatorParams`: Interface for persistent oscillator state including frequency, waveform, volume, pan, oscillatorType, fatCount, and fatSpread
 - `OscillatorWithChannel`: Pairs Tone.Oscillator or Tone.FatOscillator with Tone.Channel and tracks the oscillator type
 - `SynthWithPanner`: Pairs Tone.Synth with Tone.Panner
+- `SynthEnvelopeParams`: Interface for ADSR envelope parameters (attack, decay, sustain, release)
+- `SynthEnvelopeHandle`: Imperative handle interface for synth envelope controls with getParams() and setParams() methods
 - `Sequence`: Defines step pattern with frequency and boolean steps array
 - `AudioEffect`: Base interface for audio effects
 - `Step`: Represents individual sequencer steps
-- `OscillatorsState`: Contains minFreq, maxFreq, array of OscillatorParams, array of Sequences, and optional mutedSequences boolean array
+- `OscillatorsState`: Contains minFreq, maxFreq, array of OscillatorParams, array of Sequences, optional mutedSequences boolean array, and synthEnvelope parameters
 - `OscillatorsHandle`: Imperative handle interface with getState() and setState() methods for reading/writing all oscillator state
 
 Located in `src/utils/musicTheory.ts`:
@@ -286,7 +291,7 @@ Located in `src/utils/musicTheory.ts`:
 
 - `useOscillators`: Creates and manages Tone.Oscillator or Tone.FatOscillator instances for continuous drone sounds. Fixed at 6 oscillators. Returns oscillators array, setOscillators setter, and setTypes setter for switching between basic and fat modes. Accepts optional oscillatorTypes array to initialize with specific types
 - `useSequences`: Manages step sequencer patterns and frequencies for 6 sequences
-- `useSynths`: Creates 6 monophonic Tone.Synth instances for step sequencer note triggering
+- `useSynths`: Creates 6 monophonic Tone.Synth instances for step sequencer note triggering. Accepts optional bus and initialEnvelope parameters. Returns [synths, setSynths, updateEnvelope] tuple. The updateEnvelope function allows real-time updates to the ADSR envelope on all synths
 - `usePolysynths`: Creates polyphonic synthesizers (currently 2 instances for melodic elements)
 - `useConnectChannelsToBus`: Automatically connects audio channels to the effects bus
 - `useRecorder`: Handles audio recording functionality
@@ -429,6 +434,7 @@ Preset state includes:
 - Oscillator settings (frequency, waveform, volume, pan, oscillator type, fat count, fat spread)
 - Sequencer patterns (16 steps per oscillator)
 - Sequence mute state (boolean array indicating which sequences are muted)
+- Synth envelope parameters (attack, decay, sustain, release for step sequencer notes)
 - All audio effect parameters
 - Effects bus send level
 - PolySynth settings (2 polysynths with independent parameters)
