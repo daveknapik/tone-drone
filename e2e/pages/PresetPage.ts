@@ -115,12 +115,14 @@ export class PresetPage extends BasePage {
     expect(dialog.type()).toBe("prompt");
 
     // Store dialog for subsequent calls
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (this as any)._pendingDialog = dialog;
   }
 
   async typePresetName(name: string): Promise<void> {
     // The dialog is already open from openSaveAsDialog
     // We just need to accept it with the name
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const dialog = (this as any)._pendingDialog;
     if (!dialog) {
       throw new Error(
@@ -128,6 +130,7 @@ export class PresetPage extends BasePage {
       );
     }
     await dialog.accept(name);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (this as any)._pendingDialog;
   }
 
