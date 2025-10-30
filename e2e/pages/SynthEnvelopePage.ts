@@ -27,7 +27,7 @@ export class SynthEnvelopePage extends BasePage {
   }
 
   get envelopeHeading() {
-    return this.page.getByText("Sequencer Note Envelope");
+    return this.page.getByText("Note Envelope");
   }
 
   // Actions
