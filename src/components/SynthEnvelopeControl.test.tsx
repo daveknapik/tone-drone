@@ -80,9 +80,7 @@ describe("SynthEnvelopeControl", () => {
 
     render(<SynthEnvelopeControl onParameterChange={handleParameterChange} />);
 
-    const releaseSlider = screen.getByLabelText(
-      /release/i
-    );
+    const releaseSlider = screen.getByLabelText(/release/i);
 
     // Use fireEvent for range input change
     fireEvent.change(releaseSlider, { target: { value: "3" } });

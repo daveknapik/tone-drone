@@ -52,9 +52,7 @@ export class RandomizeFrequencyPage extends BasePage {
     await expect(button).toBeVisible();
   }
 
-  async expectFrequenciesChanged(
-    beforeFrequencies: number[]
-  ): Promise<void> {
+  async expectFrequenciesChanged(beforeFrequencies: number[]): Promise<void> {
     const afterFrequencies = await this.getAllFrequencies();
 
     // At least some frequencies should have changed

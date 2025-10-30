@@ -360,12 +360,12 @@ export function randomizeToScale(
   minFreq: number,
   maxFreq: number,
   count = 6
-): RandomizeToScaleResult
+): RandomizeToScaleResult;
 
 // Helper conversions for working with scales
-export function midiToFrequency(midiNote: number): number
-export function frequencyToMidi(frequency: number): number
-export function midiToNoteName(midiNote: number): string
+export function midiToFrequency(midiNote: number): number;
+export function frequencyToMidi(frequency: number): number;
+export function midiToNoteName(midiNote: number): string;
 ```
 
 ### Sequencer Pattern Randomization
@@ -387,13 +387,10 @@ Located in `src/utils/patternUtils.ts`, the pattern randomization system provide
 
 ```typescript
 // Generate random pattern based on density (0-100%)
-export function randomizePattern(
-  stepCount: number,
-  density: number
-): boolean[]
+export function randomizePattern(stepCount: number, density: number): boolean[];
 
 // Clear all steps in a pattern
-export function clearPattern(stepCount: number): boolean[]
+export function clearPattern(stepCount: number): boolean[];
 ```
 
 **How Mute Works**:

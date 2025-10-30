@@ -1,9 +1,6 @@
 import Slider from "./Slider";
 import { useState, useImperativeHandle, useRef, useEffect } from "react";
-import {
-  SynthEnvelopeHandle,
-  SynthEnvelopeParams,
-} from "../types/SynthParams";
+import { SynthEnvelopeHandle, SynthEnvelopeParams } from "../types/SynthParams";
 import { DEFAULT_SYNTH_ENVELOPE_PARAMS } from "../utils/presetDefaults";
 
 interface SynthEnvelopeControlProps {

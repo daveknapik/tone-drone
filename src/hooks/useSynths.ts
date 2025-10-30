@@ -13,7 +13,7 @@ export function useSynths(
 ): [
   SynthWithPanner[],
   Dispatch<SetStateAction<SynthWithPanner[]>>,
-  (envelope: SynthEnvelopeParams) => void
+  (envelope: SynthEnvelopeParams) => void,
 ] {
   const [synths, setSynths] = useState<SynthWithPanner[]>([]);
   const initialEnvelopeRef = useRef(initialEnvelope);
