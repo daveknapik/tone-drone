@@ -37,8 +37,9 @@ export function useSynths(
         },
       });
 
-      // Set maxPolyphony to 8 - allows safe handling of up to 1.0s release times at 120 BPM
-      synth.maxPolyphony = 8;
+      // Set maxPolyphony to 40 - allows safe handling of up to 5.0s release times at 120 BPM
+      // Voice stealing will occur gracefully if all 16 steps are active with max release
+      synth.maxPolyphony = 40;
 
       const panner = new Tone.Panner();
 
