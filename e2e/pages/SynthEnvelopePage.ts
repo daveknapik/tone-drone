@@ -105,7 +105,7 @@ export class SynthEnvelopePage extends BasePage {
     await this.expectAttack(0.01);
     await this.expectDecay(0.1);
     await this.expectSustain(0.5);
-    await this.expectRelease(0.1);
+    await this.expectRelease(1.0);
   }
 
   // Helpers

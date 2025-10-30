@@ -56,7 +56,7 @@ export const DEFAULT_OSCILLATORS_STATE: OscillatorsState = {
     attack: 0.01,
     decay: 0.1,
     sustain: 0.5,
-    release: 0.1,
+    release: 1.0,
   },
 };
 
@@ -67,8 +67,8 @@ export const DEFAULT_OSCILLATORS_STATE: OscillatorsState = {
 export const DEFAULT_SYNTH_ENVELOPE_PARAMS: SynthEnvelopeParams = {
   attack: 0.01, // Fast attack for percussive sequencer notes
   decay: 0.1,
-  sustain: 0.5, // Medium sustain
-  release: 0.1, // Short release for staccato notes
+  sustain: 0.5, // Medium sustain level
+  release: 1.0, // Moderate release for natural decay
 };
 
 // ============================================================================
