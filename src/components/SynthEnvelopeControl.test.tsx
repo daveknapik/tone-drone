@@ -26,7 +26,7 @@ describe("SynthEnvelopeControl", () => {
     expect(parseFloat(attackSlider.value)).toBe(0.01);
     expect(parseFloat(decaySlider.value)).toBe(0.1);
     expect(parseFloat(sustainSlider.value)).toBe(0.5);
-    expect(parseFloat(releaseSlider.value)).toBe(0.1);
+    expect(parseFloat(releaseSlider.value)).toBe(1.0);
   });
 
   it("initializes sliders with provided initial params", () => {
