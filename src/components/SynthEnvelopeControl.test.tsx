@@ -155,10 +155,14 @@ describe("SynthEnvelopeControl", () => {
   it("has correct slider ranges", () => {
     render(<SynthEnvelopeControl />);
 
-    const attackSlider = screen.getByLabelText(/attack/i);
-    const decaySlider = screen.getByLabelText(/decay/i);
-    const sustainSlider = screen.getByLabelText(/sustain/i);
-    const releaseSlider = screen.getByLabelText(/release/i);
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const attackSlider = screen.getByLabelText(/attack/i) as HTMLInputElement;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const decaySlider = screen.getByLabelText(/decay/i) as HTMLInputElement;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const sustainSlider = screen.getByLabelText(/sustain/i) as HTMLInputElement;
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+    const releaseSlider = screen.getByLabelText(/release/i) as HTMLInputElement;
 
     // Attack: 0-2s
     expect(attackSlider.min).toBe("0");

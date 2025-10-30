@@ -30,6 +30,12 @@ describe("presetUrl", () => {
           steps: [true, false, false, false, true, false, false, false],
         },
       ],
+      synthEnvelope: {
+        attack: 0.01,
+        decay: 0.1,
+        sustain: 0.5,
+        release: 1.0,
+      },
     },
     polysynths: {
       polysynths: [

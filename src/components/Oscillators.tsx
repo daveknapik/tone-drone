@@ -123,7 +123,7 @@ function Oscillators({
 
       // Set synth envelope (fallback to default for backward compatibility)
       const envelope = (state.synthEnvelope ??
-        DEFAULT_SYNTH_ENVELOPE_PARAMS) as SynthEnvelopeParams;
+        DEFAULT_SYNTH_ENVELOPE_PARAMS);
       synthEnvelopeRef.current?.setParams(envelope);
       setSynthEnvelope(envelope);
       updateSynthEnvelope(envelope);

@@ -1,5 +1,6 @@
 import { Sequence } from "./Sequence";
 import { OscillatorParams } from "./OscillatorParams";
+import { SynthEnvelopeParams } from "./SynthParams";
 
 /**
  * State for the Oscillators component (global settings + all oscillators)
@@ -10,6 +11,7 @@ export interface OscillatorsState {
   oscillators: OscillatorParams[];
   sequences: Sequence[];
   mutedSequences?: boolean[];
+  synthEnvelope: SynthEnvelopeParams;
 }
 
 /**
