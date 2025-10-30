@@ -176,7 +176,7 @@ test.describe("Synth Envelope Preset Integration", () => {
     await envelopePage.expectDefaultEnvelope();
 
     // Navigate to shared URL
-    await presetPage.page.goto(sharedUrl as string);
+    await presetPage.page.goto(sharedUrl);
 
     // Wait for preset to load from URL
     await presetPage.page.waitForLoadState("networkidle");
