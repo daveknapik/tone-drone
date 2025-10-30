@@ -1,9 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, act, fireEvent } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import SynthEnvelopeControl from "./SynthEnvelopeControl";
 import { SynthEnvelopeHandle, SynthEnvelopeParams } from "../types/SynthParams";
+
+// Helper to get input element value safely
+function getInputValue(element: HTMLElement): string {
+  if (!("value" in element)) {
+    throw new Error("Element does not have a value property");
+  }
+  return element.value as string;
+}
 
 describe("SynthEnvelopeControl", () => {
   it("renders all four envelope sliders", () => {
@@ -18,15 +25,15 @@ describe("SynthEnvelopeControl", () => {
   it("initializes sliders with default values", () => {
     render(<SynthEnvelopeControl />);
 
-    const attackSlider = screen.getByLabelText(/attack/i) as HTMLInputElement;
-    const decaySlider = screen.getByLabelText(/decay/i) as HTMLInputElement;
-    const sustainSlider = screen.getByLabelText(/sustain/i) as HTMLInputElement;
-    const releaseSlider = screen.getByLabelText(/release/i) as HTMLInputElement;
+    const attackSlider = screen.getByLabelText(/attack/i);
+    const decaySlider = screen.getByLabelText(/decay/i);
+    const sustainSlider = screen.getByLabelText(/sustain/i);
+    const releaseSlider = screen.getByLabelText(/release/i);
 
-    expect(parseFloat(attackSlider.value)).toBe(0.01);
-    expect(parseFloat(decaySlider.value)).toBe(0.1);
-    expect(parseFloat(sustainSlider.value)).toBe(0.5);
-    expect(parseFloat(releaseSlider.value)).toBe(1.0);
+    expect(parseFloat(getInputValue(attackSlider))).toBe(0.01);
+    expect(parseFloat(getInputValue(decaySlider))).toBe(0.1);
+    expect(parseFloat(getInputValue(sustainSlider))).toBe(0.5);
+    expect(parseFloat(getInputValue(releaseSlider))).toBe(1.0);
   });
 
   it("initializes sliders with provided initial params", () => {
@@ -39,15 +46,15 @@ describe("SynthEnvelopeControl", () => {
 
     render(<SynthEnvelopeControl initialParams={initialParams} />);
 
-    const attackSlider = screen.getByLabelText(/attack/i) as HTMLInputElement;
-    const decaySlider = screen.getByLabelText(/decay/i) as HTMLInputElement;
-    const sustainSlider = screen.getByLabelText(/sustain/i) as HTMLInputElement;
-    const releaseSlider = screen.getByLabelText(/release/i) as HTMLInputElement;
+    const attackSlider = screen.getByLabelText(/attack/i);
+    const decaySlider = screen.getByLabelText(/decay/i);
+    const sustainSlider = screen.getByLabelText(/sustain/i);
+    const releaseSlider = screen.getByLabelText(/release/i);
 
-    expect(parseFloat(attackSlider.value)).toBe(0.5);
-    expect(parseFloat(decaySlider.value)).toBe(0.3);
-    expect(parseFloat(sustainSlider.value)).toBe(0.7);
-    expect(parseFloat(releaseSlider.value)).toBe(2.0);
+    expect(parseFloat(getInputValue(attackSlider))).toBe(0.5);
+    expect(parseFloat(getInputValue(decaySlider))).toBe(0.3);
+    expect(parseFloat(getInputValue(sustainSlider))).toBe(0.7);
+    expect(parseFloat(getInputValue(releaseSlider))).toBe(2.0);
   });
 
   it("calls onChange callback when slider values change", () => {
@@ -55,7 +62,7 @@ describe("SynthEnvelopeControl", () => {
 
     render(<SynthEnvelopeControl onChange={handleChange} />);
 
-    const attackSlider = screen.getByLabelText(/attack/i) as HTMLInputElement;
+    const attackSlider = screen.getByLabelText(/attack/i);
 
     // Use fireEvent for range input change
     fireEvent.change(attackSlider, { target: { value: "0.8" } });
@@ -75,7 +82,7 @@ describe("SynthEnvelopeControl", () => {
 
     const releaseSlider = screen.getByLabelText(
       /release/i
-    ) as HTMLInputElement;
+    );
 
     // Use fireEvent for range input change
     fireEvent.change(releaseSlider, { target: { value: "3" } });
@@ -98,7 +105,7 @@ describe("SynthEnvelopeControl", () => {
     expect(params).toEqual(initialParams);
   });
 
-  it("exposes setParams method via ref", async () => {
+  it("exposes setParams method via ref", () => {
     const ref = createRef<SynthEnvelopeHandle>();
 
     render(<SynthEnvelopeControl ref={ref} />);
@@ -110,22 +117,22 @@ describe("SynthEnvelopeControl", () => {
       release: 4.0,
     };
 
-    await act(async () => {
+    act(() => {
       ref.current?.setParams(newParams);
     });
 
-    const attackSlider = screen.getByLabelText(/attack/i) as HTMLInputElement;
-    const decaySlider = screen.getByLabelText(/decay/i) as HTMLInputElement;
-    const sustainSlider = screen.getByLabelText(/sustain/i) as HTMLInputElement;
-    const releaseSlider = screen.getByLabelText(/release/i) as HTMLInputElement;
+    const attackSlider = screen.getByLabelText(/attack/i);
+    const decaySlider = screen.getByLabelText(/decay/i);
+    const sustainSlider = screen.getByLabelText(/sustain/i);
+    const releaseSlider = screen.getByLabelText(/release/i);
 
-    expect(parseFloat(attackSlider.value)).toBe(1.0);
-    expect(parseFloat(decaySlider.value)).toBe(0.8);
-    expect(parseFloat(sustainSlider.value)).toBe(0.4);
-    expect(parseFloat(releaseSlider.value)).toBe(4.0);
+    expect(parseFloat(getInputValue(attackSlider))).toBe(1.0);
+    expect(parseFloat(getInputValue(decaySlider))).toBe(0.8);
+    expect(parseFloat(getInputValue(sustainSlider))).toBe(0.4);
+    expect(parseFloat(getInputValue(releaseSlider))).toBe(4.0);
   });
 
-  it("updates getParams return value after setParams is called", async () => {
+  it("updates getParams return value after setParams is called", () => {
     const ref = createRef<SynthEnvelopeHandle>();
 
     render(<SynthEnvelopeControl ref={ref} />);
@@ -137,7 +144,7 @@ describe("SynthEnvelopeControl", () => {
       release: 2.5,
     };
 
-    await act(async () => {
+    act(() => {
       ref.current?.setParams(newParams);
     });
 
@@ -148,10 +155,10 @@ describe("SynthEnvelopeControl", () => {
   it("has correct slider ranges", () => {
     render(<SynthEnvelopeControl />);
 
-    const attackSlider = screen.getByLabelText(/attack/i) as HTMLInputElement;
-    const decaySlider = screen.getByLabelText(/decay/i) as HTMLInputElement;
-    const sustainSlider = screen.getByLabelText(/sustain/i) as HTMLInputElement;
-    const releaseSlider = screen.getByLabelText(/release/i) as HTMLInputElement;
+    const attackSlider = screen.getByLabelText(/attack/i);
+    const decaySlider = screen.getByLabelText(/decay/i);
+    const sustainSlider = screen.getByLabelText(/sustain/i);
+    const releaseSlider = screen.getByLabelText(/release/i);
 
     // Attack: 0-2s
     expect(attackSlider.min).toBe("0");
