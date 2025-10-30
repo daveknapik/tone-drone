@@ -24,7 +24,7 @@ interface OscillatorProps {
   muteSequenceKey: string;
   sequence: Sequence;
   sequenceIndex: number;
-  synth: Tone.Synth;
+  synth: Tone.PolySynth<Tone.Synth>;
   updateSequenceFrequency: (sequenceIndex: number, frequency: number) => void;
   ref?: React.Ref<OscillatorHandle>;
   onParameterChange?: () => void;
@@ -215,13 +215,8 @@ function Oscillator({
       const f = pendingFreqRef.current;
       if (typeof f === "number") {
         setFrequency(f); // update oscillator target
-        const now = Tone.now();
-        const synthFreq = (synth as unknown as { frequency: unknown })
-          .frequency;
-        if (hasCancelScheduledValues(synthFreq)) {
-          synthFreq.cancelScheduledValues(now);
-        }
-        synth.frequency.setValueAtTime(f, now);
+        // Note: PolySynth doesn't have a frequency property -
+        // frequency is specified when triggering notes via triggerAttackRelease
         updateSequenceFrequency(sequenceIndex, f);
         onParameterChange?.();
         pendingFreqRef.current = null;

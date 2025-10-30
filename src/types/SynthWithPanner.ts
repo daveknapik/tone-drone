@@ -1,6 +1,6 @@
 import * as Tone from "tone";
 
 export interface SynthWithPanner {
-  synth: Tone.Synth;
+  synth: Tone.PolySynth<Tone.Synth>;
   panner: Tone.Panner;
 }

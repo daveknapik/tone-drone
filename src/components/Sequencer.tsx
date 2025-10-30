@@ -9,7 +9,7 @@ interface SequencerProps {
   panner: Tone.Panner;
   sequence: Sequence;
   sequenceIndex: number;
-  synth: Tone.Synth;
+  synth: Tone.PolySynth<Tone.Synth>;
   volume: number;
   waveform: string;
 }

@@ -24,7 +24,8 @@ export function useSynths(
     const newSynths: SynthWithPanner[] = [];
 
     for (let i = 0; i < SYNTH_COUNT; i++) {
-      const synth = new Tone.Synth({
+      // Use PolySynth to prevent clicks/pops from overlapping notes
+      const synth = new Tone.PolySynth(Tone.Synth, {
         envelope: {
           attack: initialEnvelopeRef.current.attack,
           decay: initialEnvelopeRef.current.decay,
@@ -35,6 +36,10 @@ export function useSynths(
           releaseCurve: "exponential",
         },
       });
+
+      // Set maxPolyphony to 8 - allows safe handling of up to 1.0s release times at 120 BPM
+      synth.maxPolyphony = 8;
+
       const panner = new Tone.Panner();
 
       synth.connect(panner);

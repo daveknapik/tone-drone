@@ -121,8 +121,9 @@ function Oscillators({
         state.mutedSequences ?? Array(OSCILLATOR_COUNT).fill(false)
       );
 
-      // Set synth envelope
-      const envelope = state.synthEnvelope ?? DEFAULT_SYNTH_ENVELOPE_PARAMS;
+      // Set synth envelope (fallback to default for backward compatibility)
+      const envelope = (state.synthEnvelope ??
+        DEFAULT_SYNTH_ENVELOPE_PARAMS) as SynthEnvelopeParams;
       synthEnvelopeRef.current?.setParams(envelope);
       setSynthEnvelope(envelope);
       updateSynthEnvelope(envelope);

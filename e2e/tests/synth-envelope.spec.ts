@@ -170,13 +170,14 @@ test.describe("Synth Envelope Preset Integration", () => {
     // Get the shared URL
     const sharedUrl = await presetPage.getSharedUrl();
     expect(sharedUrl).toBeTruthy();
+    if (!sharedUrl) throw new Error("Failed to get shared URL");
 
     // Create new preset to reset state
     await presetPage.createNewPreset();
     await envelopePage.expectDefaultEnvelope();
 
     // Navigate to shared URL
-    await presetPage.page.goto(sharedUrl);
+    await presetPage.page.goto(sharedUrl as string);
 
     // Wait for preset to load from URL
     await presetPage.page.waitForLoadState("networkidle");
