@@ -82,7 +82,7 @@ function OptionsSelector<T extends OptionType>({
       <select
         value={value}
         onChange={handleSelectChange}
-        className="bg-slate-700 dark:bg-slate-800 border border-pink-500 dark:border-sky-300 rounded px-2 py-1 w-full"
+        className="bg-pink-100 dark:bg-gray-700 border border-pink-500 dark:border-sky-300 rounded px-2 py-1 w-full"
       >
         {options.map((option) => (
           <option key={option} value={option}>
