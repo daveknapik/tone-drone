@@ -12,6 +12,7 @@ import type { OscillatorsState } from "../types/OscillatorsParams";
 import type { Sequence } from "../types/Sequence";
 import type { PresetState } from "../types/Preset";
 import type { SynthEnvelopeParams } from "../types/SynthParams";
+import type { ModulationMatrixState } from "../types/ModulationMatrixParams";
 
 /**
  * Centralized default values for all preset components
@@ -140,6 +141,20 @@ export const DEFAULT_DELAY_PARAMS: DelayParams = {
 export const DEFAULT_EFFECTS_BUS_SEND = -15;
 
 // ============================================================================
+// Modulation Matrix Defaults
+// ============================================================================
+
+export const DEFAULT_MODULATION_MATRIX_STATE: ModulationMatrixState = {
+  lfos: [
+    { frequency: 0.5, type: "sine", amplitude: 1 },
+    { frequency: 1, type: "triangle", amplitude: 1 },
+    { frequency: 2, type: "square", amplitude: 1 },
+    { frequency: 4, type: "sawtooth", amplitude: 1 },
+  ],
+  routes: [],
+};
+
+// ============================================================================
 // Transport Defaults
 // ============================================================================
 
@@ -161,5 +176,6 @@ export const DEFAULT_PRESET_STATE: PresetState = {
     delay: DEFAULT_DELAY_PARAMS,
   },
   effectsBusSend: DEFAULT_EFFECTS_BUS_SEND,
+  modulationMatrix: DEFAULT_MODULATION_MATRIX_STATE,
   bpm: DEFAULT_BPM,
 };

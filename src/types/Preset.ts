@@ -7,6 +7,7 @@ import { Sequence } from "./Sequence";
 import { PolySynthsState } from "./PolySynthParams";
 import { OscillatorParams } from "./OscillatorParams";
 import { SynthEnvelopeParams } from "./SynthParams";
+import { ModulationMatrixState } from "./ModulationMatrixParams";
 
 /**
  * Global oscillator settings and all oscillator instances
@@ -42,6 +43,9 @@ export interface PresetState {
 
   // Effects bus send level
   effectsBusSend: number;
+
+  // Modulation matrix configuration
+  modulationMatrix?: ModulationMatrixState;
 
   // Tempo in beats per minute
   bpm: number;
