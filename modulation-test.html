@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modulation Routing Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .control {
+            margin: 15px 0;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+        input[type="range"] {
+            width: 300px;
+        }
+        .value-display {
+            display: inline-block;
+            width: 80px;
+            text-align: right;
+        }
+        .status {
+            color: #4CAF50;
+            margin-left: 10px;
+        }
+        h2 {
+            color: #4CAF50;
+        }
+        select {
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎛️ Modulation Routing Test - Tone Drone Architecture</h1>
+
+    <div class="section">
+        <h2>Audio Start</h2>
+        <button id="startAudio">Start Audio Context</button>
+        <span id="audioStatus"></span>
+    </div>
+
+    <div class="section">
+        <h2>Oscillator 1 - Dual Source Architecture</h2>
+        <p>Testing: Continuous drone (Oscillator) + Sequenced notes (PolySynth)</p>
+
+        <button id="startDrone">Start Drone</button>
+        <button id="stopDrone">Stop Drone</button>
+        <button id="triggerNote">Trigger Note (C4)</button>
+        <button id="triggerChord">Trigger Chord (C-E-G)</button>
+        <hr>
+        <h3>🧪 Test: Regular Tone.Synth (NOT PolySynth)</h3>
+        <button id="triggerTestSynth">Trigger Test Synth (C4, 2s)</button>
+        <button id="triggerTestSynthLong">Trigger Test Synth (Long note)</button>
+
+        <div class="control">
+            <label>Drone Frequency:</label>
+            <input type="range" id="droneFreq" min="100" max="1000" value="220" step="1">
+            <span class="value-display" id="droneFreqDisplay">220 Hz</span>
+        </div>
+
+        <div class="control">
+            <label>Synth Frequency:</label>
+            <input type="range" id="synthFreq" min="100" max="1000" value="220" step="1">
+            <span class="value-display" id="synthFreqDisplay">220 Hz</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>LFO 1</h2>
+
+        <button id="startLFO">Start LFO</button>
+        <button id="stopLFO">Stop LFO</button>
+
+        <div class="control">
+            <label>LFO Rate:</label>
+            <input type="range" id="lfoRate" min="0.1" max="10" value="2" step="0.1">
+            <span class="value-display" id="lfoRateDisplay">2 Hz</span>
+        </div>
+
+        <div class="control">
+            <label>LFO Amplitude:</label>
+            <input type="range" id="lfoAmp" min="0" max="1" value="1" step="0.01">
+            <span class="value-display" id="lfoAmpDisplay">1.0</span>
+        </div>
+
+        <div class="control">
+            <label>LFO Waveform:</label>
+            <select id="lfoType">
+                <option value="sine">Sine</option>
+                <option value="triangle">Triangle</option>
+                <option value="square">Square</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Modulation Routing</h2>
+
+        <div class="control">
+            <label>Route 1 Destination:</label>
+            <select id="destination">
+                <option value="none">None</option>
+                <option value="both-frequency">Both Sources - Frequency</option>
+                <option value="both-volume">Both Sources - Volume</option>
+                <option value="both-pan">Both Sources - Pan</option>
+                <option value="drone-frequency">Drone Only - Frequency</option>
+                <option value="synth-frequency">Synth Only - Frequency</option>
+                <option value="drone-volume">Drone Only - Volume</option>
+                <option value="synth-volume">Synth Only - Volume</option>
+                <option value="drone-pan">Drone Only - Pan</option>
+                <option value="synth-pan">Synth Only - Pan</option>
+                <optgroup label="🧪 Test: Regular Tone.Synth">
+                    <option value="testsynth-frequency">Test Synth - Frequency</option>
+                    <option value="testsynth-volume">Test Synth - Volume</option>
+                    <option value="testsynth-pan">Test Synth - Pan</option>
+                </optgroup>
+            </select>
+            <button id="connectRoute">Connect</button>
+            <button id="disconnectRoute">Disconnect</button>
+            <span class="status" id="routeStatus"></span>
+        </div>
+
+        <div class="control">
+            <label>Modulation Depth:</label>
+            <input type="range" id="modDepth" min="0" max="1" value="0" step="0.01">
+            <span class="value-display" id="modDepthDisplay">0.00</span>
+        </div>
+
+        <div class="control" style="margin-top: 20px; padding: 10px; background: #333; border-radius: 4px;">
+            <strong>Debug Info:</strong>
+            <div id="debugInfo" style="font-family: monospace; font-size: 12px; margin-top: 5px;"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        // Global audio objects
+        let audioContext;
+        let drone; // Continuous oscillator
+        let droneChannel;
+        let polysynth; // For sequenced notes
+        let synthChannel;
+        let synthPanner; // Panner for synth
+        let lfo;
+
+        // Modulation objects
+        let frequencyScaler;  // For scaling frequency modulation
+        let volumeScaler;     // For scaling volume modulation
+        let panScaler;        // For scaling pan modulation
+        let depthMultiplier;  // For controlling modulation depth
+
+        // Connection tracking
+        let activeConnections = [];
+
+        function log(message) {
+            const results = document.getElementById('testResults');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML = `<div>[${timestamp}] ${message}</div>` + results.innerHTML;
+        }
+
+        // Initialize audio
+        document.getElementById('startAudio').addEventListener('click', async () => {
+            await Tone.start();
+            document.getElementById('audioStatus').textContent = '✅ Audio Context Started';
+
+            // Create continuous drone oscillator
+            drone = new Tone.Oscillator(220, "sine").toDestination();
+            droneChannel = new Tone.Channel().toDestination();
+            drone.disconnect();
+            drone.connect(droneChannel);
+
+            // Create polysynth for sequenced notes with panner
+            polysynth = new Tone.PolySynth(Tone.Synth);
+            synthPanner = new Tone.Panner(0); // Center
+            synthChannel = new Tone.Channel().toDestination();
+            polysynth.connect(synthPanner);
+            synthPanner.connect(synthChannel);
+
+            // Create regular Synth for comparison (NOT PolySynth)
+            window.testSynth = new Tone.Synth({
+                oscillator: { type: 'sawtooth' },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0.5, release: 0.5 }
+            });
+            window.testSynthPanner = new Tone.Panner(0);
+            window.testSynthChannel = new Tone.Channel().toDestination();
+            testSynth.connect(testSynthPanner);
+            testSynthPanner.connect(testSynthChannel);
+
+            // Create LFO
+            lfo = new Tone.LFO({
+                frequency: 2,
+                amplitude: 1,
+                min: -1,
+                max: 1,
+                type: "sine"
+            });
+
+            // Create scaling/multiplication nodes
+            frequencyScaler = new Tone.Scale(-100, 100); // ±100 cents
+            volumeScaler = new Tone.Scale(-30, 0); // ±30 dB
+            panScaler = new Tone.Scale(-1, 1); // ±1 (left to right)
+            depthMultiplier = new Tone.Multiply(0.5); // Initial depth
+
+            log('✅ Audio objects created: Oscillator (drone) + PolySynth (sequencer) + LFO');
+        });
+
+        // Drone controls
+        document.getElementById('startDrone').addEventListener('click', () => {
+            if (!drone) {
+                log('⚠️ Please click "Start Audio Context" first!');
+                return;
+            }
+            drone.start();
+            log('▶️ Drone started');
+        });
+
+        document.getElementById('stopDrone').addEventListener('click', () => {
+            if (!drone) {
+                log('⚠️ Please click "Start Audio Context" first!');
+                return;
+            }
+            drone.stop();
+            log('⏹️ Drone stopped');
+        });
+
+        document.getElementById('triggerNote').addEventListener('click', () => {
+            if (!polysynth) {
+                log('⚠️ Please click "Start Audio Context" first!');
+                return;
+            }
+            polysynth.triggerAttackRelease("C4", "8n");
+            log('🎵 Note triggered on PolySynth');
+        });
+
+        document.getElementById('triggerChord').addEventListener('click', () => {
+            if (!polysynth) {
+                log('⚠️ Please click "Start Audio Context" first!');
+                return;
+            }
+            polysynth.triggerAttackRelease(["C4", "E4", "G4"], "2n");
+            log('🎵 Chord triggered on PolySynth (C-E-G)');
+        });
+
+        document.getElementById('triggerTestSynth').addEventListener('click', () => {
+            if (!testSynth) {
+                log('⚠️ Please click "Start Audio Context" first!');
+                return;
+            }
+            testSynth.triggerAttackRelease("C4", "2n");
+            log('🧪 Test Synth: Triggered C4 (2s)');
+        });
+
+        document.getElementById('triggerTestSynthLong').addEventListener('click', () => {
+            if (!testSynth) {
+                log('⚠️ Please click "Start Audio Context" first!');
+                return;
+            }
+            testSynth.triggerAttack("C4");
+            log('🧪 Test Synth: Triggered C4 (sustained - will release in 4s)');
+            setTimeout(() => {
+                testSynth.triggerRelease();
+                log('🧪 Test Synth: Released');
+            }, 4000);
+        });
+
+        // Frequency controls
+        document.getElementById('droneFreq').addEventListener('input', (e) => {
+            if (!drone) return; // Silently ignore if not initialized
+            const freq = e.target.value;
+            drone.frequency.value = freq;
+            document.getElementById('droneFreqDisplay').textContent = `${freq} Hz`;
+        });
+
+        document.getElementById('synthFreq').addEventListener('input', (e) => {
+            const freq = e.target.value;
+            // For PolySynth, we need to set the frequency differently
+            // This is tricky - we'll just log it for now
+            document.getElementById('synthFreqDisplay').textContent = `${freq} Hz`;
+            log(`Note: PolySynth frequency is set per-note, not globally`);
+        });
+
+        // LFO controls
+        document.getElementById('startLFO').addEventListener('click', () => {
+            lfo.start();
+            log('🌊 LFO started');
+        });
+
+        document.getElementById('stopLFO').addEventListener('click', () => {
+            lfo.stop();
+            log('⏹️ LFO stopped');
+        });
+
+        document.getElementById('lfoRate').addEventListener('input', (e) => {
+            const rate = e.target.value;
+            lfo.frequency.value = rate;
+            document.getElementById('lfoRateDisplay').textContent = `${rate} Hz`;
+        });
+
+        document.getElementById('lfoAmp').addEventListener('input', (e) => {
+            const amp = e.target.value;
+            lfo.amplitude.value = amp;
+            document.getElementById('lfoAmpDisplay').textContent = parseFloat(amp).toFixed(2);
+        });
+
+        document.getElementById('lfoType').addEventListener('change', (e) => {
+            lfo.type = e.target.value;
+            log(`LFO waveform changed to ${e.target.value}`);
+        });
+
+        // Modulation depth with debouncing for smoother parameter changes
+        let depthUpdateTimeout = null;
+
+        document.getElementById('modDepth').addEventListener('input', (e) => {
+            const depth = parseFloat(e.target.value);
+
+            // Update display immediately for responsiveness
+            document.getElementById('modDepthDisplay').textContent = depth.toFixed(2);
+
+            // Clear any pending update
+            if (depthUpdateTimeout) {
+                clearTimeout(depthUpdateTimeout);
+            }
+
+            // Debounce: Wait 10ms before applying (reduces overlapping automations)
+            depthUpdateTimeout = setTimeout(() => {
+                const now = Tone.now();
+
+                // Use setTargetAtTime for smooth exponential approach
+                // This is better than linearRamp for continuous slider input
+                // timeConstant of 0.015 = ~95% of target in 45ms
+                depthMultiplier.factor.cancelScheduledValues(now);
+                depthMultiplier.factor.setTargetAtTime(depth, now, 0.015);
+
+                updateDebugInfo();
+            }, 10);
+        });
+
+        function updateDebugInfo() {
+            const debugDiv = document.getElementById('debugInfo');
+            if (depthMultiplier && lfo) {
+                // Get depth multiplier value (it's an AudioParam)
+                let depthValue = 'N/A';
+                try {
+                    depthValue = Number(depthMultiplier.factor.value).toFixed(3);
+                } catch (e) {
+                    depthValue = 'error';
+                }
+                
+                debugDiv.innerHTML = `
+                    <strong>LFO Frequency:</strong> ${Number(lfo.frequency.value).toFixed(2)} Hz<br>
+                    <strong>LFO Amplitude:</strong> ${Number(lfo.amplitude.value).toFixed(2)}<br>
+                    <strong>Depth Multiplier:</strong> ${depthValue}<br>
+                    <strong>LFO State:</strong> ${lfo.state}<br>
+                    <strong>Active Connections:</strong> ${activeConnections.length}<br>
+                    <strong>Drone Volume Param:</strong> ${Number(droneChannel.volume.value).toFixed(2)} dB<br>
+                    <strong>Synth Volume Param:</strong> ${Number(synthChannel.volume.value).toFixed(2)} dB
+                `;
+            }
+        }
+
+        // Connect routing
+        document.getElementById('connectRoute').addEventListener('click', async () => {
+            if (!lfo || !drone || !polysynth) {
+                log('⚠️ Please click "Start Audio Context" first!');
+                return;
+            }
+            
+            // First disconnect any existing routes (with fade)
+            await disconnectAll();
+
+            const destination = document.getElementById('destination').value;
+
+            if (destination === 'none') {
+                log('⚠️ No destination selected');
+                return;
+            }
+
+            // Ensure LFO is started
+            if (lfo.state !== 'started') {
+                lfo.start();
+                log('🌊 Auto-started LFO');
+            }
+            
+            // CRITICAL: Set depth to current slider value using smooth transition
+            const currentDepth = parseFloat(document.getElementById('modDepth').value);
+            const now = Tone.now();
+            depthMultiplier.factor.cancelScheduledValues(now);
+            depthMultiplier.factor.setTargetAtTime(currentDepth, now, 0.015);
+            log(`Setting depth multiplier to ${currentDepth.toFixed(3)} before connection`);
+
+            try {
+                switch(destination) {
+                    case 'both-frequency':
+                        // Connect LFO to DRONE (audio-rate via detune)
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(frequencyScaler);
+                        frequencyScaler.connect(drone.detune);
+
+                        activeConnections.push({ 
+                            scaler: frequencyScaler, 
+                            targets: [drone.detune] 
+                        });
+
+                        log('✅ Connected LFO to DRONE frequency (audio-rate via detune)');
+                        log('   Audio-rate modulation active - should hear vibrato on drone');
+                        
+                        // For PolySynth: Use control-rate polling workaround
+                        log('🔄 Setting up PolySynth frequency modulation (control-rate polling)...');
+                        
+                        // Create a Tone.Waveform to read the actual LFO signal values
+                        const lfoWaveform = new Tone.Waveform(128);
+                        frequencyScaler.connect(lfoWaveform);
+                        
+                        let freqDebugCount = 0;
+                        const polysynthFreqInterval = setInterval(() => {
+                            // Get waveform data and use the first sample as current value
+                            const waveformData = lfoWaveform.getValue();
+                            const currentValue = Array.isArray(waveformData) ? waveformData[0] : waveformData;
+                            
+                            // Guard against null/undefined values before signal chain is ready
+                            if (typeof currentValue !== 'number' || isNaN(currentValue)) {
+                                return;
+                            }
+                            
+                            // The value should be in the ±100 cents range (from frequencyScaler)
+                            // But Waveform normalizes to -1 to +1, so scale it
+                            const detuneValue = currentValue * 100; // Scale to ±100 cents
+                            
+                            polysynth.set({ detune: detuneValue });
+                            
+                            // Debug first few
+                            if (freqDebugCount < 10) {
+                                log(`   [Freq] Raw: ${currentValue.toFixed(3)}, Detune: ${detuneValue.toFixed(1)}¢`);
+                                freqDebugCount++;
+                            }
+                        }, 50); // 20Hz update rate
+                        
+                        activeConnections.push({ 
+                            type: 'polling', 
+                            interval: polysynthFreqInterval,
+                            waveform: lfoWaveform
+                        });
+                        
+                        log('✅ Started control-rate polling for PolySynth detune (20Hz)');
+                        log('   Note: PolySynth modulation is control-rate, not audio-rate');
+                        log('   ⚠️ Trigger notes to hear frequency modulation!');
+                        break;
+
+                    case 'both-volume':
+                        log('🧪 EXPERIMENTAL: Testing Tone.Gain approach instead of direct volume modulation');
+
+                        // Store original volumes (will restore these settings later)
+                        const droneBaseVol = droneChannel.volume.value;
+                        const synthBaseVol = synthChannel.volume.value;
+
+                        log(`📝 Channel volumes: Drone=${droneBaseVol.toFixed(1)}dB, Synth=${synthBaseVol.toFixed(1)}dB`);
+
+                        // Create gain nodes - keep them UNMODULATED initially (1.0 = unity)
+                        log('🎛️ Creating Tone.Gain nodes...');
+                        const droneModGain = new Tone.Gain(1);
+                        const synthModGain = new Tone.Gain(1);
+
+                        log('🎛️ Gain nodes created at unity (1.0)');
+
+                        // Connect sources to gain nodes FIRST (before any modulation)
+                        log('🔗 Connecting sources to gain nodes...');
+                        drone.disconnect();  // Disconnect from everything
+                        polysynth.disconnect();
+
+                        drone.connect(droneModGain);
+                        droneModGain.connect(droneChannel);
+
+                        // CRITICAL: Keep synthPanner in the signal path!
+                        polysynth.connect(synthPanner);
+                        synthPanner.connect(synthModGain);
+                        synthModGain.connect(synthChannel);
+
+                        log('✅ Audio routing updated (sources → gain nodes → channels)');
+                        log('   Audio should still be playing at this point...');
+
+                        // Now set up modulation signal chain
+                        log('🔌 Building modulation signal chain...');
+
+                        // Create constant signals for unity gain (base value)
+                        const droneUnity = new Tone.Signal(1);
+                        const synthUnity = new Tone.Signal(1);
+
+                        // Create Add nodes to sum: 1.0 + modulation
+                        const droneGainAdd = new Tone.Add();
+                        const synthGainAdd = new Tone.Add();
+
+                        // Scale modulation: depth * LFO → ±0.5
+                        const gainScale = new Tone.Scale(-0.5, 0.5);
+
+                        // Connect signal chain
+                        droneUnity.connect(droneGainAdd);
+                        synthUnity.connect(synthGainAdd);
+
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(gainScale);
+                        gainScale.connect(droneGainAdd);
+                        gainScale.connect(synthGainAdd);
+
+                        log('✅ Modulation signal chain built');
+
+                        // NOW connect to gain params and zero them
+                        log('⚡ Connecting modulation to gain params...');
+                        droneGainAdd.connect(droneModGain.gain);
+                        synthGainAdd.connect(synthModGain.gain);
+
+                        log('⚡ Setting gain params to 0 (modulation signals now control)...');
+                        droneModGain.gain.value = 0;
+                        synthModGain.gain.value = 0;
+
+                        activeConnections.push({
+                            scaler: gainScale,
+                            offsets: [droneUnity, synthUnity],
+                            adds: [droneGainAdd, synthGainAdd],
+                            gainNodes: [droneModGain, synthModGain],
+                            targets: [droneModGain.gain, synthModGain.gain],
+                            baseValues: [droneBaseVol, synthBaseVol],
+                            originalRouting: { drone: droneChannel, synth: synthChannel, synthPanner: synthPanner }
+                        });
+
+                        log('✅ Volume modulation active!');
+                        log('   Gain controlled by: 0 + (1.0 + LFO*depth*0.5)');
+                        log('   Range: 0.5 to 1.5 at full depth');
+                        break;
+
+                    case 'both-pan':
+                        // CRITICAL: Need separate signal chains for each target
+                        // Connecting one output to multiple inputs might not work reliably
+                        
+                        // Chain 1: LFO → depthMultiplier → drone pan
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(droneChannel.pan);
+                        
+                        // Chain 2: Create a second multiply node for synth
+                        const synthDepthMult = new Tone.Multiply();
+                        synthDepthMult.factor.value = depthMultiplier.factor.value;
+                        lfo.connect(synthDepthMult);
+                        synthDepthMult.connect(synthPanner.pan);
+                        
+                        // Keep both multipliers in sync when depth changes
+                        const syncInterval = setInterval(() => {
+                            synthDepthMult.factor.value = depthMultiplier.factor.value;
+                        }, 50);
+
+                        activeConnections.push({
+                            targets: [droneChannel.pan, synthPanner.pan],
+                            synthDepthMult: synthDepthMult,
+                            syncInterval: syncInterval
+                        });
+
+                        log('✅ Connected LFO to BOTH pan controls (separate signal chains)');
+                        log('   Pan range: -1 (left) to +1 (right)');
+                        log('   Trigger chord to hear panning effect');
+                        log('   Note: Each target has its own multiply node for reliability');
+                        
+                        // Debug: Monitor if LFO is actually producing output
+                        setTimeout(() => {
+                            const lfoTestWaveform = new Tone.Waveform(32);
+                            lfo.connect(lfoTestWaveform);
+                            setTimeout(() => {
+                                const testValue = lfoTestWaveform.getValue();
+                                const testSample = Array.isArray(testValue) ? testValue[0] : testValue;
+                                log(`🔍 [Pan Debug] LFO output: ${testSample}, Depth: ${depthMultiplier.factor.value}`);
+                                lfoTestWaveform.disconnect();
+                                lfoTestWaveform.dispose();
+                            }, 100);
+                        }, 500);
+                        break;
+
+                    case 'drone-frequency':
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(frequencyScaler);
+                        frequencyScaler.connect(drone.detune);
+                        activeConnections.push({ source: frequencyScaler, target: drone.detune });
+                        log('✅ Connected LFO to drone frequency only');
+                        break;
+
+                    case 'synth-frequency':
+                        // PolySynth architecture limitation:
+                        // Cannot directly connect audio-rate signals to affect all voices
+                        // Use control-rate polling with Tone.Waveform to read LFO values
+
+                        log('🔄 Setting up PolySynth frequency modulation (control-rate polling)...');
+                        
+                        // Build signal chain to scale LFO for frequency
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(frequencyScaler);
+                        
+                        // Create a Tone.Waveform to read the scaled LFO signal values
+                        const synthFreqWaveform = new Tone.Waveform(128);
+                        frequencyScaler.connect(synthFreqWaveform);
+                        
+                        let synthFreqDebugCount = 0;
+                        const synthFreqInterval = setInterval(() => {
+                            // Get waveform data and use the first sample as current value
+                            const waveformData = synthFreqWaveform.getValue();
+                            const currentValue = Array.isArray(waveformData) ? waveformData[0] : waveformData;
+                            
+                            // Guard against null/undefined values before signal chain is ready
+                            if (typeof currentValue !== 'number' || isNaN(currentValue)) {
+                                return;
+                            }
+                            
+                            // Waveform normalizes to -1 to +1, scale to ±100 cents
+                            const detuneValue = currentValue * 100;
+                            
+                            polysynth.set({ detune: detuneValue });
+                            
+                            // Debug first few
+                            if (synthFreqDebugCount < 10) {
+                                log(`   [Synth Freq] Raw: ${currentValue.toFixed(3)}, Detune: ${detuneValue.toFixed(1)}¢`);
+                                synthFreqDebugCount++;
+                            }
+                        }, 50); // 20Hz update rate
+
+                        activeConnections.push({ 
+                            type: 'polling', 
+                            interval: synthFreqInterval,
+                            waveform: synthFreqWaveform,
+                            scaler: frequencyScaler
+                        });
+                        
+                        log('✅ Started control-rate polling for PolySynth detune (20Hz)');
+                        log('   Note: PolySynth modulation is control-rate, not audio-rate');
+                        log('   ⚠️ Trigger notes to hear frequency modulation!');
+                        break;
+
+                    case 'drone-volume':
+                        const droneVolScale = new Tone.Scale(-20, 20);
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(droneVolScale);
+                        droneVolScale.connect(droneChannel.volume);
+                        activeConnections.push({ scaler: droneVolScale, targets: [droneChannel.volume] });
+                        log('✅ Connected LFO to drone volume only');
+                        break;
+
+                    case 'synth-volume':
+                        const synthVolScale = new Tone.Scale(-20, 20);
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(synthVolScale);
+                        synthVolScale.connect(synthChannel.volume);
+                        activeConnections.push({ scaler: synthVolScale, targets: [synthChannel.volume] });
+                        log('✅ Connected LFO to synth volume only');
+                        break;
+
+                    case 'drone-pan':
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(droneChannel.pan);
+                        activeConnections.push({ targets: [droneChannel.pan] });
+                        log('✅ Connected LFO to drone pan only');
+                        break;
+
+                    case 'synth-pan':
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(synthPanner.pan);
+                        activeConnections.push({ targets: [synthPanner.pan] });
+                        log('✅ Connected LFO to synth pan only');
+                        break;
+
+                    // Test: Regular Tone.Synth (NOT PolySynth)
+                    case 'testsynth-frequency':
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(frequencyScaler);
+                        frequencyScaler.connect(testSynth.detune);
+                        activeConnections.push({ scaler: frequencyScaler, targets: [testSynth.detune] });
+                        log('🧪 Connected LFO to Test Synth frequency (audio-rate detune)');
+                        log('   This is a regular Tone.Synth, NOT PolySynth');
+                        log('   Should support audio-rate modulation!');
+                        break;
+
+                    case 'testsynth-pan':
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(testSynthPanner.pan);
+                        activeConnections.push({ targets: [testSynthPanner.pan] });
+                        log('🧪 Connected LFO to Test Synth pan');
+                        log('   Trigger long note to hear panning effect');
+                        break;
+
+                    case 'testsynth-volume':
+                        log('🧪 Setting up volume modulation for Test Synth...');
+                        
+                        // Create gain node
+                        const testGain = new Tone.Gain(1);
+                        
+                        // Reconnect audio path
+                        testSynth.disconnect();
+                        testSynth.connect(testSynthPanner);
+                        testSynthPanner.connect(testGain);
+                        testGain.connect(testSynthChannel);
+                        
+                        // Build modulation signal: 1.0 + (LFO * depth * 0.5)
+                        const testUnity = new Tone.Signal(1);
+                        const testGainAdd = new Tone.Add();
+                        const testGainScale = new Tone.Scale(-0.5, 0.5);
+                        
+                        testUnity.connect(testGainAdd);
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(testGainScale);
+                        testGainScale.connect(testGainAdd);
+                        testGainAdd.connect(testGain.gain);
+                        testGain.gain.value = 0;
+                        
+                        activeConnections.push({
+                            scaler: testGainScale,
+                            offsets: [testUnity],
+                            adds: [testGainAdd],
+                            gainNodes: [testGain],
+                            targets: [testGain.gain],
+                            isTestSynth: true
+                        });
+                        
+                        log('🧪 Test Synth volume modulation active');
+                        log('   Trigger notes to hear volume tremolo');
+                        break;
+                }
+
+                document.getElementById('routeStatus').textContent = '✅ Connected';
+
+                // Update debug info
+                updateDebugInfo();
+
+                // Log expected behavior based on current depth
+                if (currentDepth === 0) {
+                    log('⚠️ Depth is 0: You should hear NO modulation effect');
+                } else if (currentDepth < 0.3) {
+                    log('📊 Low depth: Subtle modulation');
+                } else if (currentDepth < 0.7) {
+                    log('📊 Medium depth: Moderate modulation');
+                } else {
+                    log('📊 High depth: Strong modulation');
+                }
+            } catch (error) {
+                log(`❌ Error connecting: ${error}`);
+                log(`❌ Error type: ${error.constructor.name}`);
+                log(`❌ Error message: ${error.message}`);
+                console.error('Full error:', error);
+            }
+        });
+
+        // Disconnect routing
+        document.getElementById('disconnectRoute').addEventListener('click', async () => {
+            await disconnectAll();
+            document.getElementById('routeStatus').textContent = '⏹️ Disconnected';
+        });
+
+        async function disconnectAll() {
+            if (activeConnections.length === 0) {
+                return; // Nothing to disconnect
+            }
+            
+            log('🔌 Disconnecting routes...');
+
+            // Disconnect all connections
+            try {
+                // Disconnect LFO from everything
+                lfo.disconnect();
+
+                // Disconnect all intermediate nodes
+                activeConnections.forEach(conn => {
+                    // Handle polling connections
+                    if (conn.type === 'polling' && conn.interval) {
+                        clearInterval(conn.interval);
+                        log('⏹️ Stopped polling interval');
+                        
+                        // Dispose waveform/meter if it exists
+                        if (conn.waveform) {
+                            conn.waveform.disconnect();
+                            conn.waveform.dispose();
+                        }
+                        if (conn.meter) {
+                            conn.meter.disconnect();
+                            conn.meter.dispose();
+                        }
+                    }
+                    
+                    // Handle monitoring connections
+                    if (conn.type === 'monitoring' && conn.interval) {
+                        clearInterval(conn.interval);
+                    }
+                    
+                    // Cleanup synth depth multiplier
+                    if (conn.synthDepthMult) {
+                        conn.synthDepthMult.disconnect();
+                        conn.synthDepthMult.dispose();
+                    }
+                    
+                    // Cleanup sync interval
+                    if (conn.syncInterval) {
+                        clearInterval(conn.syncInterval);
+                    }
+
+                    // Restore original signal routing (for gain node approach)
+                    if (conn.gainNodes && conn.originalRouting) {
+                        try {
+                            // Disconnect the gain nodes
+                            conn.gainNodes.forEach(gainNode => {
+                                gainNode.disconnect();
+                            });
+
+                            // Reconnect sources directly to channels
+                            drone.disconnect();
+                            polysynth.disconnect();
+                            
+                            drone.connect(conn.originalRouting.drone);
+                            // Restore polysynth → synthPanner → synthChannel path
+                            polysynth.connect(conn.originalRouting.synthPanner);
+
+                            log('🔄 Restored original signal routing (bypassed gain nodes, restored panner)');
+
+                            // Dispose gain nodes
+                            conn.gainNodes.forEach(gainNode => gainNode.dispose());
+                        } catch (e) {
+                            log(`⚠️ Error restoring routing: ${e.message}`);
+                        }
+                    }
+
+                    // Disconnect and dispose offset signals and add nodes
+                    if (conn.offsets) {
+                        conn.offsets.forEach(signal => {
+                            try {
+                                signal.disconnect();
+                                signal.dispose();
+                            } catch (e) {
+                                // Already disconnected, ignore
+                            }
+                        });
+                    }
+
+                    if (conn.adds) {
+                        conn.adds.forEach(add => {
+                            try {
+                                add.disconnect();
+                                add.dispose();
+                            } catch (e) {
+                                // Already disconnected, ignore
+                            }
+                        });
+                    }
+
+                    // Restore base parameter values
+                    if (conn.baseValues && conn.targets && !conn.gainNodes) {
+                        conn.baseValues.forEach((baseVal, idx) => {
+                            if (conn.targets[idx]) {
+                                conn.targets[idx].value = baseVal;
+                                log(`🔄 Restored parameter to ${baseVal.toFixed(2)}`);
+                            }
+                        });
+                    }
+
+                    // Disconnect scalers
+                    if (conn.scaler) {
+                        try {
+                            conn.scaler.disconnect();
+                            conn.scaler.dispose();
+                        } catch (e) {
+                            // Already disconnected, ignore
+                        }
+                    }
+
+                    // Handle old-style node arrays
+                    if (conn.nodes) {
+                        conn.nodes.forEach(node => {
+                            try {
+                                node.disconnect();
+                            } catch (e) {
+                                // Already disconnected, ignore
+                            }
+                        });
+                    }
+
+                    // Handle old-style source
+                    if (conn.source) {
+                        try {
+                            conn.source.disconnect();
+                        } catch (e) {
+                            // Already disconnected, ignore
+                        }
+                    }
+                });
+
+                // Disconnect shared nodes
+                try {
+                    depthMultiplier.disconnect();
+                    frequencyScaler.disconnect();
+                    volumeScaler.disconnect();
+                    panScaler.disconnect();
+                } catch (e) {
+                    // Some might not be connected, ignore
+                }
+
+                // Reset polysynth detune to 0
+                if (polysynth) {
+                    polysynth.set({ detune: 0 });
+                }
+
+                activeConnections = [];
+                updateDebugInfo();
+                log('✅ All modulation connections disconnected');
+                
+            } catch (error) {
+                log(`⚠️ Error during disconnect: ${error.message}`);
+            }
+        }
+
+        // Log initial state
+        log('Page loaded. Click "Start Audio Context" to begin.');
+    </script>
+</body>
+</html>
+
