@@ -38,6 +38,9 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
       current: null,
     },
     bpmControl: droneSynthRef.current?.bpmControlRef ?? { current: null },
+    modulationMatrix: droneSynthRef.current?.modulationMatrixRef ?? {
+      current: null,
+    },
   };
 
   const presetManager = usePresetManager(refs);

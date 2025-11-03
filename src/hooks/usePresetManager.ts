@@ -9,6 +9,7 @@ import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
 import type { EffectsBusSendHandle } from "../components/EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
+import type { ModulationMatrixHandle } from "../types/ModulationMatrixParams";
 
 import {
   savePreset as savePresetToStorage,
@@ -18,7 +19,10 @@ import {
 } from "../utils/presetStorage";
 import { createPreset, updatePresetTimestamp } from "../utils/presetSerializer";
 import { extractPresetFromUrl } from "../utils/presetUrl";
-import { DEFAULT_BPM } from "../utils/presetDefaults";
+import {
+  DEFAULT_BPM,
+  DEFAULT_MODULATION_MATRIX_STATE,
+} from "../utils/presetDefaults";
 
 /**
  * Refs to all components that expose state via imperative handles
@@ -34,6 +38,7 @@ export interface PresetComponentRefs {
   delay: React.RefObject<DelayHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControl: React.RefObject<BpmControlHandle | null>;
+  modulationMatrix: React.RefObject<ModulationMatrixHandle | null>;
 }
 
 /**
@@ -101,6 +106,9 @@ export function usePresetManager(refs: PresetComponentRefs) {
     const delayParams = refs.delay.current?.getParams();
     const effectsBusSend = refs.effectsBusSendRef.current?.value ?? 0;
     const bpm = refs.bpmControl.current?.getValue() ?? DEFAULT_BPM;
+    const modulationMatrixState =
+      refs.modulationMatrix.current?.getState() ??
+      DEFAULT_MODULATION_MATRIX_STATE;
 
     if (
       !oscillatorsState ||
@@ -129,6 +137,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
         delay: delayParams,
       },
       effectsBusSend,
+      modulationMatrix: modulationMatrixState,
       bpm,
     };
   }, [refs]);
@@ -157,6 +166,13 @@ export function usePresetManager(refs: PresetComponentRefs) {
       // Apply effects bus send
       if (refs.effectsBusSendRef.current) {
         refs.effectsBusSendRef.current.setValue(state.effectsBusSend);
+      }
+
+      // Apply modulation matrix state (with fallback for backward compatibility)
+      if (refs.modulationMatrix.current) {
+        refs.modulationMatrix.current.setState(
+          state.modulationMatrix ?? DEFAULT_MODULATION_MATRIX_STATE
+        );
       }
 
       // Apply BPM directly if ref is available

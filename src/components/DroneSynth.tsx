@@ -10,6 +10,7 @@ import Filter from "./Filter.tsx";
 import Oscillators from "./Oscillators.tsx";
 import PolySynths from "./Polysynths";
 import Recorder from "./Recorder.tsx";
+import ModulationMatrix from "./ModulationMatrix";
 
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus.ts";
 import { useAutoFilter } from "../hooks/useAutoFilter";
@@ -33,6 +34,7 @@ import type { FilterHandle } from "../types/FilterParams";
 import type { PolySynthsHandle } from "./Polysynths";
 import type { EffectsBusSendHandle } from "./EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
+import type { ModulationMatrixHandle } from "../types/ModulationMatrixParams";
 
 export interface DroneSynthHandle {
   oscillatorsRef: React.RefObject<OscillatorsHandle | null>;
@@ -45,6 +47,7 @@ export interface DroneSynthHandle {
   delayRef: React.RefObject<DelayHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControlRef: React.RefObject<BpmControlHandle | null>;
+  modulationMatrixRef: React.RefObject<ModulationMatrixHandle | null>;
 }
 
 interface DroneSynthProps {
@@ -99,6 +102,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const delayRef = useRef<DelayHandle>(null);
   const effectsBusSendRef = useRef<EffectsBusSendHandle | null>(null);
   const bpmControlRef = useRef<BpmControlHandle | null>(null);
+  const modulationMatrixRef = useRef<ModulationMatrixHandle | null>(null);
 
   // Expose refs to parent component
   useImperativeHandle(ref, () => ({
@@ -112,6 +116,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
     delayRef,
     effectsBusSendRef,
     bpmControlRef,
+    modulationMatrixRef,
   }));
 
   return (
@@ -159,6 +164,10 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             onParameterChange={onParameterChange}
           />
         </Effects>
+        <ModulationMatrix
+          ref={modulationMatrixRef}
+          onParameterChange={onParameterChange}
+        />
         <PolySynths
           polysynths={polysynths}
           ref={polysynthsRef}
