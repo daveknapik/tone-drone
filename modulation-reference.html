@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drone Modulation Reference</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .control {
+            margin: 15px 0;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+        }
+        input[type="range"] {
+            width: 300px;
+        }
+        .value-display {
+            display: inline-block;
+            width: 80px;
+            text-align: right;
+        }
+        .status {
+            color: #4CAF50;
+            margin-left: 10px;
+        }
+        h2 {
+            color: #4CAF50;
+        }
+        select {
+            padding: 5px;
+            font-size: 14px;
+        }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎛️ Drone Modulation Reference</h1>
+    <p>Simplified reference implementation for drone oscillator modulation.<br>
+    Focus: Frequency, Volume, and Pan modulation using proven Tone.js patterns.</p>
+
+    <div class="section">
+        <h2>1. Initialize Audio</h2>
+        <button id="startAudio">Start Audio Context</button>
+        <span class="status" id="audioStatus"></span>
+    </div>
+
+    <div class="section">
+        <h2>2. Drone Oscillator</h2>
+        <button id="startDrone">Start Drone</button>
+        <button id="stopDrone">Stop Drone</button>
+        
+        <div class="control">
+            <label>Drone Frequency:</label>
+            <input type="range" id="droneFreq" min="100" max="1000" value="220" step="1">
+            <span class="value-display" id="droneFreqDisplay">220 Hz</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. LFO (Modulation Source)</h2>
+        <button id="startLFO">Start LFO</button>
+        <button id="stopLFO">Stop LFO</button>
+        
+        <div class="control">
+            <label>LFO Rate:</label>
+            <input type="range" id="lfoRate" min="0.1" max="10" value="2" step="0.1">
+            <span class="value-display" id="lfoRateDisplay">2 Hz</span>
+        </div>
+
+        <div class="control">
+            <label>LFO Waveform:</label>
+            <select id="lfoType">
+                <option value="sine">Sine</option>
+                <option value="triangle">Triangle</option>
+                <option value="square">Square</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>4. Modulation Routing</h2>
+        
+        <div class="control">
+            <label>Destination:</label>
+            <select id="destination">
+                <option value="none">None</option>
+                <option value="frequency">Drone Frequency (detune)</option>
+                <option value="volume">Drone Volume (Tone.Gain)</option>
+                <option value="pan">Drone Pan</option>
+            </select>
+            <button id="connectRoute">Connect</button>
+            <button id="disconnectRoute">Disconnect</button>
+            <span class="status" id="routeStatus"></span>
+        </div>
+
+        <div class="control">
+            <label>Modulation Depth:</label>
+            <input type="range" id="modDepth" min="0" max="1" value="0.5" step="0.01">
+            <span class="value-display" id="modDepthDisplay">0.50</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📝 Implementation Notes</h2>
+        <h3>Frequency Modulation:</h3>
+        <pre>// Scale LFO (-1 to +1) to ±100 cents
+const frequencyScaler = new Tone.Scale(-100, 100);
+lfo.connect(depthMultiplier).connect(frequencyScaler).connect(drone.detune);</pre>
+
+        <h3>Volume Modulation (Critical Pattern!):</h3>
+        <pre>// Use Tone.Gain node with base+modulation architecture
+const modGain = new Tone.Gain(1);
+drone.disconnect();
+drone.connect(modGain).connect(channel);
+
+// Build signal: 1.0 + (LFO * depth * 0.5)
+const unity = new Tone.Signal(1);
+const add = new Tone.Add();
+const scale = new Tone.Scale(-0.5, 0.5);
+
+unity.connect(add);
+lfo.connect(depthMultiplier).connect(scale).connect(add);
+add.connect(modGain.gain);
+
+// CRITICAL: Zero parameter AFTER connecting signal chain!
+modGain.gain.value = 0;</pre>
+
+        <h3>Pan Modulation:</h3>
+        <pre>// LFO range (-1 to +1) matches pan range perfectly
+lfo.connect(depthMultiplier).connect(channel.pan);</pre>
+
+        <h3>Reactive Depth Control:</h3>
+        <pre>// Use Tone.Multiply with AudioParam for real-time updates
+const depthMultiplier = new Tone.Multiply(0.5);
+
+// Update smoothly to prevent clicks
+function updateDepth(newDepth) {
+    const now = Tone.now();
+    depthMultiplier.factor.cancelScheduledValues(now);
+    depthMultiplier.factor.setTargetAtTime(newDepth, now, 0.015);
+}</pre>
+    </div>
+
+    <script>
+        // Global audio objects
+        let drone, droneChannel, lfo, depthMultiplier, frequencyScaler;
+        let activeConnection = null;
+
+        // Start audio context
+        document.getElementById('startAudio').addEventListener('click', async () => {
+            await Tone.start();
+            console.log('Audio context started');
+            document.getElementById('audioStatus').textContent = '✅ Ready';
+
+            // Create drone oscillator with channel
+            drone = new Tone.Oscillator(220, "sine");
+            droneChannel = new Tone.Channel().toDestination();
+            drone.connect(droneChannel);
+
+            // Create LFO
+            lfo = new Tone.LFO({
+                frequency: 2,
+                amplitude: 1,
+                min: -1,
+                max: 1,
+                type: "sine"
+            });
+
+            // Create depth multiplier (reactive via AudioParam)
+            depthMultiplier = new Tone.Multiply(0.5);
+
+            // Create frequency scaler
+            frequencyScaler = new Tone.Scale(-100, 100);
+
+            console.log('Audio objects created');
+        });
+
+        // Drone controls
+        document.getElementById('startDrone').addEventListener('click', () => {
+            if (drone) {
+                drone.start();
+                console.log('Drone started');
+            }
+        });
+
+        document.getElementById('stopDrone').addEventListener('click', () => {
+            if (drone) {
+                drone.stop();
+                console.log('Drone stopped');
+            }
+        });
+
+        document.getElementById('droneFreq').addEventListener('input', (e) => {
+            if (drone) {
+                const freq = e.target.value;
+                drone.frequency.value = freq;
+                document.getElementById('droneFreqDisplay').textContent = `${freq} Hz`;
+            }
+        });
+
+        // LFO controls
+        document.getElementById('startLFO').addEventListener('click', () => {
+            if (lfo) {
+                lfo.start();
+                console.log('LFO started');
+            }
+        });
+
+        document.getElementById('stopLFO').addEventListener('click', () => {
+            if (lfo) {
+                lfo.stop();
+                console.log('LFO stopped');
+            }
+        });
+
+        document.getElementById('lfoRate').addEventListener('input', (e) => {
+            if (lfo) {
+                const rate = e.target.value;
+                lfo.frequency.value = rate;
+                document.getElementById('lfoRateDisplay').textContent = `${rate} Hz`;
+            }
+        });
+
+        document.getElementById('lfoType').addEventListener('change', (e) => {
+            if (lfo) {
+                lfo.type = e.target.value;
+                console.log('LFO type:', e.target.value);
+            }
+        });
+
+        // Depth control with smooth updates
+        document.getElementById('modDepth').addEventListener('input', (e) => {
+            const depth = parseFloat(e.target.value);
+            document.getElementById('modDepthDisplay').textContent = depth.toFixed(2);
+            
+            if (depthMultiplier) {
+                const now = Tone.now();
+                depthMultiplier.factor.cancelScheduledValues(now);
+                depthMultiplier.factor.setTargetAtTime(depth, now, 0.015);
+                console.log('Depth updated:', depth);
+            }
+        });
+
+        // Connect routing
+        document.getElementById('connectRoute').addEventListener('click', () => {
+            if (!drone || !lfo || !depthMultiplier) {
+                alert('Please start audio context first!');
+                return;
+            }
+
+            // Disconnect any existing route
+            if (activeConnection) {
+                disconnectAll();
+            }
+
+            const destination = document.getElementById('destination').value;
+            
+            if (destination === 'none') {
+                console.log('No destination selected');
+                return;
+            }
+
+            console.log('Connecting modulation to:', destination);
+
+            try {
+                switch(destination) {
+                    case 'frequency':
+                        // LFO → depthMultiplier → frequencyScaler → drone.detune
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(frequencyScaler);
+                        frequencyScaler.connect(drone.detune);
+                        
+                        activeConnection = {
+                            type: 'frequency',
+                            nodes: [frequencyScaler]
+                        };
+                        console.log('✅ Frequency modulation connected');
+                        break;
+
+                    case 'volume':
+                        // Create gain node
+                        const modGain = new Tone.Gain(1);
+                        
+                        // Reconnect audio path
+                        drone.disconnect();
+                        drone.connect(modGain);
+                        modGain.connect(droneChannel);
+                        
+                        // Build modulation signal: 1.0 + (LFO * depth * 0.5)
+                        const unity = new Tone.Signal(1);
+                        const add = new Tone.Add();
+                        const scale = new Tone.Scale(-0.5, 0.5);
+                        
+                        // Connect signal chain
+                        unity.connect(add);
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(scale);
+                        scale.connect(add);
+                        add.connect(modGain.gain);
+                        
+                        // CRITICAL: Zero AFTER connecting signal chain
+                        modGain.gain.value = 0;
+                        
+                        activeConnection = {
+                            type: 'volume',
+                            gainNode: modGain,
+                            nodes: [unity, add, scale]
+                        };
+                        console.log('✅ Volume modulation connected');
+                        break;
+
+                    case 'pan':
+                        // LFO → depthMultiplier → channel.pan
+                        lfo.connect(depthMultiplier);
+                        depthMultiplier.connect(droneChannel.pan);
+                        
+                        activeConnection = {
+                            type: 'pan',
+                            nodes: []
+                        };
+                        console.log('✅ Pan modulation connected');
+                        break;
+                }
+
+                document.getElementById('routeStatus').textContent = '✅ Connected';
+            } catch (error) {
+                console.error('Connection error:', error);
+                document.getElementById('routeStatus').textContent = '❌ Error';
+            }
+        });
+
+        // Disconnect routing
+        document.getElementById('disconnectRoute').addEventListener('click', () => {
+            disconnectAll();
+            document.getElementById('routeStatus').textContent = '⏹️ Disconnected';
+        });
+
+        function disconnectAll() {
+            if (!activeConnection) return;
+
+            console.log('Disconnecting modulation:', activeConnection.type);
+
+            // Disconnect LFO and depthMultiplier
+            lfo.disconnect();
+            depthMultiplier.disconnect();
+
+            // Clean up based on connection type
+            if (activeConnection.type === 'volume' && activeConnection.gainNode) {
+                // Restore original audio path
+                drone.disconnect();
+                drone.connect(droneChannel);
+                
+                // Dispose gain node and intermediate nodes
+                activeConnection.gainNode.disconnect();
+                activeConnection.gainNode.dispose();
+            }
+
+            // Dispose any intermediate nodes
+            activeConnection.nodes.forEach(node => {
+                node.disconnect();
+                node.dispose();
+            });
+
+            activeConnection = null;
+            console.log('✅ Disconnected');
+        }
+    </script>
+</body>
+</html>
+
