@@ -83,7 +83,7 @@
         <h2>2. Drone Oscillator</h2>
         <button id="startDrone">Start Drone</button>
         <button id="stopDrone">Stop Drone</button>
-        
+
         <div class="control">
             <label>Drone Frequency:</label>
             <input type="range" id="droneFreq" min="100" max="1000" value="220" step="1">
@@ -95,7 +95,7 @@
         <h2>3. LFO (Modulation Source)</h2>
         <button id="startLFO">Start LFO</button>
         <button id="stopLFO">Stop LFO</button>
-        
+
         <div class="control">
             <label>LFO Rate:</label>
             <input type="range" id="lfoRate" min="0.1" max="10" value="2" step="0.1">
@@ -115,7 +115,7 @@
 
     <div class="section">
         <h2>4. Modulation Routing</h2>
-        
+
         <div class="control">
             <label>Destination:</label>
             <select id="destination">
@@ -179,7 +179,7 @@ function updateDepth(newDepth) {
 
     <script>
         // Global audio objects
-        let drone, droneChannel, lfo, depthMultiplier, frequencyScaler;
+        let drone, droneChannel, lfo, depthMultiplier;
         let activeConnection = null;
 
         // Start audio context
@@ -204,9 +204,6 @@ function updateDepth(newDepth) {
 
             // Create depth multiplier (reactive via AudioParam)
             depthMultiplier = new Tone.Multiply(0.5);
-
-            // Create frequency scaler
-            frequencyScaler = new Tone.Scale(-100, 100);
 
             console.log('Audio objects created');
         });
@@ -268,7 +265,7 @@ function updateDepth(newDepth) {
         document.getElementById('modDepth').addEventListener('input', (e) => {
             const depth = parseFloat(e.target.value);
             document.getElementById('modDepthDisplay').textContent = depth.toFixed(2);
-            
+
             if (depthMultiplier) {
                 const now = Tone.now();
                 depthMultiplier.factor.cancelScheduledValues(now);
@@ -290,7 +287,7 @@ function updateDepth(newDepth) {
             }
 
             const destination = document.getElementById('destination').value;
-            
+
             if (destination === 'none') {
                 console.log('No destination selected');
                 return;
@@ -301,11 +298,14 @@ function updateDepth(newDepth) {
             try {
                 switch(destination) {
                     case 'frequency':
+                        // Create fresh frequency scaler for each connection
+                        const frequencyScaler = new Tone.Scale(-100, 100);
+                        
                         // LFO → depthMultiplier → frequencyScaler → drone.detune
                         lfo.connect(depthMultiplier);
                         depthMultiplier.connect(frequencyScaler);
                         frequencyScaler.connect(drone.detune);
-                        
+
                         activeConnection = {
                             type: 'frequency',
                             nodes: [frequencyScaler]
@@ -316,27 +316,27 @@ function updateDepth(newDepth) {
                     case 'volume':
                         // Create gain node
                         const modGain = new Tone.Gain(1);
-                        
+
                         // Reconnect audio path
                         drone.disconnect();
                         drone.connect(modGain);
                         modGain.connect(droneChannel);
-                        
+
                         // Build modulation signal: 1.0 + (LFO * depth * 0.5)
                         const unity = new Tone.Signal(1);
                         const add = new Tone.Add();
                         const scale = new Tone.Scale(-0.5, 0.5);
-                        
+
                         // Connect signal chain
                         unity.connect(add);
                         lfo.connect(depthMultiplier);
                         depthMultiplier.connect(scale);
                         scale.connect(add);
                         add.connect(modGain.gain);
-                        
+
                         // CRITICAL: Zero AFTER connecting signal chain
                         modGain.gain.value = 0;
-                        
+
                         activeConnection = {
                             type: 'volume',
                             gainNode: modGain,
@@ -349,7 +349,7 @@ function updateDepth(newDepth) {
                         // LFO → depthMultiplier → channel.pan
                         lfo.connect(depthMultiplier);
                         depthMultiplier.connect(droneChannel.pan);
-                        
+
                         activeConnection = {
                             type: 'pan',
                             nodes: []
@@ -385,7 +385,7 @@ function updateDepth(newDepth) {
                 // Restore original audio path
                 drone.disconnect();
                 drone.connect(droneChannel);
-                
+
                 // Dispose gain node and intermediate nodes
                 activeConnection.gainNode.disconnect();
                 activeConnection.gainNode.dispose();
