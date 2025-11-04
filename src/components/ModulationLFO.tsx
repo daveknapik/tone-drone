@@ -40,17 +40,16 @@ function ModulationLFO({
   // Imperative Tone.js updates (called immediately on every slider change)
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
     if (lfo) {
-      const now = Tone.now();
-      // Use linearRampTo for smooth, click-free parameter changes
-      lfo.frequency.linearRampTo(freq, 0.05, now);
+      // Direct value assignment - LFO parameters don't need ramping
+      // The LFO output is already smooth, changing frequency/amplitude instantly is safe
+      lfo.frequency.value = freq;
     }
   }, [lfo]);
 
   const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
     if (lfo) {
-      const now = Tone.now();
-      // Use linearRampTo for smooth, click-free parameter changes
-      lfo.amplitude.linearRampTo(amp, 0.05, now);
+      // Direct value assignment - LFO parameters don't need ramping
+      lfo.amplitude.value = amp;
     }
   }, [lfo]);
 
