@@ -68,8 +68,8 @@ function ModulationMatrixGrid({
     [routes, onRoutesChange, onParameterChange]
   );
 
-  // Debounced version for amount/depth slider (prevents audio clicks)
-  const updateRouteDebounced = useDebounceCallback(updateRoute, 50);
+  // Longer debounce for state persistence (only for serialization, not audio)
+  const updateRouteStatePersistence = useDebounceCallback(updateRoute, 500);
 
   // Sync local amounts when routes change from outside (e.g., preset load)
   useEffect(() => {
@@ -219,14 +219,18 @@ function ModulationMatrixGrid({
                     step={0.01}
                     handleChange={(e) => {
                       const newAmount = parseFloat(e.target.value);
-                      // Update local state immediately for responsive UI
+                      
+                      // 1. Update local state immediately for responsive UI
                       const newLocalAmounts = [...localAmounts];
                       newLocalAmounts[index] = newAmount;
                       setLocalAmounts(newLocalAmounts);
-                      // Direct Tone.js update - NO React state, NO reconnection!
+                      
+                      // 2. Update Tone.js immediately (imperative, no React state)
                       onDepthChange?.(index, newAmount);
-                      // Debounced React state update (for presets, serialization, etc)
-                      updateRouteDebounced(index, { amount: newAmount });
+                      
+                      // 3. Update React state ONLY after 500ms of inactivity (persistence/serialization)
+                      //    During active dragging, state does NOT update - no React overhead!
+                      updateRouteStatePersistence(index, { amount: newAmount });
                     }}
                   />
                 </div>
