@@ -91,7 +91,7 @@ function ModulationLFO({
           useDropdownOnSmall={true}
           label="Wave"
         />
-        
+
         {/* Polarity Mode Toggle */}
         <div className="flex items-center justify-between pt-2">
           <span className="text-sm font-medium text-pink-500 dark:text-sky-300">

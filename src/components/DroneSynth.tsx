@@ -23,7 +23,7 @@ import { useRecorder } from "../hooks/useRecorder.ts";
 
 import { usePolysynths } from "../hooks/usePolysynths";
 
-import { useEffect, useRef, useImperativeHandle } from "react";
+import { useEffect, useRef, useImperativeHandle, useState } from "react";
 
 import type { OscillatorsHandle } from "../types/OscillatorsParams";
 import type { AutoFilterHandle } from "../types/AutoFilterParams";
@@ -35,6 +35,7 @@ import type { PolySynthsHandle } from "./Polysynths";
 import type { EffectsBusSendHandle } from "./EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
 import type { ModulationMatrixHandle } from "../types/ModulationMatrixParams";
+import type { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 
 export interface DroneSynthHandle {
   oscillatorsRef: React.RefObject<OscillatorsHandle | null>;
@@ -104,6 +105,33 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const bpmControlRef = useRef<BpmControlHandle | null>(null);
   const modulationMatrixRef = useRef<ModulationMatrixHandle | null>(null);
 
+  // Track oscillators for modulation matrix
+  const [oscillatorsForModulation, setOscillatorsForModulation] = useState<OscillatorWithChannel[]>([]);
+
+  // Get oscillators from Oscillators component once ready
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    
+    const getOscillators = () => {
+      if (oscillatorsRef.current) {
+        const oscs = oscillatorsRef.current.getOscillators();
+        if (oscs.length > 0) {
+          setOscillatorsForModulation(oscs);
+          clearInterval(interval); // Stop polling once we have the oscillators
+        }
+      }
+    };
+
+    // Poll for oscillators to be ready (they're created in the Oscillators useEffect)
+    interval = setInterval(getOscillators, 100);
+    
+    // Also try immediately
+    getOscillators();
+    
+    // Cleanup
+    return () => clearInterval(interval);
+  }, []);
+
   // Expose refs to parent component
   useImperativeHandle(ref, () => ({
     oscillatorsRef,
@@ -167,6 +195,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
         <ModulationMatrix
           ref={modulationMatrixRef}
           onParameterChange={onParameterChange}
+          oscillators={oscillatorsForModulation}
         />
         <PolySynths
           polysynths={polysynths}

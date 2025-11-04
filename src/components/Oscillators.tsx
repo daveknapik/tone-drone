@@ -129,6 +129,10 @@ function Oscillators({
         oscillatorRefs.current[index]?.setParams(oscParams);
       });
     },
+    getOscillators: () => {
+      // Return the actual Tone.js oscillator objects for modulation
+      return oscillators;
+    },
   }));
 
   // Explicitly connect panners in createSynth; oscillators are wired at creation

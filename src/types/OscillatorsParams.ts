@@ -1,6 +1,7 @@
 import { Sequence } from "./Sequence";
 import { OscillatorParams } from "./OscillatorParams";
 import { SynthEnvelopeParams } from "./SynthParams";
+import { OscillatorWithChannel } from "./OscillatorWithChannel";
 
 /**
  * State for the Oscillators component (global settings + all oscillators)
@@ -21,4 +22,5 @@ export interface OscillatorsState {
 export interface OscillatorsHandle {
   getState: () => OscillatorsState;
   setState: (state: OscillatorsState) => void;
+  getOscillators: () => OscillatorWithChannel[]; // Get Tone.js oscillator objects for modulation
 }

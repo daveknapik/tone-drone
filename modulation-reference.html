@@ -334,54 +334,54 @@ lfo.connect(unipolarScaler);  // Now outputs 0 to +1
         }
       });
 
-       // Polarity toggle
-       document
-         .getElementById("polarityToggle")
-         .addEventListener("click", () => {
-           if (!lfo) {
-             alert("Please start audio context first!");
-             return;
-           }
+      // Polarity toggle
+      document
+        .getElementById("polarityToggle")
+        .addEventListener("click", () => {
+          if (!lfo) {
+            alert("Please start audio context first!");
+            return;
+          }
 
-           // Toggle mode
-           polarityMode = polarityMode === "bipolar" ? "unipolar" : "bipolar";
+          // Toggle mode
+          polarityMode = polarityMode === "bipolar" ? "unipolar" : "bipolar";
 
-           // Update button
-           const button = document.getElementById("polarityToggle");
-           if (polarityMode === "bipolar") {
-             button.textContent = "Bipolar (-1 to +1)";
-             button.style.background = "#2196F3";
-           } else {
-             button.textContent = "Unipolar (0 to +1)";
-             button.style.background = "#FF9800";
-           }
+          // Update button
+          const button = document.getElementById("polarityToggle");
+          if (polarityMode === "bipolar") {
+            button.textContent = "Bipolar (-1 to +1)";
+            button.style.background = "#2196F3";
+          } else {
+            button.textContent = "Unipolar (0 to +1)";
+            button.style.background = "#FF9800";
+          }
 
-           console.log("🔄 Polarity mode switched to:", polarityMode);
+          console.log("🔄 Polarity mode switched to:", polarityMode);
 
-           // If there's an active connection, automatically reconnect with new polarity
-           if (activeConnection) {
-             const currentDestination = activeConnection.type;
-             console.log(
-               `🔄 Reconnecting ${currentDestination} modulation with ${polarityMode} mode...`
-             );
+          // If there's an active connection, automatically reconnect with new polarity
+          if (activeConnection) {
+            const currentDestination = activeConnection.type;
+            console.log(
+              `🔄 Reconnecting ${currentDestination} modulation with ${polarityMode} mode...`
+            );
 
-             // Store current destination for reconnection
-             const destinationSelect = document.getElementById("destination");
-             const previousValue = destinationSelect.value;
+            // Store current destination for reconnection
+            const destinationSelect = document.getElementById("destination");
+            const previousValue = destinationSelect.value;
 
-             // Set dropdown to match current connection
-             destinationSelect.value = currentDestination;
+            // Set dropdown to match current connection
+            destinationSelect.value = currentDestination;
 
-             // Trigger reconnection with new polarity mode
-             disconnectAll();
-             
-             // Small delay to ensure clean disconnect before reconnect
-             setTimeout(() => {
-               document.getElementById("connectRoute").click();
-               console.log(`✅ Reconnected with ${polarityMode} mode`);
-             }, 50);
-           }
-         });
+            // Trigger reconnection with new polarity mode
+            disconnectAll();
+
+            // Small delay to ensure clean disconnect before reconnect
+            setTimeout(() => {
+              document.getElementById("connectRoute").click();
+              console.log(`✅ Reconnected with ${polarityMode} mode`);
+            }, 50);
+          }
+        });
 
       // Depth control with smooth updates
       document.getElementById("modDepth").addEventListener("input", (e) => {
