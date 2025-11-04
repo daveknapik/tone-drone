@@ -2,6 +2,7 @@ import * as Tone from "tone";
 import { useState, useEffect } from "react";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
+import { LFOPolarityMode } from "../types/ModulationMatrixParams";
 
 interface ModulationLFOProps {
   lfo: Tone.LFO;
@@ -9,9 +10,11 @@ interface ModulationLFOProps {
   initialFrequency?: number;
   initialType?: OscillatorType;
   initialAmplitude?: number;
+  initialPolarityMode?: LFOPolarityMode;
   onFrequencyChange?: (frequency: number) => void;
   onTypeChange?: (type: OscillatorType) => void;
   onAmplitudeChange?: (amplitude: number) => void;
+  onPolarityModeChange?: (mode: LFOPolarityMode) => void;
   onParameterChange?: () => void;
 }
 
@@ -21,14 +24,17 @@ function ModulationLFO({
   initialFrequency = 0.5,
   initialType = "sine",
   initialAmplitude = 1,
+  initialPolarityMode = "bipolar",
   onFrequencyChange,
   onTypeChange,
   onAmplitudeChange,
+  onPolarityModeChange,
   onParameterChange,
 }: ModulationLFOProps) {
   const [frequency, setFrequency] = useState(initialFrequency);
   const [type, setType] = useState<OscillatorType>(initialType);
   const [amplitude, setAmplitude] = useState(initialAmplitude);
+  const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
   // Update LFO when parameters change
   useEffect(() => {
@@ -85,6 +91,35 @@ function ModulationLFO({
           useDropdownOnSmall={true}
           label="Wave"
         />
+        
+        {/* Polarity Mode Toggle */}
+        <div className="flex items-center justify-between pt-2">
+          <span className="text-sm font-medium text-pink-500 dark:text-sky-300">
+            Mode
+          </span>
+          <button
+            onClick={() => {
+              const newMode = polarityMode === "bipolar" ? "unipolar" : "bipolar";
+              setPolarityMode(newMode);
+              onPolarityModeChange?.(newMode);
+              onParameterChange?.();
+            }}
+            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              polarityMode === "bipolar"
+                ? "bg-pink-500 dark:bg-sky-500 text-white"
+                : "bg-pink-200 dark:bg-sky-800 text-pink-900 dark:text-sky-100"
+            }`}
+            title={
+              polarityMode === "bipolar"
+                ? "Bipolar: -1 to +1 (click to switch)"
+                : "Unipolar: 0 to +1 (click to switch)"
+            }
+          >
+            {polarityMode === "bipolar" ? "±" : "+"}
+            {" "}
+            {polarityMode === "bipolar" ? "Bipolar" : "Unipolar"}
+          </button>
+        </div>
       </div>
     </div>
   );

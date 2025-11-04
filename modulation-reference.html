@@ -111,6 +111,14 @@
                 <option value="sawtooth">Sawtooth</option>
             </select>
         </div>
+
+        <div class="control">
+            <label>LFO Polarity:</label>
+            <button id="polarityToggle" style="background: #2196F3;">Bipolar (-1 to +1)</button>
+            <span style="color: #999; font-size: 12px; margin-left: 10px;" id="polarityInfo">
+                Use Bipolar for frequency/pan, Unipolar for volume
+            </span>
+        </div>
     </div>
 
     <div class="section">
@@ -175,12 +183,24 @@ function updateDepth(newDepth) {
     depthMultiplier.factor.cancelScheduledValues(now);
     depthMultiplier.factor.setTargetAtTime(newDepth, now, 0.015);
 }</pre>
+
+        <h3>LFO Polarity (Unipolar vs Bipolar):</h3>
+        <pre>// Bipolar LFO: -1 to +1 (default, good for frequency/pan)
+const lfo = new Tone.LFO({ min: -1, max: 1 });
+
+// Unipolar transformation: Convert bipolar to 0 to +1
+const unipolarScaler = new Tone.Scale(-1, 1, 0, 1);
+lfo.connect(unipolarScaler);  // Now outputs 0 to +1
+
+// Use unipolar for: volume, filter cutoff, effect mix
+// Use bipolar for: frequency (vibrato), pan, pitch</pre>
     </div>
 
     <script>
         // Global audio objects
-        let drone, droneChannel, lfo, depthMultiplier;
+        let drone, droneChannel, lfo, depthMultiplier, unipolarScaler;
         let activeConnection = null;
+        let polarityMode = 'bipolar';  // 'bipolar' or 'unipolar'
 
         // Start audio context
         document.getElementById('startAudio').addEventListener('click', async () => {
@@ -193,7 +213,7 @@ function updateDepth(newDepth) {
             droneChannel = new Tone.Channel().toDestination();
             drone.connect(droneChannel);
 
-            // Create LFO
+            // Create LFO (always bipolar internally)
             lfo = new Tone.LFO({
                 frequency: 2,
                 amplitude: 1,
@@ -201,6 +221,9 @@ function updateDepth(newDepth) {
                 max: 1,
                 type: "sine"
             });
+
+            // Create unipolar scaler (converts -1..+1 to 0..+1)
+            unipolarScaler = new Tone.Scale(-1, 1, 0, 1);
 
             // Create depth multiplier (reactive via AudioParam)
             depthMultiplier = new Tone.Multiply(0.5);
@@ -261,6 +284,36 @@ function updateDepth(newDepth) {
             }
         });
 
+        // Polarity toggle
+        document.getElementById('polarityToggle').addEventListener('click', () => {
+            if (!lfo) {
+                alert('Please start audio context first!');
+                return;
+            }
+            
+            // Toggle mode
+            polarityMode = polarityMode === 'bipolar' ? 'unipolar' : 'bipolar';
+            
+            // Update button
+            const button = document.getElementById('polarityToggle');
+            if (polarityMode === 'bipolar') {
+                button.textContent = 'Bipolar (-1 to +1)';
+                button.style.background = '#2196F3';
+            } else {
+                button.textContent = 'Unipolar (0 to +1)';
+                button.style.background = '#FF9800';
+            }
+            
+            console.log('Polarity mode:', polarityMode);
+            
+            // Note: If a modulation route is active, you would need to reconnect
+            // with the new polarity processing. For simplicity, we'll just update
+            // the mode and let the user reconnect if needed.
+            if (activeConnection) {
+                console.log('ℹ️ Reconnect your modulation route to apply polarity change');
+            }
+        });
+
         // Depth control with smooth updates
         document.getElementById('modDepth').addEventListener('input', (e) => {
             const depth = parseFloat(e.target.value);
@@ -301,16 +354,26 @@ function updateDepth(newDepth) {
                         // Create fresh frequency scaler for each connection
                         const frequencyScaler = new Tone.Scale(-100, 100);
                         
-                        // LFO → depthMultiplier → frequencyScaler → drone.detune
-                        lfo.connect(depthMultiplier);
-                        depthMultiplier.connect(frequencyScaler);
-                        frequencyScaler.connect(drone.detune);
+                        // Route based on polarity mode
+                        if (polarityMode === 'unipolar') {
+                            // LFO → unipolarScaler → depthMultiplier → frequencyScaler → drone.detune
+                            lfo.connect(unipolarScaler);
+                            unipolarScaler.connect(depthMultiplier);
+                            depthMultiplier.connect(frequencyScaler);
+                            frequencyScaler.connect(drone.detune);
+                            console.log('✅ Frequency modulation connected (unipolar)');
+                        } else {
+                            // LFO → depthMultiplier → frequencyScaler → drone.detune
+                            lfo.connect(depthMultiplier);
+                            depthMultiplier.connect(frequencyScaler);
+                            frequencyScaler.connect(drone.detune);
+                            console.log('✅ Frequency modulation connected (bipolar)');
+                        }
 
                         activeConnection = {
                             type: 'frequency',
                             nodes: [frequencyScaler]
                         };
-                        console.log('✅ Frequency modulation connected');
                         break;
 
                     case 'volume':
@@ -346,15 +409,24 @@ function updateDepth(newDepth) {
                         break;
 
                     case 'pan':
-                        // LFO → depthMultiplier → channel.pan
-                        lfo.connect(depthMultiplier);
-                        depthMultiplier.connect(droneChannel.pan);
+                        // Route based on polarity mode
+                        if (polarityMode === 'unipolar') {
+                            // LFO → unipolarScaler → depthMultiplier → channel.pan
+                            lfo.connect(unipolarScaler);
+                            unipolarScaler.connect(depthMultiplier);
+                            depthMultiplier.connect(droneChannel.pan);
+                            console.log('✅ Pan modulation connected (unipolar)');
+                        } else {
+                            // LFO → depthMultiplier → channel.pan
+                            lfo.connect(depthMultiplier);
+                            depthMultiplier.connect(droneChannel.pan);
+                            console.log('✅ Pan modulation connected (bipolar)');
+                        }
 
                         activeConnection = {
                             type: 'pan',
                             nodes: []
                         };
-                        console.log('✅ Pan modulation connected');
                         break;
                 }
 
