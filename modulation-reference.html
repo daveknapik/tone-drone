@@ -152,12 +152,12 @@ const frequencyScaler = new Tone.Scale(-100, 100);
 lfo.connect(depthMultiplier).connect(frequencyScaler).connect(drone.detune);</pre>
 
         <h3>Volume Modulation (Critical Pattern!):</h3>
-        <pre>// Use Tone.Gain node with base+modulation architecture
+        <pre>// BIPOLAR MODE (subtle tremolo, never silent)
+// Use Tone.Gain node with base+modulation: 1.0 + (LFO * depth * 0.5)
 const modGain = new Tone.Gain(1);
 drone.disconnect();
 drone.connect(modGain).connect(channel);
 
-// Build signal: 1.0 + (LFO * depth * 0.5)
 const unity = new Tone.Signal(1);
 const add = new Tone.Add();
 const scale = new Tone.Scale(-0.5, 0.5);
@@ -165,9 +165,17 @@ const scale = new Tone.Scale(-0.5, 0.5);
 unity.connect(add);
 lfo.connect(depthMultiplier).connect(scale).connect(add);
 add.connect(modGain.gain);
+modGain.gain.value = 0;  // Zero AFTER connecting!
 
-// CRITICAL: Zero parameter AFTER connecting signal chain!
-modGain.gain.value = 0;</pre>
+// Result: Volume ranges from 0.5 to 1.5
+
+// UNIPOLAR MODE (full tremolo, can go silent)
+// Direct connection: 0 to 1
+lfo.connect(unipolarScaler).connect(depthMultiplier);
+depthMultiplier.connect(modGain.gain);
+modGain.gain.value = 0;  // Zero AFTER connecting!
+
+// Result: Volume ranges from 0 to 1 (silence to full)</pre>
 
         <h3>Pan Modulation:</h3>
         <pre>// LFO range (-1 to +1) matches pan range perfectly
@@ -290,10 +298,10 @@ lfo.connect(unipolarScaler);  // Now outputs 0 to +1
                 alert('Please start audio context first!');
                 return;
             }
-            
+
             // Toggle mode
             polarityMode = polarityMode === 'bipolar' ? 'unipolar' : 'bipolar';
-            
+
             // Update button
             const button = document.getElementById('polarityToggle');
             if (polarityMode === 'bipolar') {
@@ -303,9 +311,9 @@ lfo.connect(unipolarScaler);  // Now outputs 0 to +1
                 button.textContent = 'Unipolar (0 to +1)';
                 button.style.background = '#FF9800';
             }
-            
+
             console.log('Polarity mode:', polarityMode);
-            
+
             // Note: If a modulation route is active, you would need to reconnect
             // with the new polarity processing. For simplicity, we'll just update
             // the mode and let the user reconnect if needed.
@@ -353,7 +361,7 @@ lfo.connect(unipolarScaler);  // Now outputs 0 to +1
                     case 'frequency':
                         // Create fresh frequency scaler for each connection
                         const frequencyScaler = new Tone.Scale(-100, 100);
-                        
+
                         // Route based on polarity mode
                         if (polarityMode === 'unipolar') {
                             // LFO → unipolarScaler → depthMultiplier → frequencyScaler → drone.detune
@@ -385,27 +393,47 @@ lfo.connect(unipolarScaler);  // Now outputs 0 to +1
                         drone.connect(modGain);
                         modGain.connect(droneChannel);
 
-                        // Build modulation signal: 1.0 + (LFO * depth * 0.5)
-                        const unity = new Tone.Signal(1);
-                        const add = new Tone.Add();
-                        const scale = new Tone.Scale(-0.5, 0.5);
+                        if (polarityMode === 'unipolar') {
+                            // Unipolar: Direct modulation from 0 to 1 (full tremolo)
+                            // LFO already 0 to +1 after scaler
+                            // Route: LFO → unipolarScaler → depthMultiplier → modGain.gain
+                            lfo.connect(unipolarScaler);
+                            unipolarScaler.connect(depthMultiplier);
+                            depthMultiplier.connect(modGain.gain);
+                            
+                            // CRITICAL: Zero AFTER connecting
+                            modGain.gain.value = 0;
+                            
+                            activeConnection = {
+                                type: 'volume',
+                                gainNode: modGain,
+                                nodes: []
+                            };
+                            console.log('✅ Volume modulation connected (unipolar, 0→1)');
+                        } else {
+                            // Bipolar: Base + modulation architecture (partial tremolo)
+                            // Build signal: 1.0 + (LFO * depth * 0.5)
+                            const unity = new Tone.Signal(1);
+                            const add = new Tone.Add();
+                            const scale = new Tone.Scale(-0.5, 0.5);
 
-                        // Connect signal chain
-                        unity.connect(add);
-                        lfo.connect(depthMultiplier);
-                        depthMultiplier.connect(scale);
-                        scale.connect(add);
-                        add.connect(modGain.gain);
+                            // Connect signal chain
+                            unity.connect(add);
+                            lfo.connect(depthMultiplier);
+                            depthMultiplier.connect(scale);
+                            scale.connect(add);
+                            add.connect(modGain.gain);
 
-                        // CRITICAL: Zero AFTER connecting signal chain
-                        modGain.gain.value = 0;
+                            // CRITICAL: Zero AFTER connecting signal chain
+                            modGain.gain.value = 0;
 
-                        activeConnection = {
-                            type: 'volume',
-                            gainNode: modGain,
-                            nodes: [unity, add, scale]
-                        };
-                        console.log('✅ Volume modulation connected');
+                            activeConnection = {
+                                type: 'volume',
+                                gainNode: modGain,
+                                nodes: [unity, add, scale]
+                            };
+                            console.log('✅ Volume modulation connected (bipolar, 0.5→1.5)');
+                        }
                         break;
 
                     case 'pan':
@@ -448,9 +476,10 @@ lfo.connect(unipolarScaler);  // Now outputs 0 to +1
 
             console.log('Disconnecting modulation:', activeConnection.type);
 
-            // Disconnect LFO and depthMultiplier
+            // Disconnect ALL signal processing nodes
             lfo.disconnect();
             depthMultiplier.disconnect();
+            unipolarScaler.disconnect();  // Important: disconnect scaler too!
 
             // Clean up based on connection type
             if (activeConnection.type === 'volume' && activeConnection.gainNode) {
