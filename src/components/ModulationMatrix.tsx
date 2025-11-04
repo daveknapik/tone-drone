@@ -54,6 +54,12 @@ function ModulationMatrix({
   // Create connection manager and depth multipliers refs
   const connectionManager = useMemo(() => new ModulationConnectionManager(), []);
   const depthMultipliersRef = useRef<Tone.Multiply[]>([]);
+  
+  // Track route structure separately from amounts to avoid unnecessary reconnections
+  const routeStructureRef = useRef<string>("");
+  const getRouteStructure = (routes: ModulationRoute[]): string => {
+    return routes.map(r => `${r.sourceIndex}-${r.destination}`).join("|");
+  };
 
   // Update ref whenever state changes
   useEffect(() => {
@@ -84,8 +90,17 @@ function ModulationMatrix({
     },
   }));
 
-  // Apply modulation routes whenever routes or oscillators change
+  // Apply modulation routes ONLY when route structure changes (not amounts!)
   useEffect(() => {
+    const currentStructure = getRouteStructure(routes);
+    
+    // Only reconnect if structure actually changed
+    if (currentStructure === routeStructureRef.current && oscillators.length > 0) {
+      return; // Skip reconnection, structure hasn't changed
+    }
+    
+    routeStructureRef.current = currentStructure;
+    
     // Disconnect all previous connections
     connectionManager.disconnectAll();
 
@@ -106,16 +121,14 @@ function ModulationMatrix({
 
       const lfoSignal = signals[route.sourceIndex];
       const depthMultiplier = depthMultipliers[routeIndex];
-
+      
       if (!lfoSignal || !depthMultiplier) {
         console.warn(`Missing LFO signal or depth multiplier for route ${routeIndex}`);
         return;
       }
 
-      // Update depth multiplier value
-      const now = Tone.now();
-      depthMultiplier.factor.cancelScheduledValues(now);
-      depthMultiplier.factor.setTargetAtTime(route.amount, now, 0.015);
+      // Set initial depth multiplier value
+      depthMultiplier.factor.value = route.amount;
 
       // Parse destination to get oscillator index and parameter type
       const destinationParts = route.destination.split("-");
@@ -175,14 +188,15 @@ function ModulationMatrix({
     return () => {
       connectionManager.disconnectAll();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routes, signals, oscillators, lfoParams, connectionManager]);
 
-  // Update depth multipliers when route amounts change
+  // Update depth multipliers when ONLY amounts change (no reconnection!)
   useEffect(() => {
     const depthMultipliers = depthMultipliersRef.current;
     routes.forEach((route, index) => {
       const depthMultiplier = depthMultipliers[index];
-      if (depthMultiplier) {
+      if (depthMultiplier && depthMultiplier.factor.value !== route.amount) {
         const now = Tone.now();
         depthMultiplier.factor.cancelScheduledValues(now);
         depthMultiplier.factor.setTargetAtTime(route.amount, now, 0.015);
