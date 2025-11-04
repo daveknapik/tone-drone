@@ -39,9 +39,19 @@ function ModulationLFO({
   // Update LFO when parameters change
   useEffect(() => {
     if (lfo) {
-      lfo.frequency.value = frequency;
+      // Use smooth parameter transitions to prevent clicks/pops
+      const now = Tone.now();
+      
+      // Frequency changes with smooth ramp
+      lfo.frequency.cancelScheduledValues(now);
+      lfo.frequency.setTargetAtTime(frequency, now, 0.015);
+      
+      // Type can be changed instantly (no audio rate parameter)
       lfo.type = type;
-      lfo.amplitude.value = amplitude;
+      
+      // Amplitude changes with smooth ramp
+      lfo.amplitude.cancelScheduledValues(now);
+      lfo.amplitude.setTargetAtTime(amplitude, now, 0.015);
     }
   }, [lfo, frequency, type, amplitude]);
 
