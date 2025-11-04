@@ -9,7 +9,7 @@ This document contains everything needed to implement modulation in tone-drone, 
 
 After comprehensive testing, we determined that:
 - ✅ **Drone oscillators** support reliable audio-rate modulation
-- ✅ **Effects parameters** can be modulated effectively  
+- ✅ **Effects parameters** can be modulated effectively
 - ❌ **PolySynth voices** have architectural limitations preventing reliable modulation
 
 ### Test Results Summary
@@ -35,7 +35,7 @@ After comprehensive testing, we determined that:
 
 ### Effects Parameters (Examples)
 - Delay: time, feedback, wet/dry
-- Reverb: roomSize, dampening, wet/dry  
+- Reverb: roomSize, dampening, wet/dry
 - Filter: frequency, Q/resonance
 - Distortion: amount
 - etc.
@@ -174,14 +174,19 @@ const handleDepthChange = (value: number) => {
 
 ### 5. LFO Polarity Modes (Unipolar vs Bipolar)
 
-**Overview**: LFOs can output either bipolar (-1 to +1) or unipolar (0 to +1) signals depending on the modulation destination.
+**Overview**: LFOs can output either bipolar (-1 to +1) or unipolar (0 to +1) signals. The polarity mode affects both the LFO signal range AND the resulting modulation behavior.
 
 #### When to Use Each Mode
 
-| Polarity | Range | Best For | Why |
-|----------|-------|----------|-----|
-| **Bipolar** | -1 to +1 | Frequency (vibrato), Pan, Pitch | Oscillates equally above/below center value |
-| **Unipolar** | 0 to +1 | Volume (tremolo), Filter cutoff, Effect mix | Prevents negative/nonsensical values |
+| Polarity | LFO Signal Range | Volume Result | Best For | Why |
+|----------|------------------|---------------|----------|-----|
+| **Bipolar** | -1 to +1 | 0.5 → 1.5 gain | Frequency (vibrato), Pan, Pitch | Oscillates equally above/below center value |
+| **Unipolar** | 0 to +1 | 0 → 1.0 gain | Volume (tremolo), Filter cutoff, Effect mix | Starts from zero, prevents negative values |
+
+**Key Distinction**:
+- **LFO Signal Range**: What the LFO outputs (the raw modulation signal)
+- **Volume Result**: How that signal affects audio volume after processing
+- The volume modulation architecture transforms the LFO signal (see Volume Modulation section above)
 
 #### Implementation
 
@@ -218,22 +223,22 @@ const setPolarityMode = (lfoIndex: number, mode: 'bipolar' | 'unipolar') => {
   if (state.polarityMode === mode) return;
 
   const now = Tone.now();
-  
+
   // Smooth fade-out
   state.outputSignal.linearRampToValueAtTime(0, now + 0.05);
-  
+
   // Reconfigure routing after fade-out
   setTimeout(() => {
     state.lfo.disconnect();
     state.unipolarScaler.disconnect();
-    
+
     if (mode === 'unipolar') {
       state.lfo.connect(state.unipolarScaler);
       state.unipolarScaler.connect(state.outputSignal);
     } else {
       state.lfo.connect(state.outputSignal);
     }
-    
+
     state.polarityMode = mode;
   }, 60);  // Slightly longer than fade time
 };
@@ -257,20 +262,38 @@ interface LFOState {
 - **Color Coding**: Different colors help distinguish modes
 - **Tooltips**: Explain what each mode does and when to use it
 
-#### Example Use Cases
+#### Example Use Cases & Signal Flow
 
-**Tremolo (Unipolar Volume Modulation)**:
+**Example 1: Tremolo (Unipolar Volume Modulation)**:
 ```typescript
-// Sine LFO at 4Hz in unipolar mode
-// Routes to Oscillator Volume
-// Result: Volume pulses from 0% to 100% (doesn't go negative/silent)
+// LFO Configuration: Sine wave, 4Hz, unipolar mode
+// Signal Flow:
+//   1. LFO outputs: 0 → +1 → 0 → +1 (sine wave)
+//   2. After depth (0.8): 0 → 0.8 → 0 → 0.8
+//   3. Applied to Tone.Gain: gain ranges from 0 to 0.8
+// Result: Volume pulses from silence to 80%, dramatic tremolo effect
 ```
 
-**Vibrato (Bipolar Frequency Modulation)**:
+**Example 2: Subtle Tremolo (Bipolar Volume Modulation)**:
 ```typescript
-// Sine LFO at 5Hz in bipolar mode
-// Routes to Oscillator Frequency (detune)
-// Result: Pitch oscillates ±30 cents around center frequency
+// LFO Configuration: Sine wave, 4Hz, bipolar mode
+// Signal Flow:
+//   1. LFO outputs: -1 → +1 → -1 → +1 (sine wave)
+//   2. After depth (0.8) and scale (×0.5): -0.4 → +0.4
+//   3. After adding base (1.0): 0.6 → 1.4
+//   4. Applied to Tone.Gain: gain ranges from 0.6 to 1.4
+// Result: Volume pulses from 60% to 140%, never goes silent, gentle tremolo
+```
+
+**Example 3: Vibrato (Bipolar Frequency Modulation)**:
+```typescript
+// LFO Configuration: Sine wave, 5Hz, bipolar mode
+// Signal Flow:
+//   1. LFO outputs: -1 → +1 → -1 → +1 (sine wave)
+//   2. After depth (0.5): -0.5 → +0.5
+//   3. After frequency scaling (×100): -50 → +50 cents
+//   4. Applied to oscillator.detune: ±50 cents from base frequency
+// Result: Pitch oscillates smoothly around center frequency
 ```
 
 ---
@@ -289,7 +312,7 @@ interface ModulationConnection {
 
 class ModulationConnectionManager {
   private connections = new Map<string, ModulationConnection>();
-  
+
   connect(
     lfo: Tone.LFO,
     depthMultiplier: Tone.Multiply,
@@ -297,7 +320,7 @@ class ModulationConnectionManager {
     targetParam: Tone.Param
   ): string {
     const id = `${lfo.toString()}-${destination}`;
-    
+
     // Build appropriate signal chain based on destination type
     if (destination.includes('volume')) {
       this.connectVolume(lfo, depthMultiplier, targetParam);
@@ -306,10 +329,10 @@ class ModulationConnectionManager {
     } else if (destination.includes('pan')) {
       this.connectPan(lfo, depthMultiplier, targetParam);
     }
-    
+
     return id;
   }
-  
+
   disconnect(connectionId: string): void {
     const conn = this.connections.get(connectionId);
     if (conn) {
@@ -317,7 +340,7 @@ class ModulationConnectionManager {
       this.connections.delete(connectionId);
     }
   }
-  
+
   disconnectAll(): void {
     this.connections.forEach(conn => conn.cleanup());
     this.connections.clear();
@@ -370,26 +393,26 @@ When implementing modulation, verify:
   - [ ] Smooth vibrato at various depths
   - [ ] No pitch drift (returns to center)
   - [ ] Works on all 6 oscillators
-  
-- [ ] **Volume modulation**  
+
+- [ ] **Volume modulation**
   - [ ] Clean tremolo, no distortion
   - [ ] Baseline volume unchanged at 0 depth
   - [ ] Full depth provides audible but not extreme pulsing
-  
+
 - [ ] **Pan modulation**
   - [ ] Clear left/right movement in stereo
   - [ ] Returns to center between cycles
   - [ ] No perceived timbre changes
-  
+
 - [ ] **Depth control**
   - [ ] Real-time updates without audio artifacts
   - [ ] 0 depth = no modulation
   - [ ] Full depth provides strong but musical effect
-  
+
 - [ ] **Multiple routes**
   - [ ] Can run 8+ routes simultaneously without performance issues
   - [ ] Each route independent and clean
-  
+
 - [ ] **Connect/disconnect**
   - [ ] No clicks or pops
   - [ ] Clean transitions
@@ -410,7 +433,7 @@ When implementing modulation, verify:
 ### Types
 - `src/types/ModulationMatrixParams.ts` - TypeScript interfaces
 
-### Hooks  
+### Hooks
 - `src/hooks/useModulationLFOs.ts` - LFO instance management
 
 ---
