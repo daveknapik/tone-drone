@@ -54,7 +54,7 @@ function ModulationMatrix({
   // Create connection manager and depth multipliers refs
   const connectionManager = useMemo(() => new ModulationConnectionManager(), []);
   const depthMultipliersRef = useRef<Tone.Multiply[]>([]);
-  
+
   // Track route structure separately from amounts to avoid unnecessary reconnections
   const routeStructureRef = useRef<string>("");
   const hasConnectedRef = useRef<boolean>(false);
@@ -94,23 +94,23 @@ function ModulationMatrix({
   // Apply modulation routes ONLY when route structure changes (not amounts!)
   useEffect(() => {
     const currentStructure = getRouteStructure(routes);
-    
+
     // Skip if structure unchanged AND we've already connected with current oscillators
     const structureUnchanged = currentStructure === routeStructureRef.current;
     const hasOscillators = oscillators.length > 0;
-    
+
     if (structureUnchanged && hasConnectedRef.current && hasOscillators) {
       return; // Skip reconnection, structure hasn't changed and we're already connected
     }
-    
+
     // If no oscillators yet, wait for them
     if (!hasOscillators) {
       hasConnectedRef.current = false;
       return;
     }
-    
+
     routeStructureRef.current = currentStructure;
-    
+
     // Disconnect all previous connections
     connectionManager.disconnectAll();
     hasConnectedRef.current = false;
@@ -212,7 +212,7 @@ function ModulationMatrix({
     if (!hasConnectedRef.current) {
       return;
     }
-    
+
     const depthMultipliers = depthMultipliersRef.current;
     routes.forEach((route, index) => {
       const depthMultiplier = depthMultipliers[index];
@@ -289,6 +289,15 @@ function ModulationMatrix({
           routes={routes}
           onRoutesChange={setRoutes}
           onParameterChange={onParameterChange}
+          onDepthChange={(routeIndex, amount) => {
+            // Update depth multiplier directly - bypass React state for real-time audio updates
+            const depthMultiplier = depthMultipliersRef.current[routeIndex];
+            if (depthMultiplier && hasConnectedRef.current) {
+              const now = Tone.now();
+              depthMultiplier.factor.cancelScheduledValues(now);
+              depthMultiplier.factor.setTargetAtTime(amount, now, 0.015);
+            }
+          }}
         />
       </div>
     </Fragment>

@@ -12,6 +12,7 @@ interface ModulationMatrixGridProps {
   routes: ModulationRoute[];
   onRoutesChange: (routes: ModulationRoute[]) => void;
   onParameterChange?: () => void;
+  onDepthChange?: (routeIndex: number, amount: number) => void; // Direct Tone.js update, bypasses React
 }
 
 // Define available destinations with categories
@@ -49,6 +50,7 @@ function ModulationMatrixGrid({
   routes,
   onRoutesChange,
   onParameterChange,
+  onDepthChange,
 }: ModulationMatrixGridProps) {
   const [expandedRoute, setExpandedRoute] = useState<number | null>(null);
   // Local state for slider values (immediate visual feedback)
@@ -221,7 +223,9 @@ function ModulationMatrixGrid({
                       const newLocalAmounts = [...localAmounts];
                       newLocalAmounts[index] = newAmount;
                       setLocalAmounts(newLocalAmounts);
-                      // Debounce the actual route update to prevent audio clicks
+                      // Direct Tone.js update - NO React state, NO reconnection!
+                      onDepthChange?.(index, newAmount);
+                      // Debounced React state update (for presets, serialization, etc)
                       updateRouteDebounced(index, { amount: newAmount });
                     }}
                   />
