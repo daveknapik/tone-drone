@@ -57,10 +57,12 @@ function ModulationLFO({
   // Debounced state persistence callbacks (for serialization only)
   const persistFrequency = useDebounceCallback((freq: number) => {
     onFrequencyChange?.(freq);
+    onParameterChange?.(); // Call AFTER dragging stops
   }, 500);
 
   const persistAmplitude = useDebounceCallback((amp: number) => {
     onAmplitudeChange?.(amp);
+    onParameterChange?.(); // Call AFTER dragging stops
   }, 500);
 
   // Update LFO type immediately (non-audio-rate parameter)
@@ -88,7 +90,7 @@ function ModulationLFO({
             setFrequency(newFreq); // 1. Immediate UI update (local state)
             updateLFOFrequencyImmediate(newFreq); // 2. Immediate Tone.js update (imperative)
             persistFrequency(newFreq); // 3. Debounced state persistence (500ms, serialization only)
-            onParameterChange?.();
+            // Note: onParameterChange NOT called here - would trigger parent re-renders during drag
           }}
         />
         <Slider
@@ -103,7 +105,7 @@ function ModulationLFO({
             setAmplitude(newAmp); // 1. Immediate UI update (local state)
             updateLFOAmplitudeImmediate(newAmp); // 2. Immediate Tone.js update (imperative)
             persistAmplitude(newAmp); // 3. Debounced state persistence (500ms, serialization only)
-            onParameterChange?.();
+            // Note: onParameterChange NOT called here - would trigger parent re-renders during drag
           }}
         />
         <OptionsSelector<OscillatorType>
