@@ -1,6 +1,7 @@
 # Modulation Matrix Implementation Guide
 
 ## Overview
+
 This document contains everything needed to implement modulation in tone-drone, based on extensive testing and prototyping.
 
 ---
@@ -8,17 +9,18 @@ This document contains everything needed to implement modulation in tone-drone, 
 ## Decision: Focus on Drones + Effects Only
 
 After comprehensive testing, we determined that:
+
 - ✅ **Drone oscillators** support reliable audio-rate modulation
 - ✅ **Effects parameters** can be modulated effectively
 - ❌ **PolySynth voices** have architectural limitations preventing reliable modulation
 
 ### Test Results Summary
 
-| Source Type | Frequency | Volume | Pan | Verdict |
-|-------------|-----------|--------|-----|---------|
-| **Drone (Tone.Oscillator)** | ✅ Perfect | ✅ Perfect | ✅ Perfect | **Use for modulation** |
-| **Regular Synth** | ✅ Works | ✅ Works | ⚠️ Subtle | Possible but not priority |
-| **PolySynth** | ❌ Unreliable | ✅ Works | ❌ Inaudible | **Skip for modulation** |
+| Source Type                 | Frequency     | Volume     | Pan          | Verdict                   |
+| --------------------------- | ------------- | ---------- | ------------ | ------------------------- |
+| **Drone (Tone.Oscillator)** | ✅ Perfect    | ✅ Perfect | ✅ Perfect   | **Use for modulation**    |
+| **Regular Synth**           | ✅ Works      | ✅ Works   | ⚠️ Subtle    | Possible but not priority |
+| **PolySynth**               | ❌ Unreliable | ✅ Works   | ❌ Inaudible | **Skip for modulation**   |
 
 **Root Cause**: `Tone.PolySynth` dynamically creates voices. Audio-rate signals connected to PolySynth parameters don't reliably affect individual voices created after connection. Control-rate polling workarounds proved unreliable.
 
@@ -27,6 +29,7 @@ After comprehensive testing, we determined that:
 ## Recommended Modulation Destinations
 
 ### 6 Drone Oscillators × 3 Parameters Each
+
 1. **Frequency** (via `detune` parameter)
 2. **Volume** (via `Tone.Gain` nodes)
 3. **Pan** (via `Channel.pan`)
@@ -34,6 +37,7 @@ After comprehensive testing, we determined that:
 = **18 oscillator destinations**
 
 ### Effects Parameters (Examples)
+
 - Delay: time, feedback, wet/dry
 - Reverb: roomSize, dampening, wet/dry
 - Filter: frequency, Q/resonance
@@ -63,6 +67,7 @@ frequencyScaler.connect(oscillator.detune);
 ```
 
 **Key Points**:
+
 - Audio-rate modulation (smooth, sample-accurate)
 - ±100 cents provides ~2 semitones of vibrato at full depth
 - Works perfectly on `Tone.Oscillator` and `Tone.FatOscillator`
@@ -74,12 +79,14 @@ frequencyScaler.connect(oscillator.detune);
 **Critical Discovery**: Web Audio parameters use **additive modulation** (signals ADD to parameter values, not multiply).
 
 **WRONG Approach** ❌:
+
 ```typescript
 // Don't modulate Tone.Channel.volume directly!
 lfo.connect(droneChannel.volume); // Causes baseline shift + distortion
 ```
 
 **CORRECT Approach** ✅:
+
 ```typescript
 // Insert Tone.Gain node into signal path
 const modulationGain = new Tone.Gain(1);
@@ -105,13 +112,24 @@ modulationGain.gain.value = 0; // Signal now provides value (1.0 ± 0.5)
 ```
 
 **Why This Works**:
+
 - `Tone.Gain.gain` parameter is **linear** (not dB like volume)
 - Base value = 1.0 (unity gain)
 - Modulation range = 0.5 to 1.5 (50% to 150% volume)
 - No baseline shift, no distortion
 - Clean tremolo effect
 
+**Important Limitation**:
+
+- This modulates in **linear gain space**, not **dB space**
+- Result: Modulation is **asymmetric** in perceived loudness
+  - Goes further DOWN than UP when modulating around a set volume
+  - Example: -5 dB base volume with bipolar modulation might range -11 dB to -1.5 dB
+- Many professional VCAs use "linear-in-dB" control (exponential in linear space) for more symmetric perceived modulation
+- Our approach uses Web Audio API's native linear gain parameters for audio-rate performance
+
 **Order of Operations**:
+
 1. Connect all signal chain nodes first
 2. Then connect signal to `gain.gain` parameter
 3. **THEN** set `gain.gain.value = 0`
@@ -130,6 +148,7 @@ depthMultiplier.connect(channel.pan);
 ```
 
 **Key Points**:
+
 - Audio-rate stereo modulation
 - -1 = full left, +1 = full right, 0 = center
 - Most effective on continuous, rich sounds (like drones)
@@ -155,11 +174,13 @@ const updateDepth = (newDepth: number) => {
 ```
 
 **Why `Tone.Multiply` not `new Tone.Multiply(depth)`**:
+
 - `depthMultiplier.factor` is an **AudioParam** - updates in real-time
 - `new Tone.Multiply(depth)` creates a static node - depth captured at creation
 - Use `setTargetAtTime()` for smooth, exponential ramps (prevents clicks)
 
 **Debouncing** (optional for sliders):
+
 ```typescript
 let debounceTimer: NodeJS.Timeout;
 const handleDepthChange = (value: number) => {
@@ -178,12 +199,13 @@ const handleDepthChange = (value: number) => {
 
 #### When to Use Each Mode
 
-| Polarity | LFO Signal Range | Volume Result | Best For | Why |
-|----------|------------------|---------------|----------|-----|
-| **Bipolar** | -1 to +1 | 0.5 → 1.5 gain | Frequency (vibrato), Pan, Pitch | Oscillates equally above/below center value |
-| **Unipolar** | 0 to +1 | 0 → 1.0 gain | Volume (tremolo), Filter cutoff, Effect mix | Starts from zero, prevents negative values |
+| Polarity     | LFO Signal Range | Volume Result  | Best For                                    | Why                                         |
+| ------------ | ---------------- | -------------- | ------------------------------------------- | ------------------------------------------- |
+| **Bipolar**  | -1 to +1         | 0.5 → 1.5 gain | Frequency (vibrato), Pan, Pitch             | Oscillates equally above/below center value |
+| **Unipolar** | 0 to +1          | 0 → 1.0 gain   | Volume (tremolo), Filter cutoff, Effect mix | Starts from zero, prevents negative values  |
 
 **Key Distinction**:
+
 - **LFO Signal Range**: What the LFO outputs (the raw modulation signal)
 - **Volume Result**: How that signal affects audio volume after processing
 - The volume modulation architecture transforms the LFO signal (see Volume Modulation section above)
@@ -198,14 +220,14 @@ const lfo = new Tone.LFO({
   frequency: 2,
   amplitude: 1,
   min: -1,
-  max: 1
+  max: 1,
 });
 
 // Create unipolar transformer
-const unipolarScaler = new Tone.Scale(-1, 1, 0, 1);  // Maps [-1,1] → [0,1]
+const unipolarScaler = new Tone.Scale(-1, 1, 0, 1); // Maps [-1,1] → [0,1]
 
 // Route based on polarity mode
-if (polarityMode === 'unipolar') {
+if (polarityMode === "unipolar") {
   // LFO → unipolarScaler → [rest of chain]
   lfo.connect(unipolarScaler);
   unipolarScaler.connect(depthMultiplier);
@@ -218,7 +240,7 @@ if (polarityMode === 'unipolar') {
 #### Seamless Mode Switching
 
 ```typescript
-const setPolarityMode = (lfoIndex: number, mode: 'bipolar' | 'unipolar') => {
+const setPolarityMode = (lfoIndex: number, mode: "bipolar" | "unipolar") => {
   const state = lfoStates[lfoIndex];
   if (state.polarityMode === mode) return;
 
@@ -232,7 +254,7 @@ const setPolarityMode = (lfoIndex: number, mode: 'bipolar' | 'unipolar') => {
     state.lfo.disconnect();
     state.unipolarScaler.disconnect();
 
-    if (mode === 'unipolar') {
+    if (mode === "unipolar") {
       state.lfo.connect(state.unipolarScaler);
       state.unipolarScaler.connect(state.outputSignal);
     } else {
@@ -240,7 +262,7 @@ const setPolarityMode = (lfoIndex: number, mode: 'bipolar' | 'unipolar') => {
     }
 
     state.polarityMode = mode;
-  }, 60);  // Slightly longer than fade time
+  }, 60); // Slightly longer than fade time
 };
 ```
 
@@ -249,9 +271,9 @@ const setPolarityMode = (lfoIndex: number, mode: 'bipolar' | 'unipolar') => {
 ```typescript
 interface LFOState {
   lfo: Tone.LFO;
-  polarityMode: 'bipolar' | 'unipolar';
-  unipolarScaler: Tone.Scale;  // Always created, conditionally inserted
-  outputSignal: Tone.Signal;    // Final output after polarity processing
+  polarityMode: "bipolar" | "unipolar";
+  unipolarScaler: Tone.Scale; // Always created, conditionally inserted
+  outputSignal: Tone.Signal; // Final output after polarity processing
 }
 ```
 
@@ -265,6 +287,7 @@ interface LFOState {
 #### Example Use Cases & Signal Flow
 
 **Example 1: Tremolo (Unipolar Volume Modulation)**:
+
 ```typescript
 // LFO Configuration: Sine wave, 4Hz, unipolar mode
 // Signal Flow:
@@ -275,6 +298,7 @@ interface LFOState {
 ```
 
 **Example 2: Subtle Tremolo (Bipolar Volume Modulation)**:
+
 ```typescript
 // LFO Configuration: Sine wave, 4Hz, bipolar mode
 // Signal Flow:
@@ -286,6 +310,7 @@ interface LFOState {
 ```
 
 **Example 3: Vibrato (Bipolar Frequency Modulation)**:
+
 ```typescript
 // LFO Configuration: Sine wave, 5Hz, bipolar mode
 // Signal Flow:
@@ -322,11 +347,11 @@ class ModulationConnectionManager {
     const id = `${lfo.toString()}-${destination}`;
 
     // Build appropriate signal chain based on destination type
-    if (destination.includes('volume')) {
+    if (destination.includes("volume")) {
       this.connectVolume(lfo, depthMultiplier, targetParam);
-    } else if (destination.includes('frequency')) {
+    } else if (destination.includes("frequency")) {
       this.connectFrequency(lfo, depthMultiplier, targetParam);
-    } else if (destination.includes('pan')) {
+    } else if (destination.includes("pan")) {
       this.connectPan(lfo, depthMultiplier, targetParam);
     }
 
@@ -342,7 +367,7 @@ class ModulationConnectionManager {
   }
 
   disconnectAll(): void {
-    this.connections.forEach(conn => conn.cleanup());
+    this.connections.forEach((conn) => conn.cleanup());
     this.connections.clear();
   }
 }
@@ -353,12 +378,14 @@ class ModulationConnectionManager {
 ## Architecture: Dual-Source Challenge (Solved)
 
 **Original Problem**: Each "oscillator" in tone-drone is actually TWO sources:
+
 1. **Drone** - Continuous `Tone.Oscillator` or `Tone.FatOscillator`
 2. **Sequencer** - `Tone.PolySynth` for sequenced notes
 
 **Original Goal**: Modulate both as if they were one unit.
 
 **Solution**: Focus modulation on drones only.
+
 - Drones provide the continuous, modulation-rich foundation
 - Sequenced notes remain clean and rhythmic
 - This separation actually enhances the musical distinction
@@ -369,18 +396,23 @@ class ModulationConnectionManager {
 ## Common Pitfalls & Solutions
 
 ### ❌ Problem: Volume modulation causes baseline shift
+
 **Solution**: Use `Tone.Gain` nodes with base+modulation architecture (1.0 + LFO)
 
 ### ❌ Problem: Depth slider doesn't affect modulation
+
 **Solution**: Use `Tone.Multiply.factor` AudioParam, not static value
 
 ### ❌ Problem: Clicking/popping when changing depth
+
 **Solution**: Use `setTargetAtTime()` with debouncing
 
 ### ❌ Problem: Audio cuts out when connecting modulation
+
 **Solution**: Connect signal chain fully BEFORE zeroing parameter value
 
 ### ❌ Problem: PolySynth frequency modulation doesn't work
+
 **Solution**: Don't modulate PolySynth - use drones only
 
 ---
@@ -423,17 +455,21 @@ When implementing modulation, verify:
 ## File Structure
 
 ### React Components
+
 - `src/components/ModulationMatrix.tsx` - Main container
 - `src/components/ModulationLFO.tsx` - Individual LFO controls
 - `src/components/ModulationMatrixGrid.tsx` - Routing grid
 
 ### Utilities
+
 - `src/utils/modulationConnectionManager.ts` - Connection management class
 
 ### Types
+
 - `src/types/ModulationMatrixParams.ts` - TypeScript interfaces
 
 ### Hooks
+
 - `src/hooks/useModulationLFOs.ts` - LFO instance management
 
 ---
@@ -464,4 +500,3 @@ When implementing modulation, verify:
 By focusing on **drones + effects** and using the proven **Tone.Gain architecture for volume**, we can implement a robust, reliable modulation matrix with ~26-30 destinations that all work perfectly.
 
 The PolySynth limitation is not a compromise - it's an architectural decision that actually improves the design by maintaining clear sonic roles: drones provide evolving, modulated textures while sequenced notes stay crisp and rhythmic.
-
