@@ -39,7 +39,7 @@ export function useModulationLFOs() {
       }).start();
 
       // Create unipolar scaler: maps [-1,1] to [0,1]
-      const unipolarScaler = new Tone.Scale(-1, 1, 0, 1);
+      const unipolarScaler = new Tone.Scale({ min: 0, max: 1 });
 
       // Create output signal
       const outputSignal = new Tone.Signal(0);
@@ -86,7 +86,7 @@ export function useModulationLFOs() {
     if (!state || state.polarityMode === mode) return;
 
     const now = Tone.now();
-    
+
     // Smooth fade-out the output
     state.outputSignal.linearRampToValueAtTime(0, now + 0.05);
 

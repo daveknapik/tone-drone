@@ -6,6 +6,7 @@ import {
   useRef,
   useImperativeHandle,
   useEffect,
+  useMemo,
 } from "react";
 import * as Tone from "tone";
 import ModulationLFO from "./ModulationLFO";
@@ -17,6 +18,8 @@ import {
   ModulationRoute,
   LFOParams,
 } from "../types/ModulationMatrixParams";
+import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
+import { ModulationConnectionManager } from "../utils/modulationConnectionManager";
 
 const DEFAULT_LFOS: LFOParams[] = [
   { frequency: 0.5, type: "sine", amplitude: 1, polarityMode: "bipolar" },
@@ -30,23 +33,27 @@ const DEFAULT_ROUTES: ModulationRoute[] = [];
 interface ModulationMatrixProps {
   ref?: React.Ref<ModulationMatrixHandle>;
   onParameterChange?: () => void;
-  oscillatorChannels?: Tone.Channel[]; // Pass oscillator channels for routing
+  oscillators?: OscillatorWithChannel[]; // Pass oscillator objects for modulation
 }
 
 function ModulationMatrix({
   ref,
   onParameterChange,
-  oscillatorChannels = [],
+  oscillators = [],
 }: ModulationMatrixProps) {
   const [expandMatrix, setExpandMatrix] = useState(false);
   const [lfoParams, setLfoParams] = useState<LFOParams[]>(DEFAULT_LFOS);
   const [routes, setRoutes] = useState<ModulationRoute[]>(DEFAULT_ROUTES);
 
-  const { lfos, signals, setPolarityMode, getPolarityMode } = useModulationLFOs();
+  const { lfos, signals, setPolarityMode } = useModulationLFOs();
   const stateRef = useRef<ModulationMatrixState>({
     lfos: lfoParams,
     routes: routes,
   });
+
+  // Create connection manager and depth multipliers refs
+  const connectionManager = useMemo(() => new ModulationConnectionManager(), []);
+  const depthMultipliersRef = useRef<Tone.Multiply[]>([]);
 
   // Update ref whenever state changes
   useEffect(() => {
@@ -77,30 +84,111 @@ function ModulationMatrix({
     },
   }));
 
-  // Apply modulation routes
+  // Apply modulation routes whenever routes or oscillators change
   useEffect(() => {
-    // For now, this is a placeholder for actual routing logic
-    // In a full implementation, you would:
-    // 1. Disconnect all previous connections
-    // 2. Connect LFO signals to their destinations based on routes
-    // 3. Scale the signal by the amount parameter
+    // Disconnect all previous connections
+    connectionManager.disconnectAll();
 
-    routes.forEach((route) => {
+    const depthMultipliers = depthMultipliersRef.current;
+
+    // Ensure depth multipliers array matches routes
+    while (depthMultipliers.length < routes.length) {
+      depthMultipliers.push(new Tone.Multiply(1));
+    }
+    while (depthMultipliers.length > routes.length) {
+      const removed = depthMultipliers.pop();
+      removed?.dispose();
+    }
+
+    // Connect each route
+    routes.forEach((route, routeIndex) => {
       if (route.destination === "none") return;
 
       const lfoSignal = signals[route.sourceIndex];
-      if (!lfoSignal) return;
+      const depthMultiplier = depthMultipliers[routeIndex];
+      
+      if (!lfoSignal || !depthMultiplier) {
+        console.warn(`Missing LFO signal or depth multiplier for route ${routeIndex}`);
+        return;
+      }
 
-      // Example routing logic (would need to be expanded)
-      // This would connect the LFO to the appropriate parameter
-      // based on the destination string
+      // Update depth multiplier value
+      const now = Tone.now();
+      depthMultiplier.factor.cancelScheduledValues(now);
+      depthMultiplier.factor.setTargetAtTime(route.amount, now, 0.015);
 
-      // TODO: Implement actual routing to oscillator parameters
-      console.log(
-        `Route: LFO ${route.sourceIndex} -> ${route.destination} (${route.amount})`
-      );
+      // Parse destination to get oscillator index and parameter type
+      const destinationParts = route.destination.split("-");
+      const oscIndexStr = destinationParts[0]?.replace("osc", "");
+      const paramType = destinationParts[1];
+
+      if (!oscIndexStr || !paramType) {
+        console.warn(`Invalid destination format: ${route.destination}`);
+        return;
+      }
+
+      const oscIndex = parseInt(oscIndexStr) - 1; // Convert 1-based to 0-based
+      const oscillator = oscillators[oscIndex];
+
+      if (!oscillator) {
+        console.warn(`Oscillator ${oscIndex + 1} not found`);
+        return;
+      }
+
+      const connectionId = `${route.sourceIndex}-${route.destination}`;
+      const polarityMode = lfoParams[route.sourceIndex]?.polarityMode || "bipolar";
+
+      try {
+        if (paramType === "frequency") {
+          connectionManager.connectFrequency(
+            connectionId,
+            lfoSignal,
+            depthMultiplier,
+            route.destination,
+            oscillator.oscillator.detune as unknown as Tone.Param<"cents">
+          );
+        } else if (paramType === "volume") {
+          connectionManager.connectVolume(
+            connectionId,
+            lfoSignal,
+            depthMultiplier,
+            route.destination,
+            oscillator.oscillator,
+            oscillator.channel,
+            polarityMode
+          );
+        } else if (paramType === "pan") {
+          connectionManager.connectPan(
+            connectionId,
+            lfoSignal,
+            depthMultiplier,
+            route.destination,
+            oscillator.channel.pan
+          );
+        }
+      } catch (error) {
+        console.error(`Error connecting route ${connectionId}:`, error);
+      }
     });
-  }, [routes, signals, oscillatorChannels]);
+
+    // Cleanup function to disconnect all on unmount
+    return () => {
+      connectionManager.disconnectAll();
+    };
+  }, [routes, signals, oscillators, lfoParams, connectionManager]);
+
+  // Update depth multipliers when route amounts change
+  useEffect(() => {
+    const depthMultipliers = depthMultipliersRef.current;
+    routes.forEach((route, index) => {
+      const depthMultiplier = depthMultipliers[index];
+      if (depthMultiplier) {
+        const now = Tone.now();
+        depthMultiplier.factor.cancelScheduledValues(now);
+        depthMultiplier.factor.setTargetAtTime(route.amount, now, 0.015);
+      }
+    });
+  }, [routes]);
 
   const toggleExpandMatrix = (): void => {
     setExpandMatrix((prev) => !prev);
