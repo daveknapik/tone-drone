@@ -19,10 +19,10 @@ import {
 } from "../types/ModulationMatrixParams";
 
 const DEFAULT_LFOS: LFOParams[] = [
-  { frequency: 0.5, type: "sine", amplitude: 1 },
-  { frequency: 1, type: "triangle", amplitude: 1 },
-  { frequency: 2, type: "square", amplitude: 1 },
-  { frequency: 4, type: "sawtooth", amplitude: 1 },
+  { frequency: 0.5, type: "sine", amplitude: 1, polarityMode: "bipolar" },
+  { frequency: 1, type: "triangle", amplitude: 1, polarityMode: "bipolar" },
+  { frequency: 2, type: "square", amplitude: 1, polarityMode: "bipolar" },
+  { frequency: 4, type: "sawtooth", amplitude: 1, polarityMode: "bipolar" },
 ];
 
 const DEFAULT_ROUTES: ModulationRoute[] = [];
@@ -42,7 +42,7 @@ function ModulationMatrix({
   const [lfoParams, setLfoParams] = useState<LFOParams[]>(DEFAULT_LFOS);
   const [routes, setRoutes] = useState<ModulationRoute[]>(DEFAULT_ROUTES);
 
-  const { lfos, signals } = useModulationLFOs();
+  const { lfos, signals, setPolarityMode, getPolarityMode } = useModulationLFOs();
   const stateRef = useRef<ModulationMatrixState>({
     lfos: lfoParams,
     routes: routes,
@@ -69,6 +69,9 @@ function ModulationMatrix({
           lfos[i].frequency.value = params.frequency;
           lfos[i].type = params.type;
           lfos[i].amplitude.value = params.amplitude;
+          if (params.polarityMode) {
+            setPolarityMode(i, params.polarityMode);
+          }
         }
       });
     },
@@ -137,6 +140,7 @@ function ModulationMatrix({
                 initialFrequency={lfoParams[i]?.frequency}
                 initialType={lfoParams[i]?.type}
                 initialAmplitude={lfoParams[i]?.amplitude}
+                initialPolarityMode={lfoParams[i]?.polarityMode || "bipolar"}
                 onFrequencyChange={(freq) => {
                   handleLfoParamsUpdate(i, { frequency: freq });
                 }}
@@ -145,6 +149,10 @@ function ModulationMatrix({
                 }}
                 onAmplitudeChange={(amp) => {
                   handleLfoParamsUpdate(i, { amplitude: amp });
+                }}
+                onPolarityModeChange={(mode) => {
+                  setPolarityMode(i, mode);
+                  handleLfoParamsUpdate(i, { polarityMode: mode });
                 }}
                 onParameterChange={onParameterChange}
               />

@@ -1,10 +1,16 @@
 /**
+ * LFO polarity mode
+ */
+export type LFOPolarityMode = 'bipolar' | 'unipolar';
+
+/**
  * LFO parameters
  */
 export interface LFOParams {
   frequency: number; // Hz
   type: OscillatorType; // waveform type
   amplitude: number; // 0-1
+  polarityMode?: LFOPolarityMode; // bipolar (-1 to +1) or unipolar (0 to +1), defaults to bipolar
 }
 
 /**
