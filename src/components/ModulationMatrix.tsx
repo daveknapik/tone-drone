@@ -57,6 +57,7 @@ function ModulationMatrix({
   
   // Track route structure separately from amounts to avoid unnecessary reconnections
   const routeStructureRef = useRef<string>("");
+  const hasConnectedRef = useRef<boolean>(false);
   const getRouteStructure = (routes: ModulationRoute[]): string => {
     return routes.map(r => `${r.sourceIndex}-${r.destination}`).join("|");
   };
@@ -94,15 +95,25 @@ function ModulationMatrix({
   useEffect(() => {
     const currentStructure = getRouteStructure(routes);
     
-    // Only reconnect if structure actually changed
-    if (currentStructure === routeStructureRef.current && oscillators.length > 0) {
-      return; // Skip reconnection, structure hasn't changed
+    // Skip if structure unchanged AND we've already connected with current oscillators
+    const structureUnchanged = currentStructure === routeStructureRef.current;
+    const hasOscillators = oscillators.length > 0;
+    
+    if (structureUnchanged && hasConnectedRef.current && hasOscillators) {
+      return; // Skip reconnection, structure hasn't changed and we're already connected
+    }
+    
+    // If no oscillators yet, wait for them
+    if (!hasOscillators) {
+      hasConnectedRef.current = false;
+      return;
     }
     
     routeStructureRef.current = currentStructure;
     
     // Disconnect all previous connections
     connectionManager.disconnectAll();
+    hasConnectedRef.current = false;
 
     const depthMultipliers = depthMultipliersRef.current;
 
@@ -121,7 +132,7 @@ function ModulationMatrix({
 
       const lfoSignal = signals[route.sourceIndex];
       const depthMultiplier = depthMultipliers[routeIndex];
-      
+
       if (!lfoSignal || !depthMultiplier) {
         console.warn(`Missing LFO signal or depth multiplier for route ${routeIndex}`);
         return;
@@ -184,15 +195,24 @@ function ModulationMatrix({
       }
     });
 
+    // Mark as connected after successful setup
+    hasConnectedRef.current = true;
+
     // Cleanup function to disconnect all on unmount
     return () => {
       connectionManager.disconnectAll();
+      hasConnectedRef.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routes, signals, oscillators, lfoParams, connectionManager]);
 
   // Update depth multipliers when ONLY amounts change (no reconnection!)
   useEffect(() => {
+    // Only update if we're already connected
+    if (!hasConnectedRef.current) {
+      return;
+    }
+    
     const depthMultipliers = depthMultipliersRef.current;
     routes.forEach((route, index) => {
       const depthMultiplier = depthMultipliers[index];
