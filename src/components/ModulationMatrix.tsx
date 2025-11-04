@@ -7,6 +7,7 @@ import {
   useImperativeHandle,
   useEffect,
   useMemo,
+  useCallback,
 } from "react";
 import * as Tone from "tone";
 import ModulationLFO from "./ModulationLFO";
