@@ -219,15 +219,15 @@ function ModulationMatrixGrid({
                     step={0.01}
                     handleChange={(e) => {
                       const newAmount = parseFloat(e.target.value);
-                      
+
                       // 1. Update local state immediately for responsive UI
                       const newLocalAmounts = [...localAmounts];
                       newLocalAmounts[index] = newAmount;
                       setLocalAmounts(newLocalAmounts);
-                      
+
                       // 2. Update Tone.js immediately (imperative, no React state)
                       onDepthChange?.(index, newAmount);
-                      
+
                       // 3. Update React state ONLY after 500ms of inactivity (persistence/serialization)
                       //    During active dragging, state does NOT update - no React overhead!
                       updateRouteStatePersistence(index, { amount: newAmount });
