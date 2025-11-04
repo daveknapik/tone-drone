@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
@@ -37,19 +37,46 @@ function ModulationLFO({
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
-  // Imperative Tone.js updates (called immediately on every slider change)
+  // RAF throttling for LFO parameter updates
+  const rafFreqRef = useRef<number | null>(null);
+  const rafAmpRef = useRef<number | null>(null);
+  const pendingFreqRef = useRef<number | null>(null);
+  const pendingAmpRef = useRef<number | null>(null);
+
+  // Imperative Tone.js updates with RAF throttling
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
-    if (lfo) {
-      // Direct value assignment - LFO parameters don't need ramping
-      // The LFO output is already smooth, changing frequency/amplitude instantly is safe
-      lfo.frequency.value = freq;
+    if (!lfo) return;
+    
+    // Store pending value
+    pendingFreqRef.current = freq;
+    
+    // Only schedule RAF if one isn't already pending
+    if (rafFreqRef.current === null) {
+      rafFreqRef.current = requestAnimationFrame(() => {
+        if (lfo && pendingFreqRef.current !== null) {
+          lfo.frequency.value = pendingFreqRef.current;
+          pendingFreqRef.current = null;
+        }
+        rafFreqRef.current = null;
+      });
     }
   }, [lfo]);
 
   const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
-    if (lfo) {
-      // Direct value assignment - LFO parameters don't need ramping
-      lfo.amplitude.value = amp;
+    if (!lfo) return;
+    
+    // Store pending value
+    pendingAmpRef.current = amp;
+    
+    // Only schedule RAF if one isn't already pending
+    if (rafAmpRef.current === null) {
+      rafAmpRef.current = requestAnimationFrame(() => {
+        if (lfo && pendingAmpRef.current !== null) {
+          lfo.amplitude.value = pendingAmpRef.current;
+          pendingAmpRef.current = null;
+        }
+        rafAmpRef.current = null;
+      });
     }
   }, [lfo]);
 
