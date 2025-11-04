@@ -41,16 +41,16 @@ function ModulationLFO({
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
     if (lfo) {
       const now = Tone.now();
-      lfo.frequency.cancelScheduledValues(now);
-      lfo.frequency.setTargetAtTime(freq, now, 0.015);
+      // Use linearRampTo for smooth, click-free parameter changes
+      lfo.frequency.linearRampTo(freq, 0.05, now);
     }
   }, [lfo]);
 
   const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
     if (lfo) {
       const now = Tone.now();
-      lfo.amplitude.cancelScheduledValues(now);
-      lfo.amplitude.setTargetAtTime(amp, now, 0.015);
+      // Use linearRampTo for smooth, click-free parameter changes
+      lfo.amplitude.linearRampTo(amp, 0.05, now);
     }
   }, [lfo]);
 

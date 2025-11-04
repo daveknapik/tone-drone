@@ -211,9 +211,9 @@ function ModulationMatrix({
   const updateDepth = useCallback((routeIndex: number, amount: number) => {
     const depthMultiplier = depthMultipliersRef.current[routeIndex];
     if (depthMultiplier && hasConnectedRef.current) {
-      const now = Tone.now();
-      depthMultiplier.factor.cancelScheduledValues(now);
-      depthMultiplier.factor.setTargetAtTime(amount, now, 0.015);
+      // Direct value assignment - depth multiplier modulates control signals, not audio
+      // Using ramps here causes clicks because it's modulating modulators
+      depthMultiplier.factor.value = amount;
     }
   }, []);
 
