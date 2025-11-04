@@ -37,47 +37,15 @@ function ModulationLFO({
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
-  // RAF throttling for LFO parameter updates
-  const rafFreqRef = useRef<number | null>(null);
-  const rafAmpRef = useRef<number | null>(null);
-  const pendingFreqRef = useRef<number | null>(null);
-  const pendingAmpRef = useRef<number | null>(null);
-
-  // Imperative Tone.js updates with RAF throttling
+  // Direct immediate updates - exactly like modulation-reference.html
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
     if (!lfo) return;
-    
-    // Store pending value
-    pendingFreqRef.current = freq;
-    
-    // Only schedule RAF if one isn't already pending
-    if (rafFreqRef.current === null) {
-      rafFreqRef.current = requestAnimationFrame(() => {
-        if (lfo && pendingFreqRef.current !== null) {
-          lfo.frequency.value = pendingFreqRef.current;
-          pendingFreqRef.current = null;
-        }
-        rafFreqRef.current = null;
-      });
-    }
+    lfo.frequency.value = freq;
   }, [lfo]);
 
   const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
     if (!lfo) return;
-    
-    // Store pending value
-    pendingAmpRef.current = amp;
-    
-    // Only schedule RAF if one isn't already pending
-    if (rafAmpRef.current === null) {
-      rafAmpRef.current = requestAnimationFrame(() => {
-        if (lfo && pendingAmpRef.current !== null) {
-          lfo.amplitude.value = pendingAmpRef.current;
-          pendingAmpRef.current = null;
-        }
-        rafAmpRef.current = null;
-      });
-    }
+    lfo.amplitude.value = amp;
   }, [lfo]);
 
   // Debounced state persistence callbacks (for serialization only)
@@ -113,10 +81,12 @@ function ModulationLFO({
           step={0.01}
           handleChange={(e) => {
             const newFreq = parseFloat(e.target.value);
-            setFrequency(newFreq); // 1. Immediate UI update (local state)
-            updateLFOFrequencyImmediate(newFreq); // 2. Immediate Tone.js update (imperative)
-            persistFrequency(newFreq); // 3. Debounced state persistence (500ms, serialization only)
-            // Note: onParameterChange NOT called here - would trigger parent re-renders during drag
+            // Update Tone.js immediately (like modulation-reference.html)
+            updateLFOFrequencyImmediate(newFreq);
+            // Update local state for UI (this causes re-render but should be OK)
+            setFrequency(newFreq);
+            // Debounced state persistence (for serialization)
+            persistFrequency(newFreq);
           }}
         />
         <Slider
@@ -128,10 +98,12 @@ function ModulationLFO({
           step={0.01}
           handleChange={(e) => {
             const newAmp = parseFloat(e.target.value);
-            setAmplitude(newAmp); // 1. Immediate UI update (local state)
-            updateLFOAmplitudeImmediate(newAmp); // 2. Immediate Tone.js update (imperative)
-            persistAmplitude(newAmp); // 3. Debounced state persistence (500ms, serialization only)
-            // Note: onParameterChange NOT called here - would trigger parent re-renders during drag
+            // Update Tone.js immediately (like modulation-reference.html)
+            updateLFOAmplitudeImmediate(newAmp);
+            // Update local state for UI (this causes re-render but should be OK)
+            setAmplitude(newAmp);
+            // Debounced state persistence (for serialization)
+            persistAmplitude(newAmp);
           }}
         />
         <OptionsSelector<OscillatorType>

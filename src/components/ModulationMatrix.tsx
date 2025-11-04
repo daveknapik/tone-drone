@@ -207,31 +207,11 @@ function ModulationMatrix({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routes, signals, oscillators, lfoParams, connectionManager]);
 
-  // RAF throttling for depth updates
-  const rafIdRef = useRef<number | null>(null);
-  const pendingDepthUpdatesRef = useRef<Map<number, number>>(new Map());
-
-  // Create imperative depth update function with RAF throttling
+  // Direct immediate updates - exactly like modulation-reference.html
   const updateDepth = useCallback((routeIndex: number, amount: number) => {
-    // Store the pending update (latest value wins)
-    pendingDepthUpdatesRef.current.set(routeIndex, amount);
-
-    // Only schedule RAF if one isn't already pending
-    if (rafIdRef.current === null) {
-      rafIdRef.current = requestAnimationFrame(() => {
-        // Apply all pending depth updates in one batch
-        const depthMultipliers = depthMultipliersRef.current;
-        pendingDepthUpdatesRef.current.forEach((value, index) => {
-          const depthMultiplier = depthMultipliers[index];
-          if (depthMultiplier && hasConnectedRef.current) {
-            depthMultiplier.factor.value = value;
-          }
-        });
-        
-        // Clear for next batch
-        pendingDepthUpdatesRef.current.clear();
-        rafIdRef.current = null;
-      });
+    const depthMultiplier = depthMultipliersRef.current[routeIndex];
+    if (depthMultiplier && hasConnectedRef.current) {
+      depthMultiplier.factor.value = amount;
     }
   }, []);
 
