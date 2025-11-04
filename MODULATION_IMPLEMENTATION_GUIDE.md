@@ -172,6 +172,109 @@ const handleDepthChange = (value: number) => {
 
 ---
 
+### 5. LFO Polarity Modes (Unipolar vs Bipolar)
+
+**Overview**: LFOs can output either bipolar (-1 to +1) or unipolar (0 to +1) signals depending on the modulation destination.
+
+#### When to Use Each Mode
+
+| Polarity | Range | Best For | Why |
+|----------|-------|----------|-----|
+| **Bipolar** | -1 to +1 | Frequency (vibrato), Pan, Pitch | Oscillates equally above/below center value |
+| **Unipolar** | 0 to +1 | Volume (tremolo), Filter cutoff, Effect mix | Prevents negative/nonsensical values |
+
+#### Implementation
+
+**Architecture**: Base LFO always generates bipolar signal, transform to unipolar when needed.
+
+```typescript
+// Create LFO (always bipolar internally)
+const lfo = new Tone.LFO({
+  frequency: 2,
+  amplitude: 1,
+  min: -1,
+  max: 1
+});
+
+// Create unipolar transformer
+const unipolarScaler = new Tone.Scale(-1, 1, 0, 1);  // Maps [-1,1] → [0,1]
+
+// Route based on polarity mode
+if (polarityMode === 'unipolar') {
+  // LFO → unipolarScaler → [rest of chain]
+  lfo.connect(unipolarScaler);
+  unipolarScaler.connect(depthMultiplier);
+} else {
+  // LFO → [rest of chain] (direct)
+  lfo.connect(depthMultiplier);
+}
+```
+
+#### Seamless Mode Switching
+
+```typescript
+const setPolarityMode = (lfoIndex: number, mode: 'bipolar' | 'unipolar') => {
+  const state = lfoStates[lfoIndex];
+  if (state.polarityMode === mode) return;
+
+  const now = Tone.now();
+  
+  // Smooth fade-out
+  state.outputSignal.linearRampToValueAtTime(0, now + 0.05);
+  
+  // Reconfigure routing after fade-out
+  setTimeout(() => {
+    state.lfo.disconnect();
+    state.unipolarScaler.disconnect();
+    
+    if (mode === 'unipolar') {
+      state.lfo.connect(state.unipolarScaler);
+      state.unipolarScaler.connect(state.outputSignal);
+    } else {
+      state.lfo.connect(state.outputSignal);
+    }
+    
+    state.polarityMode = mode;
+  }, 60);  // Slightly longer than fade time
+};
+```
+
+#### Per-LFO State Management
+
+```typescript
+interface LFOState {
+  lfo: Tone.LFO;
+  polarityMode: 'bipolar' | 'unipolar';
+  unipolarScaler: Tone.Scale;  // Always created, conditionally inserted
+  outputSignal: Tone.Signal;    // Final output after polarity processing
+}
+```
+
+#### UI Considerations
+
+- **Button/Toggle**: Allow users to switch modes
+- **Visual Indicator**: Show current mode (e.g., ± for bipolar, + for unipolar)
+- **Color Coding**: Different colors help distinguish modes
+- **Tooltips**: Explain what each mode does and when to use it
+
+#### Example Use Cases
+
+**Tremolo (Unipolar Volume Modulation)**:
+```typescript
+// Sine LFO at 4Hz in unipolar mode
+// Routes to Oscillator Volume
+// Result: Volume pulses from 0% to 100% (doesn't go negative/silent)
+```
+
+**Vibrato (Bipolar Frequency Modulation)**:
+```typescript
+// Sine LFO at 5Hz in bipolar mode
+// Routes to Oscillator Frequency (detune)
+// Result: Pitch oscillates ±30 cents around center frequency
+```
+
+---
+
 ## Connection Management
 
 ### ModulationConnectionManager Class
