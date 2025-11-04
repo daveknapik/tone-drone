@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
@@ -37,24 +37,31 @@ function ModulationLFO({
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
-  // Debounced Tone.js updates to prevent clicks/pops
-  const updateLFOFrequency = useDebounceCallback((freq: number) => {
+  // Imperative Tone.js updates (called immediately on every slider change)
+  const updateLFOFrequencyImmediate = useCallback((freq: number) => {
     if (lfo) {
       const now = Tone.now();
       lfo.frequency.cancelScheduledValues(now);
       lfo.frequency.setTargetAtTime(freq, now, 0.015);
     }
-    onFrequencyChange?.(freq);
-  }, 50);
+  }, [lfo]);
 
-  const updateLFOAmplitude = useDebounceCallback((amp: number) => {
+  const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
     if (lfo) {
       const now = Tone.now();
       lfo.amplitude.cancelScheduledValues(now);
       lfo.amplitude.setTargetAtTime(amp, now, 0.015);
     }
+  }, [lfo]);
+
+  // Debounced state persistence callbacks (for serialization only)
+  const persistFrequency = useDebounceCallback((freq: number) => {
+    onFrequencyChange?.(freq);
+  }, 500);
+
+  const persistAmplitude = useDebounceCallback((amp: number) => {
     onAmplitudeChange?.(amp);
-  }, 50);
+  }, 500);
 
   // Update LFO type immediately (non-audio-rate parameter)
   useEffect(() => {
@@ -78,8 +85,9 @@ function ModulationLFO({
           step={0.01}
           handleChange={(e) => {
             const newFreq = parseFloat(e.target.value);
-            setFrequency(newFreq); // Immediate UI update
-            updateLFOFrequency(newFreq); // Debounced Tone.js update
+            setFrequency(newFreq); // 1. Immediate UI update (local state)
+            updateLFOFrequencyImmediate(newFreq); // 2. Immediate Tone.js update (imperative)
+            persistFrequency(newFreq); // 3. Debounced state persistence (500ms, serialization only)
             onParameterChange?.();
           }}
         />
@@ -92,8 +100,9 @@ function ModulationLFO({
           step={0.01}
           handleChange={(e) => {
             const newAmp = parseFloat(e.target.value);
-            setAmplitude(newAmp); // Immediate UI update
-            updateLFOAmplitude(newAmp); // Debounced Tone.js update
+            setAmplitude(newAmp); // 1. Immediate UI update (local state)
+            updateLFOAmplitudeImmediate(newAmp); // 2. Immediate Tone.js update (imperative)
+            persistAmplitude(newAmp); // 3. Debounced state persistence (500ms, serialization only)
             onParameterChange?.();
           }}
         />

@@ -206,23 +206,15 @@ function ModulationMatrix({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routes, signals, oscillators, lfoParams, connectionManager]);
 
-  // Update depth multipliers when ONLY amounts change (no reconnection!)
-  useEffect(() => {
-    // Only update if we're already connected
-    if (!hasConnectedRef.current) {
-      return;
+  // Create imperative depth update function (like other components in this codebase)
+  const updateDepth = useCallback((routeIndex: number, amount: number) => {
+    const depthMultiplier = depthMultipliersRef.current[routeIndex];
+    if (depthMultiplier && hasConnectedRef.current) {
+      const now = Tone.now();
+      depthMultiplier.factor.cancelScheduledValues(now);
+      depthMultiplier.factor.setTargetAtTime(amount, now, 0.015);
     }
-
-    const depthMultipliers = depthMultipliersRef.current;
-    routes.forEach((route, index) => {
-      const depthMultiplier = depthMultipliers[index];
-      if (depthMultiplier && depthMultiplier.factor.value !== route.amount) {
-        const now = Tone.now();
-        depthMultiplier.factor.cancelScheduledValues(now);
-        depthMultiplier.factor.setTargetAtTime(route.amount, now, 0.015);
-      }
-    });
-  }, [routes]);
+  }, []);
 
   const toggleExpandMatrix = (): void => {
     setExpandMatrix((prev) => !prev);
@@ -289,15 +281,7 @@ function ModulationMatrix({
           routes={routes}
           onRoutesChange={setRoutes}
           onParameterChange={onParameterChange}
-          onDepthChange={(routeIndex, amount) => {
-            // Update depth multiplier directly - bypass React state for real-time audio updates
-            const depthMultiplier = depthMultipliersRef.current[routeIndex];
-            if (depthMultiplier && hasConnectedRef.current) {
-              const now = Tone.now();
-              depthMultiplier.factor.cancelScheduledValues(now);
-              depthMultiplier.factor.setTargetAtTime(amount, now, 0.015);
-            }
-          }}
+          onDepthChange={updateDepth}
         />
       </div>
     </Fragment>
