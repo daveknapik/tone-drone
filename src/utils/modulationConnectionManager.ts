@@ -31,7 +31,7 @@ export class ModulationConnectionManager {
 
   /**
    * Connect an LFO to a frequency parameter (uses detune)
-   * 
+   *
    * @param connectionId Unique identifier for this connection
    * @param lfoSignal Output signal from LFO (after polarity processing)
    * @param depthMultiplier Depth control multiplier node
@@ -72,11 +72,11 @@ export class ModulationConnectionManager {
 
   /**
    * Connect an LFO to a volume parameter (uses Tone.Gain architecture)
-   * 
+   *
    * IMPORTANT: Volume modulation requires inserting a Tone.Gain node into the
    * audio path and using base+modulation signal architecture to avoid baseline
    * shift and distortion.
-   * 
+   *
    * @param connectionId Unique identifier for this connection
    * @param lfoSignal Output signal from LFO (after polarity processing)
    * @param depthMultiplier Depth control multiplier node
@@ -170,7 +170,7 @@ export class ModulationConnectionManager {
 
   /**
    * Connect an LFO to a pan parameter
-   * 
+   *
    * @param connectionId Unique identifier for this connection
    * @param lfoSignal Output signal from LFO (after polarity processing)
    * @param depthMultiplier Depth control multiplier node
@@ -206,7 +206,7 @@ export class ModulationConnectionManager {
 
   /**
    * Disconnect a specific modulation connection
-   * 
+   *
    * @param connectionId Unique identifier for the connection to disconnect
    */
   disconnect(connectionId: string): void {

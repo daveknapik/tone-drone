@@ -111,7 +111,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   // Get oscillators from Oscillators component once ready
   useEffect(() => {
     let interval: NodeJS.Timeout;
-    
+
     const getOscillators = () => {
       if (oscillatorsRef.current) {
         const oscs = oscillatorsRef.current.getOscillators();
@@ -124,10 +124,10 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
 
     // Poll for oscillators to be ready (they're created in the Oscillators useEffect)
     interval = setInterval(getOscillators, 100);
-    
+
     // Also try immediately
     getOscillators();
-    
+
     // Cleanup
     return () => clearInterval(interval);
   }, []);

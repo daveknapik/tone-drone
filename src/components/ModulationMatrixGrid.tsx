@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { clsx } from "clsx";
+import { useDebounceCallback } from "usehooks-ts";
 import {
   ModulationRoute,
   ModulationDestination,
@@ -50,16 +51,28 @@ function ModulationMatrixGrid({
   onParameterChange,
 }: ModulationMatrixGridProps) {
   const [expandedRoute, setExpandedRoute] = useState<number | null>(null);
+  // Local state for slider values (immediate visual feedback)
+  const [localAmounts, setLocalAmounts] = useState<number[]>(
+    routes.map((r) => r.amount)
+  );
 
-  const updateRoute = (
-    index: number,
-    updates: Partial<ModulationRoute>
-  ): void => {
-    const newRoutes = [...routes];
-    newRoutes[index] = { ...newRoutes[index], ...updates };
-    onRoutesChange(newRoutes);
-    onParameterChange?.();
-  };
+  const updateRoute = useCallback(
+    (index: number, updates: Partial<ModulationRoute>): void => {
+      const newRoutes = [...routes];
+      newRoutes[index] = { ...newRoutes[index], ...updates };
+      onRoutesChange(newRoutes);
+      onParameterChange?.();
+    },
+    [routes, onRoutesChange, onParameterChange]
+  );
+
+  // Debounced version for amount/depth slider (prevents audio clicks)
+  const updateRouteDebounced = useDebounceCallback(updateRoute, 50);
+
+  // Sync local amounts when routes change from outside (e.g., preset load)
+  useEffect(() => {
+    setLocalAmounts(routes.map((r) => r.amount));
+  }, [routes.length]); // Only sync when routes are added/removed
 
   const addRoute = (): void => {
     if (routes.length < 8) {
@@ -70,6 +83,7 @@ function ModulationMatrixGrid({
         amount: 0.5,
       };
       onRoutesChange([...routes, newRoute]);
+      setLocalAmounts([...localAmounts, 0.5]);
       setExpandedRoute(routes.length); // Auto-expand new route
       onParameterChange?.();
     }
@@ -78,6 +92,7 @@ function ModulationMatrixGrid({
   const removeRoute = (index: number): void => {
     const newRoutes = routes.filter((_, i) => i !== index);
     onRoutesChange(newRoutes);
+    setLocalAmounts(localAmounts.filter((_, i) => i !== index));
     if (expandedRoute === index) {
       setExpandedRoute(null);
     }
@@ -133,7 +148,7 @@ function ModulationMatrixGrid({
               <span className="font-medium">{getRouteLabel(route)}</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  {(route.amount * 100).toFixed(0)}%
+                  {((localAmounts[index] ?? route.amount) * 100).toFixed(0)}%
                 </span>
                 <button
                   onClick={(e) => {
@@ -197,12 +212,18 @@ function ModulationMatrixGrid({
                     inputName={`route${index}-amount`}
                     min={0}
                     max={1}
-                    value={route.amount}
+                    value={localAmounts[index] ?? route.amount}
                     labelText="Depth"
                     step={0.01}
-                    handleChange={(e) =>
-                      updateRoute(index, { amount: parseFloat(e.target.value) })
-                    }
+                    handleChange={(e) => {
+                      const newAmount = parseFloat(e.target.value);
+                      // Update local state immediately for responsive UI
+                      const newLocalAmounts = [...localAmounts];
+                      newLocalAmounts[index] = newAmount;
+                      setLocalAmounts(newLocalAmounts);
+                      // Debounce the actual route update to prevent audio clicks
+                      updateRouteDebounced(index, { amount: newAmount });
+                    }}
                   />
                 </div>
               </div>

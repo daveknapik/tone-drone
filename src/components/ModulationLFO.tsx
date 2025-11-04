@@ -1,5 +1,6 @@
 import * as Tone from "tone";
 import { useState, useEffect } from "react";
+import { useDebounceCallback } from "usehooks-ts";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 import { LFOPolarityMode } from "../types/ModulationMatrixParams";
@@ -36,24 +37,31 @@ function ModulationLFO({
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
-  // Update LFO when parameters change
+  // Debounced Tone.js updates to prevent clicks/pops
+  const updateLFOFrequency = useDebounceCallback((freq: number) => {
+    if (lfo) {
+      const now = Tone.now();
+      lfo.frequency.cancelScheduledValues(now);
+      lfo.frequency.setTargetAtTime(freq, now, 0.015);
+    }
+    onFrequencyChange?.(freq);
+  }, 50);
+
+  const updateLFOAmplitude = useDebounceCallback((amp: number) => {
+    if (lfo) {
+      const now = Tone.now();
+      lfo.amplitude.cancelScheduledValues(now);
+      lfo.amplitude.setTargetAtTime(amp, now, 0.015);
+    }
+    onAmplitudeChange?.(amp);
+  }, 50);
+
+  // Update LFO type immediately (non-audio-rate parameter)
   useEffect(() => {
     if (lfo) {
-      // Use smooth parameter transitions to prevent clicks/pops
-      const now = Tone.now();
-      
-      // Frequency changes with smooth ramp
-      lfo.frequency.cancelScheduledValues(now);
-      lfo.frequency.setTargetAtTime(frequency, now, 0.015);
-      
-      // Type can be changed instantly (no audio rate parameter)
       lfo.type = type;
-      
-      // Amplitude changes with smooth ramp
-      lfo.amplitude.cancelScheduledValues(now);
-      lfo.amplitude.setTargetAtTime(amplitude, now, 0.015);
     }
-  }, [lfo, frequency, type, amplitude]);
+  }, [lfo, type]);
 
   return (
     <div className="border-2 rounded border-pink-500 dark:border-sky-300 p-4">
@@ -70,8 +78,8 @@ function ModulationLFO({
           step={0.01}
           handleChange={(e) => {
             const newFreq = parseFloat(e.target.value);
-            setFrequency(newFreq);
-            onFrequencyChange?.(newFreq);
+            setFrequency(newFreq); // Immediate UI update
+            updateLFOFrequency(newFreq); // Debounced Tone.js update
             onParameterChange?.();
           }}
         />
@@ -84,8 +92,8 @@ function ModulationLFO({
           step={0.01}
           handleChange={(e) => {
             const newAmp = parseFloat(e.target.value);
-            setAmplitude(newAmp);
-            onAmplitudeChange?.(newAmp);
+            setAmplitude(newAmp); // Immediate UI update
+            updateLFOAmplitude(newAmp); // Debounced Tone.js update
             onParameterChange?.();
           }}
         />

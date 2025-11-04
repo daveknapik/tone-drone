@@ -106,7 +106,7 @@ function ModulationMatrix({
 
       const lfoSignal = signals[route.sourceIndex];
       const depthMultiplier = depthMultipliers[routeIndex];
-      
+
       if (!lfoSignal || !depthMultiplier) {
         console.warn(`Missing LFO signal or depth multiplier for route ${routeIndex}`);
         return;
