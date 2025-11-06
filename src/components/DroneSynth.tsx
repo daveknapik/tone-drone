@@ -106,12 +106,12 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const modulationMatrixRef = useRef<ModulationMatrixHandle | null>(null);
 
   // Track oscillators for modulation matrix
-  const [oscillatorsForModulation, setOscillatorsForModulation] = useState<OscillatorWithChannel[]>([]);
+  const [oscillatorsForModulation, setOscillatorsForModulation] = useState<
+    OscillatorWithChannel[]
+  >([]);
 
   // Get oscillators from Oscillators component once ready
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-
     const getOscillators = () => {
       if (oscillatorsRef.current) {
         const oscs = oscillatorsRef.current.getOscillators();
@@ -123,7 +123,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
     };
 
     // Poll for oscillators to be ready (they're created in the Oscillators useEffect)
-    interval = setInterval(getOscillators, 100);
+    const interval = setInterval(getOscillators, 100);
 
     // Also try immediately
     getOscillators();
@@ -196,7 +196,13 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
           ref={modulationMatrixRef}
           onParameterChange={onParameterChange}
           oscillators={oscillatorsForModulation}
-          effects={{ filter: afterFilter, delay: delay }}
+          effects={{
+            filter: afterFilter,
+            delay: delay,
+            micro: microlooper,
+            bitCrusher: bitCrusher,
+            chebyshev: chebyshev,
+          }}
         />
         <PolySynths
           polysynths={polysynths}

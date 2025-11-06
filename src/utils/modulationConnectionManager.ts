@@ -34,12 +34,6 @@ export class ModulationConnectionManager {
 
   /**
    * Connect an LFO to a frequency parameter (uses detune)
-   *
-   * @param connectionId Unique identifier for this connection
-   * @param lfoSignal Output signal from LFO (after polarity processing)
-   * @param depthMultiplier Depth control multiplier node
-   * @param destination Modulation destination identifier
-   * @param detuneParam The oscillator's detune parameter
    */
   connectFrequency(
     connectionId: string,
@@ -65,7 +59,7 @@ export class ModulationConnectionManager {
 
     this.connections.set(connectionId, {
       type: "frequency",
-      source: lfoSignal,
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
       depthMultiplier,
       destination,
       nodes: [frequencyScaler],
@@ -75,18 +69,6 @@ export class ModulationConnectionManager {
 
   /**
    * Connect an LFO to a volume parameter (uses Tone.Gain architecture)
-   *
-   * IMPORTANT: Volume modulation requires inserting a Tone.Gain node into the
-   * audio path and using base+modulation signal architecture to avoid baseline
-   * shift and distortion.
-   *
-   * @param connectionId Unique identifier for this connection
-   * @param lfoSignal Output signal from LFO (after polarity processing)
-   * @param depthMultiplier Depth control multiplier node
-   * @param destination Modulation destination identifier
-   * @param audioSource The audio source node (oscillator)
-   * @param audioDestination Where the audio should go (typically channel)
-   * @param polarityMode Bipolar or unipolar (affects signal routing)
    */
   connectVolume(
     connectionId: string,
@@ -168,7 +150,7 @@ export class ModulationConnectionManager {
 
     this.connections.set(connectionId, {
       type: "volume",
-      source: lfoSignal,
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
       depthMultiplier,
       destination,
       nodes: [modulationGain, ...intermediateNodes],
@@ -178,12 +160,6 @@ export class ModulationConnectionManager {
 
   /**
    * Connect an LFO to a pan parameter
-   *
-   * @param connectionId Unique identifier for this connection
-   * @param lfoSignal Output signal from LFO (after polarity processing)
-   * @param depthMultiplier Depth control multiplier node
-   * @param destination Modulation destination identifier
-   * @param panParam The channel's pan parameter
    */
   connectPan(
     connectionId: string,
@@ -224,6 +200,36 @@ export class ModulationConnectionManager {
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(scale);
     scale.connect(filter.Q as unknown as Tone.ToneAudioNode);
+
+    const cleanup = () => {
+      lfoSignal.disconnect();
+      depthMultiplier.disconnect();
+      scale.disconnect();
+      scale.dispose();
+    };
+
+    this.connections.set(connectionId, {
+      type: "volume",
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
+      depthMultiplier,
+      destination,
+      nodes: [scale],
+      cleanup,
+    });
+  }
+
+  /** Connect to Filter Frequency (30..7000 Hz) using unipolar depth */
+  connectFilterFrequency(
+    connectionId: string,
+    lfoSignal: Tone.Signal,
+    depthMultiplier: Tone.Multiply,
+    destination: ModulationDestination,
+    filter: Tone.Filter
+  ): void {
+    const scale = new Tone.Scale({ min: 30, max: 7000 });
+    lfoSignal.connect(depthMultiplier);
+    depthMultiplier.connect(scale);
+    scale.connect(filter.frequency as unknown as Tone.ToneAudioNode);
 
     const cleanup = () => {
       lfoSignal.disconnect();
@@ -302,10 +308,88 @@ export class ModulationConnectionManager {
     });
   }
 
+  /** Connect to BitCrusher bits (2..8) */
+  connectBitCrusherBits(
+    connectionId: string,
+    lfoSignal: Tone.Signal,
+    depthMultiplier: Tone.Multiply,
+    destination: ModulationDestination,
+    bitCrusher: Tone.BitCrusher
+  ): void {
+    const scale = new Tone.Scale({ min: 1, max: 16 });
+    // Seed scale output to mid before connecting to Param (avoid 0)
+    const seed = new Tone.Signal(0.5);
+    seed.connect(scale);
+    scale.connect(bitCrusher.bits as unknown as Tone.ToneAudioNode);
+    // Live path: Convert bipolar (-1..+1) to unipolar (0..1): (x + 1) * 0.5
+    const add = new Tone.Add();
+    const one = new Tone.Signal(1);
+    const half = new Tone.Multiply(0.5);
+    lfoSignal.connect(depthMultiplier);
+    depthMultiplier.connect(add);
+    one.connect(add);
+    add.connect(half);
+    half.connect(scale);
+    // Remove seed after wiring
+    seed.disconnect();
+    seed.dispose();
+
+    const cleanup = () => {
+      lfoSignal.disconnect();
+      depthMultiplier.disconnect();
+      // dispose wiring
+      one.disconnect();
+      add.disconnect();
+      half.disconnect();
+      scale.disconnect();
+      add.dispose();
+      half.dispose();
+      scale.dispose();
+      one.dispose();
+    };
+
+    this.connections.set(connectionId, {
+      type: "volume",
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
+      depthMultiplier,
+      destination,
+      nodes: [one, add, half, scale],
+      cleanup,
+    });
+  }
+
+  /** Connect to Chebyshev order (1..100) */
+  connectChebyshevOrder(
+    connectionId: string,
+    lfoSignal: Tone.Signal,
+    depthMultiplier: Tone.Multiply,
+    destination: ModulationDestination,
+    chebyshev: Tone.Chebyshev
+  ): void {
+    const scale = new Tone.Scale({ min: 1, max: 100 });
+    lfoSignal.connect(depthMultiplier);
+    depthMultiplier.connect(scale);
+    scale.connect(chebyshev.order as unknown as Tone.ToneAudioNode);
+
+    const cleanup = () => {
+      lfoSignal.disconnect();
+      depthMultiplier.disconnect();
+      scale.disconnect();
+      scale.dispose();
+    };
+
+    this.connections.set(connectionId, {
+      type: "volume",
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
+      depthMultiplier,
+      destination,
+      nodes: [scale],
+      cleanup,
+    });
+  }
+
   /**
    * Disconnect a specific modulation connection
-   *
-   * @param connectionId Unique identifier for the connection to disconnect
    */
   disconnect(connectionId: string): void {
     const connection = this.connections.get(connectionId);
@@ -326,23 +410,17 @@ export class ModulationConnectionManager {
     this.volumeStates.clear();
   }
 
-  /**
-   * Check if a connection exists
-   */
+  /** Check if a connection exists */
   hasConnection(connectionId: string): boolean {
     return this.connections.has(connectionId);
   }
 
-  /**
-   * Get count of active connections
-   */
+  /** Get count of active connections */
   getConnectionCount(): number {
     return this.connections.size;
   }
 
-  /**
-   * Get all active connection IDs
-   */
+  /** Get all active connection IDs */
   getConnectionIds(): string[] {
     return Array.from(this.connections.keys());
   }
