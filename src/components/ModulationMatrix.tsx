@@ -288,9 +288,32 @@ function ModulationMatrix({
             dest: "bitcrusher-bits",
             amount,
             update: () => {
-              const val = Math.round(
-                computeControlValue(lfoIdx, amount, 1, 16)
-              );
+              /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+              const r: ModulationRoute = route;
+              const lp = lfoParams[lfoIdx];
+              const amp = lp?.amplitude ?? 1;
+              const depth = Math.max(0, Math.min(1, amount * amp));
+              const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
+              const unipolar = (sample + 1) * 0.5;
+              let valNum: number;
+              if ((r.rangeMode ?? "center") === "center") {
+                const centerVal =
+                  typeof r.center === "number" ? r.center : 8.5;
+                let amountRangeVal =
+                  typeof r.rangeAmount === "number" ? r.rangeAmount : 4;
+                if (amountRangeVal < 0) amountRangeVal = 0;
+                const bipolar = sample * depth;
+                valNum = centerVal + bipolar * amountRangeVal;
+              } else {
+                const minVal = typeof r.min === "number" ? r.min : 1;
+                const maxVal = typeof r.max === "number" ? r.max : 16;
+                let span = maxVal - minVal;
+                if (span < 0) span = 0;
+                valNum = minVal + unipolar * depth * span;
+              }
+              let val = Math.round(valNum);
+              if (val < 1) val = 1;
+              if (val > 16) val = 16;
               node.bits.value = val;
               const now =
                 typeof performance !== "undefined"
@@ -304,6 +327,7 @@ function ModulationMatrix({
                 );
                 lastLogMs = now;
               }
+              /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             },
           });
           return;
@@ -321,8 +345,33 @@ function ModulationMatrix({
             dest: "chebyshev-order",
             amount,
             update: () => {
-              const val = computeControlValue(lfoIdx, amount, 1, 100);
-              node.order = Math.round(val);
+              /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+              const r: ModulationRoute = route;
+              const lp = lfoParams[lfoIdx];
+              const amp = lp?.amplitude ?? 1;
+              const depth = Math.max(0, Math.min(1, amount * amp));
+              const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
+              const unipolar = (sample + 1) * 0.5;
+              let valNum: number;
+              if ((r.rangeMode ?? "center") === "center") {
+                const centerVal =
+                  typeof r.center === "number" ? r.center : 50;
+                let amountRangeVal =
+                  typeof r.rangeAmount === "number" ? r.rangeAmount : 20;
+                if (amountRangeVal < 0) amountRangeVal = 0;
+                const bipolar = sample * depth;
+                valNum = centerVal + bipolar * amountRangeVal;
+              } else {
+                const minVal = typeof r.min === "number" ? r.min : 1;
+                const maxVal = typeof r.max === "number" ? r.max : 100;
+                let span = maxVal - minVal;
+                if (span < 0) span = 0;
+                valNum = minVal + unipolar * depth * span;
+              }
+              let rounded = Math.round(valNum);
+              if (rounded < 1) rounded = 1;
+              if (rounded > 100) rounded = 100;
+              node.order = rounded;
               const now =
                 typeof performance !== "undefined"
                   ? performance.now()
@@ -330,10 +379,11 @@ function ModulationMatrix({
               if (now - lastLogMs > 100) {
                 console.log(
                   `[ModMatrix] LFO ${lfoIdx + 1} → Chebyshev order:`,
-                  Math.round(val)
+                  rounded
                 );
                 lastLogMs = now;
               }
+              /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             },
           });
           return;
@@ -375,19 +425,7 @@ function ModulationMatrix({
     };
   }, [routes, signals, oscillators, lfoParams, connectionManager, effects]);
 
-  // Control-rate compute (maps LFO to [min,max] with amount and amplitude)
-  const computeControlValue = useCallback(
-    (lfoIdx: number, amount: number, min: number, max: number): number => {
-      const lp = lfoParams[lfoIdx];
-      const amp = lp?.amplitude ?? 1;
-      const depth = Math.max(0, Math.min(1, amount * amp));
-      const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string); // [-1,1]
-      const unipolar = (sample + 1) * 0.5; // 0..1
-      const scaled = min + unipolar * depth * (max - min);
-      return Math.max(min, Math.min(max, scaled));
-    },
-    [lfoParams]
-  );
+  // (computeControlValue removed; custom per-route mapping is used directly)
 
   // Sample LFO at control-rate using stored phase
   const sampleLfo = useCallback((lfoIdx: number, type: string): number => {
@@ -591,6 +629,41 @@ function ModulationMatrix({
           onRoutesChange={setRoutes}
           onParameterChange={onParameterChange}
           onDepthChange={updateDepth}
+          onAnchorToCurrent={(routeIndex: number) => {
+            const route = routes[routeIndex];
+            if (!route) return;
+            const dest = route.destination;
+            // Only handle control-rate destinations for now
+            if (dest === "bitcrusher-bits" && effects?.bitCrusher?.current) {
+              const current = effects.bitCrusher.current.bits.value;
+              const updated: Partial<ModulationRoute> =
+                (route.rangeMode ?? "center") === "center"
+                  ? { center: Math.max(1, Math.min(16, Math.round(current))) }
+                  : {
+                      min: Math.max(1, Math.round(current - 2)),
+                      max: Math.min(16, Math.round(current + 2)),
+                    };
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
+              setRoutes(newRoutes);
+              return;
+            }
+            if (dest === "chebyshev-order" && effects?.chebyshev?.current) {
+              const current = effects.chebyshev.current.order;
+              const updated: Partial<ModulationRoute> =
+                (route.rangeMode ?? "center") === "center"
+                  ? { center: Math.max(1, Math.min(100, Math.round(current))) }
+                  : {
+                      min: Math.max(1, Math.round(current - 10)),
+                      max: Math.min(100, Math.round(current + 10)),
+                    };
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
+              setRoutes(newRoutes);
+            }
+          }}
         />
       </div>
     </Fragment>

@@ -20,6 +20,12 @@ export interface ModulationRoute {
   sourceIndex: number; // which LFO (0-3)
   destination: ModulationDestination;
   amount: number; // 0-1 (modulation depth)
+  // Per-route range configuration
+  rangeMode?: "center" | "minmax"; // center±amount or [min,max]
+  center?: number; // center value for bipolar mapping
+  rangeAmount?: number; // peak deviation for bipolar mapping
+  min?: number; // lower bound for unipolar mapping
+  max?: number; // upper bound for unipolar mapping
 }
 
 /**
