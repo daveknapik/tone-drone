@@ -344,15 +344,17 @@ Represents a single sequencer step's state.
 ### Signal Flow Diagram
 
 ```
-Oscillator 1 ──┐
-Oscillator 2 ──┤
-Oscillator 3 ──┤
-Oscillator 4 ──┼──→ Per‑Osc Chain → Effects Bus → Destination
-Oscillator 5 ──┤                 ↓          ↓
-Oscillator 6 ──┤        [Channel → Tremolo (spread=0) → AutoPanner]   [Recorder]
-Synths (x6) ───┤ (step sequencer)
-PolySynth 1 ───┤
-PolySynth 2 ───┘
+Per‑Oscillator Chains (x6):
+  Oscillator → Channel → Tremolo (spread=0) → AutoPanner → Effects Bus
+
+Global Routing:
+  Effects Bus → [Effects Chain] → Destination
+  Recorder (tap): after Effects Bus output
+
+Notes:
+  - The per‑oscillator chain FEEDS the Effects Bus (the bus does not feed Tremolo)
+  - Tremolo is after Channel and uses spread=0 so amplitude modulation is in‑phase L/R
+  - AutoPanner is after Channel as well to pan the final stereo signal
 ```
 
 #### Modulation Matrix Routing (click‑free)
