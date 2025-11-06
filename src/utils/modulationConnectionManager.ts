@@ -31,6 +31,8 @@ interface VolumeConnectionState {
 export class ModulationConnectionManager {
   private connections = new Map<string, ModulationConnection>();
   private volumeStates = new Map<string, VolumeConnectionState>();
+  // Track Scale nodes per connection for live range updates
+  private scaleNodes = new Map<string, Tone.Scale>();
 
   /**
    * Connect an LFO to a frequency parameter (uses detune)
@@ -200,12 +202,14 @@ export class ModulationConnectionManager {
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(scale);
     scale.connect(filter.Q as unknown as Tone.ToneAudioNode);
+    this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
       lfoSignal.disconnect();
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
+      this.scaleNodes.delete(connectionId);
     };
 
     this.connections.set(connectionId, {
@@ -230,12 +234,14 @@ export class ModulationConnectionManager {
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(scale);
     scale.connect(filter.frequency as unknown as Tone.ToneAudioNode);
+    this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
       lfoSignal.disconnect();
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
+      this.scaleNodes.delete(connectionId);
     };
 
     this.connections.set(connectionId, {
@@ -260,12 +266,14 @@ export class ModulationConnectionManager {
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(scale);
     scale.connect(delay.feedback as unknown as Tone.ToneAudioNode);
+    this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
       lfoSignal.disconnect();
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
+      this.scaleNodes.delete(connectionId);
     };
 
     this.connections.set(connectionId, {
@@ -290,12 +298,14 @@ export class ModulationConnectionManager {
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(scale);
     scale.connect(delay.delayTime as unknown as Tone.ToneAudioNode);
+    this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
       lfoSignal.disconnect();
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
+      this.scaleNodes.delete(connectionId);
     };
 
     this.connections.set(connectionId, {
@@ -330,6 +340,7 @@ export class ModulationConnectionManager {
     one.connect(add);
     add.connect(half);
     half.connect(scale);
+    this.scaleNodes.set(connectionId, scale);
     // Remove seed after wiring
     seed.disconnect();
     seed.dispose();
@@ -346,6 +357,7 @@ export class ModulationConnectionManager {
       half.dispose();
       scale.dispose();
       one.dispose();
+      this.scaleNodes.delete(connectionId);
     };
 
     this.connections.set(connectionId, {
@@ -370,12 +382,14 @@ export class ModulationConnectionManager {
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(scale);
     scale.connect(chebyshev.order as unknown as Tone.ToneAudioNode);
+    this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
       lfoSignal.disconnect();
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
+      this.scaleNodes.delete(connectionId);
     };
 
     this.connections.set(connectionId, {
@@ -396,6 +410,7 @@ export class ModulationConnectionManager {
     if (connection) {
       connection.cleanup();
       this.connections.delete(connectionId);
+      this.scaleNodes.delete(connectionId);
     }
   }
 
@@ -408,6 +423,7 @@ export class ModulationConnectionManager {
     });
     this.connections.clear();
     this.volumeStates.clear();
+    this.scaleNodes.clear();
   }
 
   /** Check if a connection exists */
@@ -423,6 +439,15 @@ export class ModulationConnectionManager {
   /** Get all active connection IDs */
   getConnectionIds(): string[] {
     return Array.from(this.connections.keys());
+  }
+
+  /** Update range (min/max) for connections that use a Scale node */
+  updateScaleRange(connectionId: string, min: number, max: number): void {
+    const scale = this.scaleNodes.get(connectionId);
+    if (!scale) return;
+    // Tone.Scale exposes min/max as properties in v15
+    (scale as unknown as { min: number }).min = min;
+    (scale as unknown as { max: number }).max = max;
   }
 
   /**
