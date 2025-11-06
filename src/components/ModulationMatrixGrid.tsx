@@ -49,7 +49,8 @@ const DESTINATIONS: DestinationInfo[] = [
   { value: "micro-feedback", label: "Microlooper Feedback", category: "Effects" },
   // BitCrusher
   { value: "bitcrusher-bits", label: "BitCrusher Bits", category: "Effects" },
-  // Chebyshev (order not modulated at audio-rate)
+  // Chebyshev
+  { value: "chebyshev-order", label: "Chebyshev Order", category: "Effects" },
 ];
 
 function ModulationMatrixGrid({
