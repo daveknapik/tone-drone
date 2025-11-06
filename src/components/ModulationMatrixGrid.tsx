@@ -13,6 +13,7 @@ interface ModulationMatrixGridProps {
   onRoutesChange: (routes: ModulationRoute[]) => void;
   onParameterChange?: () => void;
   onDepthChange?: (routeIndex: number, amount: number) => void; // Direct Tone.js update, bypasses React
+  onAnchorToCurrent?: (routeIndex: number) => void;
 }
 
 // Define available destinations with categories
@@ -58,6 +59,7 @@ function ModulationMatrixGrid({
   onRoutesChange,
   onParameterChange,
   onDepthChange,
+  onAnchorToCurrent,
 }: ModulationMatrixGridProps) {
   const [expandedRoute, setExpandedRoute] = useState<number | null>(null);
   // Local state for slider values (immediate visual feedback)
@@ -240,6 +242,100 @@ function ModulationMatrixGrid({
                       updateRouteStatePersistence(index, { amount: newAmount });
                     }}
                   />
+                </div>
+
+                {/* Range Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm mb-1">Range Mode</label>
+                    <select
+                      value={route.rangeMode ?? "center"}
+                      onChange={(e) =>
+                        updateRoute(index, {
+                          rangeMode: e.target.value as "center" | "minmax",
+                        })
+                      }
+                      className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
+                    >
+                      <option value="center">Center ± Amount</option>
+                      <option value="minmax">Min..Max</option>
+                    </select>
+                  </div>
+
+                  {(route.rangeMode ?? "center") === "center" ? (
+                    <>
+                      <div>
+                        <label className="block text-sm mb-1">Center</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={route.center ?? 0}
+                          onChange={(e) =>
+                            updateRoute(index, {
+                              center: parseFloat(e.target.value || "0"),
+                            })
+                          }
+                          className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1">Amount</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min={0}
+                          value={route.rangeAmount ?? 0}
+                          onChange={(e) =>
+                            updateRoute(index, {
+                              rangeAmount: Math.max(0, parseFloat(e.target.value || "0")),
+                            })
+                          }
+                          className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <label className="block text-sm mb-1">Min</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={route.min ?? 0}
+                          onChange={(e) =>
+                            updateRoute(index, {
+                              min: parseFloat(e.target.value || "0"),
+                            })
+                          }
+                          className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm mb-1">Max</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={route.max ?? 1}
+                          onChange={(e) =>
+                            updateRoute(index, {
+                              max: parseFloat(e.target.value || "1"),
+                            })
+                          }
+                          className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => onAnchorToCurrent?.(index)}
+                    className="px-3 py-1 rounded border-2 text-sm border-pink-500 dark:border-sky-300 hover:bg-pink-100 dark:hover:bg-sky-900"
+                  >
+                    Anchor To Current
+                  </button>
                 </div>
               </div>
             )}
