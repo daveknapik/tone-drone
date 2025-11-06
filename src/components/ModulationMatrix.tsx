@@ -35,12 +35,17 @@ interface ModulationMatrixProps {
   ref?: React.Ref<ModulationMatrixHandle>;
   onParameterChange?: () => void;
   oscillators?: OscillatorWithChannel[]; // Pass oscillator objects for modulation
+  effects?: {
+    filter?: React.RefObject<Tone.Filter>;
+    delay?: React.RefObject<Tone.FeedbackDelay>;
+  };
 }
 
 function ModulationMatrix({
   ref,
   onParameterChange,
   oscillators = [],
+  effects,
 }: ModulationMatrixProps) {
   const [expandMatrix, setExpandMatrix] = useState(false);
   const [lfoParams, setLfoParams] = useState<LFOParams[]>(DEFAULT_LFOS);
@@ -147,60 +152,91 @@ function ModulationMatrix({
       // Set initial depth multiplier value
       depthMultiplier.factor.value = route.amount;
 
-      // Parse destination to get oscillator index and parameter type
-      const re = /^osc(\d+)-(frequency|volume|pan)$/;
-      const m = re.exec(route.destination);
-      if (!m) {
-        console.warn(`Unsupported destination: ${route.destination}`);
-        return;
-      }
-      const oscIndexStr = m[1];
-      const paramType = m[2] as "frequency" | "volume" | "pan";
-
-      const oscIndex = parseInt(oscIndexStr) - 1; // Convert 1-based to 0-based
-      const oscillator = oscillators[oscIndex];
-
-      if (!oscillator) {
-        console.warn(`Oscillator ${oscIndex + 1} not found`);
-        return;
-      }
-
       const connectionId = `${route.sourceIndex}-${route.destination}`;
 
       try {
-        if (paramType === "frequency") {
-          connectionManager.connectFrequency(
+        // Oscillator destinations
+        const re = /^osc(\d+)-(frequency|volume|pan)$/;
+        const m = re.exec(route.destination);
+        if (m) {
+          const oscIndex = parseInt(m[1]) - 1;
+          const paramType = m[2] as "frequency" | "volume" | "pan";
+          const oscillator = oscillators[oscIndex];
+          if (!oscillator) {
+            console.warn(`Oscillator ${oscIndex + 1} not found`);
+            return;
+          }
+          if (paramType === "frequency") {
+            connectionManager.connectFrequency(
+              connectionId,
+              lfoSignal as unknown as Tone.Signal,
+              depthMultiplier,
+              route.destination,
+              oscillator.oscillator.detune as unknown as Tone.Param<"cents">
+            );
+            return;
+          }
+          if (paramType === "volume") {
+            const lfoObj = lfos[route.sourceIndex];
+            const initialDepth =
+              (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
+            connectionManager.connectVolumeEffect(
+              connectionId,
+              lfoObj,
+              initialDepth,
+              route.destination,
+              oscillator.tremolo
+            );
+            return;
+          }
+          if (paramType === "pan") {
+            const lfoObj = lfos[route.sourceIndex];
+            const initialDepth =
+              (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
+            connectionManager.connectPanEffect(
+              connectionId,
+              lfoObj,
+              initialDepth,
+              route.destination,
+              oscillator.autoPanner
+            );
+            return;
+          }
+        }
+
+        // Effect destinations
+        if (route.destination === "filter-q" && effects?.filter?.current) {
+          connectionManager.connectFilterQ(
             connectionId,
             lfoSignal as unknown as Tone.Signal,
             depthMultiplier,
             route.destination,
-            oscillator.oscillator.detune as unknown as Tone.Param<"cents">
+            effects.filter.current
           );
-        } else if (paramType === "volume") {
-          // Use Tremolo effect for click-free volume modulation
-          const lfoObj = lfos[route.sourceIndex];
-          const initialDepth =
-            (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
-          connectionManager.connectVolumeEffect(
-            connectionId,
-            lfoObj,
-            initialDepth,
-            route.destination,
-            oscillator.tremolo
-          );
-        } else if (paramType === "pan") {
-          // Use AutoPanner effect for click-free pan modulation
-          const lfoObj = lfos[route.sourceIndex];
-          const initialDepth =
-            (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
-          connectionManager.connectPanEffect(
-            connectionId,
-            lfoObj,
-            initialDepth,
-            route.destination,
-            oscillator.autoPanner
-          );
+          return;
         }
+        if (route.destination === "delay-feedback" && effects?.delay?.current) {
+          connectionManager.connectDelayFeedback(
+            connectionId,
+            lfoSignal as unknown as Tone.Signal,
+            depthMultiplier,
+            route.destination,
+            effects.delay.current
+          );
+          return;
+        }
+        if (route.destination === "delay-time" && effects?.delay?.current) {
+          connectionManager.connectDelayTime(
+            connectionId,
+            lfoSignal as unknown as Tone.Signal,
+            depthMultiplier,
+            route.destination,
+            effects.delay.current
+          );
+          return;
+        }
+
+        console.warn(`Unsupported destination: ${route.destination}`);
       } catch (error) {
         console.error(`Error connecting route ${connectionId}:`, error);
       }

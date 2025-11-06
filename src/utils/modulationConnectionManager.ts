@@ -212,6 +212,96 @@ export class ModulationConnectionManager {
     });
   }
 
+  /** Connect to Filter Q (0..9) using unipolar depth */
+  connectFilterQ(
+    connectionId: string,
+    lfoSignal: Tone.Signal,
+    depthMultiplier: Tone.Multiply,
+    destination: ModulationDestination,
+    filter: Tone.Filter
+  ): void {
+    const scale = new Tone.Scale({ min: 0, max: 9 });
+    lfoSignal.connect(depthMultiplier);
+    depthMultiplier.connect(scale);
+    scale.connect(filter.Q as unknown as Tone.ToneAudioNode);
+
+    const cleanup = () => {
+      lfoSignal.disconnect();
+      depthMultiplier.disconnect();
+      scale.disconnect();
+      scale.dispose();
+    };
+
+    this.connections.set(connectionId, {
+      type: "volume",
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
+      depthMultiplier,
+      destination,
+      nodes: [scale],
+      cleanup,
+    });
+  }
+
+  /** Connect to Delay Feedback (0..0.95) using unipolar depth */
+  connectDelayFeedback(
+    connectionId: string,
+    lfoSignal: Tone.Signal,
+    depthMultiplier: Tone.Multiply,
+    destination: ModulationDestination,
+    delay: Tone.FeedbackDelay
+  ): void {
+    const scale = new Tone.Scale({ min: 0, max: 0.95 });
+    lfoSignal.connect(depthMultiplier);
+    depthMultiplier.connect(scale);
+    scale.connect(delay.feedback as unknown as Tone.ToneAudioNode);
+
+    const cleanup = () => {
+      lfoSignal.disconnect();
+      depthMultiplier.disconnect();
+      scale.disconnect();
+      scale.dispose();
+    };
+
+    this.connections.set(connectionId, {
+      type: "volume",
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
+      depthMultiplier,
+      destination,
+      nodes: [scale],
+      cleanup,
+    });
+  }
+
+  /** Connect to Delay Time (0..1s) using unipolar depth */
+  connectDelayTime(
+    connectionId: string,
+    lfoSignal: Tone.Signal,
+    depthMultiplier: Tone.Multiply,
+    destination: ModulationDestination,
+    delay: Tone.FeedbackDelay
+  ): void {
+    const scale = new Tone.Scale({ min: 0, max: 1 });
+    lfoSignal.connect(depthMultiplier);
+    depthMultiplier.connect(scale);
+    scale.connect(delay.delayTime as unknown as Tone.ToneAudioNode);
+
+    const cleanup = () => {
+      lfoSignal.disconnect();
+      depthMultiplier.disconnect();
+      scale.disconnect();
+      scale.dispose();
+    };
+
+    this.connections.set(connectionId, {
+      type: "volume",
+      source: lfoSignal as unknown as Tone.ToneAudioNode,
+      depthMultiplier,
+      destination,
+      nodes: [scale],
+      cleanup,
+    });
+  }
+
   /**
    * Disconnect a specific modulation connection
    *
