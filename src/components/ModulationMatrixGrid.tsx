@@ -269,11 +269,14 @@ function ModulationMatrixGrid({
                         <input
                           type="number"
                           step="0.01"
-                          value={route.center ?? 0}
+                          value={route.center ?? ""}
                           onChange={(e) =>
-                            updateRoute(index, {
-                              center: parseFloat(e.target.value || "0"),
-                            })
+                            updateRoute(
+                              index,
+                              e.target.value === ""
+                                ? { center: undefined }
+                                : { center: parseFloat(e.target.value) }
+                            )
                           }
                           className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
                         />
@@ -284,11 +287,19 @@ function ModulationMatrixGrid({
                           type="number"
                           step="0.01"
                           min={0}
-                          value={route.rangeAmount ?? 0}
+                          value={route.rangeAmount ?? ""}
                           onChange={(e) =>
-                            updateRoute(index, {
-                              rangeAmount: Math.max(0, parseFloat(e.target.value || "0")),
-                            })
+                            updateRoute(
+                              index,
+                              e.target.value === ""
+                                ? { rangeAmount: undefined }
+                                : {
+                                    rangeAmount: Math.max(
+                                      0,
+                                      parseFloat(e.target.value)
+                                    ),
+                                  }
+                            )
                           }
                           className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
                         />
@@ -301,11 +312,14 @@ function ModulationMatrixGrid({
                         <input
                           type="number"
                           step="0.01"
-                          value={route.min ?? 0}
+                          value={route.min ?? ""}
                           onChange={(e) =>
-                            updateRoute(index, {
-                              min: parseFloat(e.target.value || "0"),
-                            })
+                            updateRoute(
+                              index,
+                              e.target.value === ""
+                                ? { min: undefined }
+                                : { min: parseFloat(e.target.value) }
+                            )
                           }
                           className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
                         />
@@ -315,11 +329,14 @@ function ModulationMatrixGrid({
                         <input
                           type="number"
                           step="0.01"
-                          value={route.max ?? 1}
+                          value={route.max ?? ""}
                           onChange={(e) =>
-                            updateRoute(index, {
-                              max: parseFloat(e.target.value || "1"),
-                            })
+                            updateRoute(
+                              index,
+                              e.target.value === ""
+                                ? { max: undefined }
+                                : { max: parseFloat(e.target.value) }
+                            )
                           }
                           className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
                         />
