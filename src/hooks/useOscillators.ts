@@ -28,12 +28,26 @@ export function useOscillators(
       type === "fat"
         ? new Tone.FatOscillator(DEFAULT_OSCILLATOR_PARAMS.frequency, "sine")
         : new Tone.Oscillator(DEFAULT_OSCILLATOR_PARAMS.frequency, "sine");
-    const channel = new Tone.Channel(-5, 0);
+    const channel = new Tone.Channel(0, 0);
+    // Pre-create effects for smooth, click-free modulation routing
+    const tremolo = new Tone.Tremolo({
+      frequency: 2,
+      depth: 0,
+      type: "sine",
+    }).start();
+    const autoPanner = new Tone.AutoPanner({ frequency: 2, depth: 0 }).start();
+    // Ensure tremolo modulates both channels in-phase for audible AM
+    tremolo.spread = 0;
+    tremolo.wet.value = 1;
+    autoPanner.wet.value = 1;
+    // Chain: oscillator → channel → tremolo (AM) → autoPanner (stereo pan) → bus
     oscillator.connect(channel);
+    channel.connect(tremolo);
+    tremolo.connect(autoPanner);
     if (bus) {
-      channel.connect(bus);
+      autoPanner.connect(bus);
     }
-    return { oscillator, channel, type };
+    return { oscillator, channel, tremolo, autoPanner, type };
   };
 
   // Mount/unmount: create initial set and dispose everything on unmount
@@ -47,10 +61,14 @@ export function useOscillators(
     initializedRef.current = true;
 
     return () => {
-      oscillatorsRef.current.forEach(({ oscillator, channel }) => {
-        oscillator.dispose();
-        channel.dispose();
-      });
+      oscillatorsRef.current.forEach(
+        ({ oscillator, channel, tremolo, autoPanner }) => {
+          oscillator.dispose();
+          channel.dispose();
+          tremolo.dispose();
+          autoPanner.dispose();
+        }
+      );
       oscillatorsRef.current = [];
     };
   }, []);

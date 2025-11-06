@@ -347,13 +347,19 @@ Represents a single sequencer step's state.
 Oscillator 1 ──┐
 Oscillator 2 ──┤
 Oscillator 3 ──┤
-Oscillator 4 ──┼──→ Effects Bus ──→ Destination
-Oscillator 5 ──┤         ↓               ↓
-Oscillator 6 ──┤    [Effects]       [Recorder]
+Oscillator 4 ──┼──→ Per‑Osc Chain → Effects Bus → Destination
+Oscillator 5 ──┤                 ↓          ↓
+Oscillator 6 ──┤        [Channel → Tremolo (spread=0) → AutoPanner]   [Recorder]
 Synths (x6) ───┤ (step sequencer)
 PolySynth 1 ───┤
 PolySynth 2 ───┘
 ```
+
+#### Modulation Matrix Routing (click‑free)
+
+- Volume (AM): pre‑inserted `Tone.Tremolo` per oscillator, positioned AFTER `Tone.Channel` with `tremolo.spread = 0` so both channels modulate in‑phase. LFO UI drives tremolo `frequency`, `depth`, and `type`.
+- Pan: pre‑inserted `Tone.AutoPanner` per oscillator, positioned AFTER `Tone.Channel`. LFO UI drives `frequency`, `depth`, and (if supported) `type`.
+- Frequency: LFO → depth multiplier → scale (±cents) → `detune`.
 
 ### Detailed Effects Chain
 

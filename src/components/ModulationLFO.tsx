@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useDebounceCallback } from "usehooks-ts";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
@@ -37,15 +37,32 @@ function ModulationLFO({
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
+  // Track active drag for Rate to avoid repeatedly ducking
+  const endRateDrag = useDebounceCallback(() => {}, 120);
+
   // Direct immediate updates - exactly like modulation-reference.html
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
     if (!lfo) return;
-    lfo.frequency.value = freq;
+    const now = Tone.now();
+    const hasTarget = typeof (lfo.frequency as any).setTargetAtTime === "function";
+    if (hasTarget) {
+      (lfo.frequency as any).cancelScheduledValues?.(now);
+      (lfo.frequency as any).setTargetAtTime?.(freq, now, 0.08);
+    } else {
+      (lfo.frequency as any).value = freq;
+    }
   }, [lfo]);
 
   const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
     if (!lfo) return;
-    lfo.amplitude.value = amp;
+    const now = Tone.now();
+    const hasTarget = typeof (lfo.amplitude as any).setTargetAtTime === "function";
+    if (hasTarget) {
+      (lfo.amplitude as any).cancelScheduledValues?.(now);
+      (lfo.amplitude as any).setTargetAtTime?.(amp, now, 0.08);
+    } else {
+      (lfo.amplitude as any).value = amp;
+    }
   }, [lfo]);
 
   // Debounced state persistence callbacks (for serialization only)
@@ -81,12 +98,20 @@ function ModulationLFO({
           step={0.01}
           handleChange={(e) => {
             const newFreq = parseFloat(e.target.value);
+            // Reset phase to avoid discontinuity when changing rate
+            if (lfo) {
+              try {
+                (lfo as any).phase = 0;
+              } catch {}
+            }
             // Update Tone.js immediately (like modulation-reference.html)
             updateLFOFrequencyImmediate(newFreq);
             // Update local state for UI (this causes re-render but should be OK)
             setFrequency(newFreq);
             // Debounced state persistence (for serialization)
             persistFrequency(newFreq);
+            // Debounced end (no-op)
+            endRateDrag();
           }}
         />
         <Slider
@@ -104,6 +129,7 @@ function ModulationLFO({
             setAmplitude(newAmp);
             // Debounced state persistence (for serialization)
             persistAmplitude(newAmp);
+            endRateDrag();
           }}
         />
         <OptionsSelector<OscillatorType>
