@@ -196,6 +196,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
           ref={modulationMatrixRef}
           onParameterChange={onParameterChange}
           oscillators={oscillatorsForModulation}
+          effects={{ filter: afterFilter, delay: delay }}
         />
         <PolySynths
           polysynths={polysynths}
