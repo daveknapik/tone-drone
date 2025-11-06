@@ -48,6 +48,9 @@ export type ModulationDestination =
   | "filter-q"
   | "delay-time"
   | "delay-feedback"
+  | "micro-time"
+  | "micro-feedback"
+  | "bitcrusher-bits"
   | "none";
 
 /**

@@ -38,6 +38,9 @@ interface ModulationMatrixProps {
   effects?: {
     filter?: React.RefObject<Tone.Filter>;
     delay?: React.RefObject<Tone.FeedbackDelay>;
+    micro?: React.RefObject<Tone.FeedbackDelay>;
+    bitCrusher?: React.RefObject<Tone.BitCrusher>;
+    chebyshev?: React.RefObject<Tone.Chebyshev>;
   };
 }
 
@@ -215,6 +218,54 @@ function ModulationMatrix({
           );
           return;
         }
+        if (
+          route.destination === "filter-frequency" &&
+          effects?.filter?.current
+        ) {
+          connectionManager.connectFilterFrequency(
+            connectionId,
+            lfoSignal as unknown as Tone.Signal,
+            depthMultiplier,
+            route.destination,
+            effects.filter.current
+          );
+          return;
+        }
+        if (route.destination === "micro-time" && effects?.micro?.current) {
+          connectionManager.connectDelayTime(
+            connectionId,
+            lfoSignal as unknown as Tone.Signal,
+            depthMultiplier,
+            route.destination,
+            effects.micro.current
+          );
+          return;
+        }
+        if (route.destination === "micro-feedback" && effects?.micro?.current) {
+          connectionManager.connectDelayFeedback(
+            connectionId,
+            lfoSignal as unknown as Tone.Signal,
+            depthMultiplier,
+            route.destination,
+            effects.micro.current
+          );
+          return;
+        }
+        // wet destinations removed to preserve manual control
+        if (
+          route.destination === "bitcrusher-bits" &&
+          effects?.bitCrusher?.current
+        ) {
+          connectionManager.connectBitCrusherBits(
+            connectionId,
+            lfoSignal as unknown as Tone.Signal,
+            depthMultiplier,
+            route.destination,
+            effects.bitCrusher.current
+          );
+          return;
+        }
+        // Chebyshev order is not an AudioParam; skip audio-rate modulation to avoid runtime errors
         if (route.destination === "delay-feedback" && effects?.delay?.current) {
           connectionManager.connectDelayFeedback(
             connectionId,

@@ -44,6 +44,12 @@ const DESTINATIONS: DestinationInfo[] = [
   { value: "filter-q", label: "Filter Q", category: "Effects" },
   { value: "delay-time", label: "Delay Time", category: "Effects" },
   { value: "delay-feedback", label: "Delay Feedback", category: "Effects" },
+  // Microlooper (FeedbackDelay under the hood)
+  { value: "micro-time", label: "Microlooper Time", category: "Effects" },
+  { value: "micro-feedback", label: "Microlooper Feedback", category: "Effects" },
+  // BitCrusher
+  { value: "bitcrusher-bits", label: "BitCrusher Bits", category: "Effects" },
+  // Chebyshev (order not modulated at audio-rate)
 ];
 
 function ModulationMatrixGrid({
