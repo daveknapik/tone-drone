@@ -292,7 +292,10 @@ function ModulationMatrix({
                 computeControlValue(lfoIdx, amount, 1, 16)
               );
               node.bits.value = val;
-              const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+              const now =
+                typeof performance !== "undefined"
+                  ? performance.now()
+                  : Date.now();
               if (now - lastLogMs > 100) {
                 // log at most ~10/sec per route
                 console.log(
@@ -320,7 +323,10 @@ function ModulationMatrix({
             update: () => {
               const val = computeControlValue(lfoIdx, amount, 1, 100);
               node.order = Math.round(val);
-              const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+              const now =
+                typeof performance !== "undefined"
+                  ? performance.now()
+                  : Date.now();
               if (now - lastLogMs > 100) {
                 console.log(
                   `[ModMatrix] LFO ${lfoIdx + 1} → Chebyshev order:`,
