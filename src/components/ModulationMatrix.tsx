@@ -21,6 +21,11 @@ import {
 } from "../types/ModulationMatrixParams";
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { ModulationConnectionManager } from "../utils/modulationConnectionManager";
+import {
+  coerceParamToNumber,
+  defaultsForDestination,
+  computeRouteRange,
+} from "../utils/modulationRange";
 
 const DEFAULT_LFOS: LFOParams[] = [
   { frequency: 0.5, type: "sine", amplitude: 1, polarityMode: "bipolar" },
@@ -92,6 +97,28 @@ function ModulationMatrix({
       routes: routes,
     };
   }, [lfoParams, routes]);
+
+  // Live-apply per-route ranges to audio-rate routes by updating Scale nodes
+  useEffect(() => {
+    routes.forEach((route) => {
+      const dest = route.destination;
+      const def = defaultsForDestination(dest);
+      if (!def) return;
+      // Only destinations handled via audio-rate Scale nodes:
+      const isAudioScale =
+        dest === "filter-q" ||
+        dest === "filter-frequency" ||
+        dest === "delay-time" ||
+        dest === "delay-feedback" ||
+        dest === "micro-time" ||
+        dest === "micro-feedback";
+      if (!isAudioScale) return;
+      const connectionId = `${route.sourceIndex}-${route.destination}`;
+      if (!connectionManager.hasConnection(connectionId)) return;
+      const [min, max] = computeRouteRange(dest, route, def);
+      connectionManager.updateScaleRange(connectionId, min, max);
+    });
+  }, [routes, connectionManager]);
 
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
@@ -633,7 +660,7 @@ function ModulationMatrix({
             const dest = route.destination;
             // Control-rate destinations
             if (dest === "bitcrusher-bits" && effects?.bitCrusher?.current) {
-              const current = effects.bitCrusher.current.bits.value;
+              const current = coerceParamToNumber(effects.bitCrusher.current.bits.value, "normal");
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
                   ? { center: Math.max(1, Math.min(16, Math.round(current))) }
@@ -641,12 +668,14 @@ function ModulationMatrix({
                       min: Math.max(1, Math.round(current - 2)),
                       max: Math.min(16, Math.round(current + 2)),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
               return;
             }
             if (dest === "chebyshev-order" && effects?.chebyshev?.current) {
-              const current = effects.chebyshev.current.order;
+              const current = coerceParamToNumber(effects.chebyshev.current.order, "normal");
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
                   ? { center: Math.max(1, Math.min(100, Math.round(current))) }
@@ -654,14 +683,15 @@ function ModulationMatrix({
                       min: Math.max(1, Math.round(current - 10)),
                       max: Math.min(100, Math.round(current + 10)),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
               return;
             }
             // Effect AudioParams
             if (dest === "filter-frequency" && effects?.filter?.current) {
-              const current = effects.filter.current.frequency
-                .value as unknown as number;
+              const current = coerceParamToNumber(effects.filter.current.frequency.value, "frequency");
               const clamp = (v: number) => Math.max(30, Math.min(7000, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -670,12 +700,14 @@ function ModulationMatrix({
                       min: clamp(current * 0.9),
                       max: clamp(current * 1.1),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
               return;
             }
             if (dest === "filter-q" && effects?.filter?.current) {
-              const current = effects.filter.current.Q.value;
+              const current = coerceParamToNumber(effects.filter.current.Q.value, "normal");
               const clamp = (v: number) => Math.max(0, Math.min(9, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -684,13 +716,14 @@ function ModulationMatrix({
                       min: clamp(current - 0.5),
                       max: clamp(current + 0.5),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
               return;
             }
             if (dest === "delay-time" && effects?.delay?.current) {
-              const current = effects.delay.current.delayTime
-                .value as unknown as number;
+              const current = coerceParamToNumber(effects.delay.current.delayTime.value, "time");
               const clamp = (v: number) => Math.max(0, Math.min(1, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -699,13 +732,14 @@ function ModulationMatrix({
                       min: clamp(current - 0.05),
                       max: clamp(current + 0.05),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
               return;
             }
             if (dest === "delay-feedback" && effects?.delay?.current) {
-              const current = effects.delay.current.feedback
-                .value as unknown as number;
+              const current = coerceParamToNumber(effects.delay.current.feedback.value, "normal");
               const clamp = (v: number) => Math.max(0, Math.min(0.95, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -714,13 +748,14 @@ function ModulationMatrix({
                       min: clamp(current - 0.1),
                       max: clamp(current + 0.1),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
               return;
             }
             if (dest === "micro-time" && effects?.micro?.current) {
-              const current = effects.micro.current.delayTime
-                .value as unknown as number;
+              const current = coerceParamToNumber(effects.micro.current.delayTime.value, "time");
               const clamp = (v: number) => Math.max(0, Math.min(1, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -729,13 +764,14 @@ function ModulationMatrix({
                       min: clamp(current - 0.05),
                       max: clamp(current + 0.05),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
               return;
             }
             if (dest === "micro-feedback" && effects?.micro?.current) {
-              const current = effects.micro.current.feedback
-                .value as unknown as number;
+              const current = coerceParamToNumber(effects.micro.current.feedback.value, "normal");
               const clamp = (v: number) => Math.max(0, Math.min(0.95, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -744,7 +780,9 @@ function ModulationMatrix({
                       min: clamp(current - 0.1),
                       max: clamp(current + 0.1),
                     };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) => (i === routeIndex ? { ...rt, ...updated } : rt));
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
               setRoutes(newRoutes);
             }
           }}
