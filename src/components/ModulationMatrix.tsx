@@ -53,14 +53,17 @@ function ModulationMatrix({
   });
 
   // Create connection manager and depth multipliers refs
-  const connectionManager = useMemo(() => new ModulationConnectionManager(), []);
+  const connectionManager = useMemo(
+    () => new ModulationConnectionManager(),
+    []
+  );
   const depthMultipliersRef = useRef<Tone.Multiply[]>([]);
 
   // Track route structure separately from amounts to avoid unnecessary reconnections
   const routeStructureRef = useRef<string>("");
   const hasConnectedRef = useRef<boolean>(false);
   const getRouteStructure = (routes: ModulationRoute[]): string => {
-    return routes.map(r => `${r.sourceIndex}-${r.destination}`).join("|");
+    return routes.map((r) => `${r.sourceIndex}-${r.destination}`).join("|");
   };
 
   // Update ref whenever state changes
@@ -135,7 +138,9 @@ function ModulationMatrix({
       const depthMultiplier = depthMultipliers[routeIndex];
 
       if (!lfoSignal || !depthMultiplier) {
-        console.warn(`Missing LFO signal or depth multiplier for route ${routeIndex}`);
+        console.warn(
+          `Missing LFO signal or depth multiplier for route ${routeIndex}`
+        );
         return;
       }
 
@@ -143,14 +148,14 @@ function ModulationMatrix({
       depthMultiplier.factor.value = route.amount;
 
       // Parse destination to get oscillator index and parameter type
-      const destinationParts = route.destination.split("-");
-      const oscIndexStr = destinationParts[0]?.replace("osc", "");
-      const paramType = destinationParts[1];
-
-      if (!oscIndexStr || !paramType) {
-        console.warn(`Invalid destination format: ${route.destination}`);
+      const re = /^osc(\d+)-(frequency|volume|pan)$/;
+      const m = re.exec(route.destination);
+      if (!m) {
+        console.warn(`Unsupported destination: ${route.destination}`);
         return;
       }
+      const oscIndexStr = m[1];
+      const paramType = m[2] as "frequency" | "volume" | "pan";
 
       const oscIndex = parseInt(oscIndexStr) - 1; // Convert 1-based to 0-based
       const oscillator = oscillators[oscIndex];
@@ -161,34 +166,39 @@ function ModulationMatrix({
       }
 
       const connectionId = `${route.sourceIndex}-${route.destination}`;
-      const polarityMode = lfoParams[route.sourceIndex]?.polarityMode || "bipolar";
 
       try {
         if (paramType === "frequency") {
           connectionManager.connectFrequency(
             connectionId,
-            lfoSignal,
+            lfoSignal as unknown as Tone.Signal,
             depthMultiplier,
             route.destination,
             oscillator.oscillator.detune as unknown as Tone.Param<"cents">
           );
         } else if (paramType === "volume") {
-          connectionManager.connectVolume(
+          // Use Tremolo effect for click-free volume modulation
+          const lfoObj = lfos[route.sourceIndex];
+          const initialDepth =
+            (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
+          connectionManager.connectVolumeEffect(
             connectionId,
-            lfoSignal,
-            depthMultiplier,
+            lfoObj,
+            initialDepth,
             route.destination,
-            oscillator.oscillator,
-            oscillator.channel,
-            polarityMode
+            oscillator.tremolo
           );
         } else if (paramType === "pan") {
-          connectionManager.connectPan(
+          // Use AutoPanner effect for click-free pan modulation
+          const lfoObj = lfos[route.sourceIndex];
+          const initialDepth =
+            (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
+          connectionManager.connectPanEffect(
             connectionId,
-            lfoSignal,
-            depthMultiplier,
+            lfoObj,
+            initialDepth,
             route.destination,
-            oscillator.channel.pan
+            oscillator.autoPanner
           );
         }
       } catch (error) {
@@ -204,16 +214,40 @@ function ModulationMatrix({
       connectionManager.disconnectAll();
       hasConnectedRef.current = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routes, signals, oscillators, lfoParams, connectionManager]);
 
   // Direct immediate updates - exactly like modulation-reference.html
-  const updateDepth = useCallback((routeIndex: number, amount: number) => {
-    const depthMultiplier = depthMultipliersRef.current[routeIndex];
-    if (depthMultiplier && hasConnectedRef.current) {
-      depthMultiplier.factor.value = amount;
-    }
-  }, []);
+  const updateDepth = useCallback(
+    (routeIndex: number, amount: number) => {
+      const route = routes[routeIndex];
+      if (!route) return;
+      const re = /^osc(\d+)-(frequency|volume|pan)$/;
+      const exec = re.exec(route.destination);
+      const paramType = exec?.[2];
+      const oscIndex = exec ? parseInt(exec[1]) - 1 : -1;
+      const oscillator = oscillators[oscIndex];
+
+      if (paramType === "volume" && oscillator) {
+        const lfoAmp = lfoParams[route.sourceIndex]?.amplitude ?? 1;
+        const target = Math.max(0, Math.min(1, 0.05 + amount * lfoAmp * 1.25));
+        oscillator.tremolo.depth.rampTo(target, 0.05);
+        return;
+      }
+      if (paramType === "pan" && oscillator) {
+        const lfoAmp = lfoParams[route.sourceIndex]?.amplitude ?? 1;
+        const target = amount * lfoAmp;
+        oscillator.autoPanner.depth.rampTo(target, 0.05);
+        return;
+      }
+
+      // Frequency route: use depth multiplier
+      const depthMultiplier = depthMultipliersRef.current[routeIndex];
+      if (depthMultiplier && hasConnectedRef.current) {
+        depthMultiplier.factor.rampTo(amount, 0.02);
+      }
+    },
+    [routes, oscillators, lfoParams, hasConnectedRef.current]
+  );
 
   const toggleExpandMatrix = (): void => {
     setExpandMatrix((prev) => !prev);
@@ -253,15 +287,74 @@ function ModulationMatrix({
                 initialFrequency={lfoParams[i]?.frequency}
                 initialType={lfoParams[i]?.type}
                 initialAmplitude={lfoParams[i]?.amplitude}
-                initialPolarityMode={lfoParams[i]?.polarityMode || "bipolar"}
+                initialPolarityMode={lfoParams[i]?.polarityMode ?? "bipolar"}
                 onFrequencyChange={(freq) => {
                   handleLfoParamsUpdate(i, { frequency: freq });
+                  // Sync effect LFOs for volume/pan routes from this LFO
+                  routes.forEach((route) => {
+                    if (route.sourceIndex !== i) return;
+                    const re = /^osc(\d+)-(frequency|volume|pan)$/;
+                    const m = re.exec(route.destination);
+                    if (!m) return;
+                    const paramType = m[2];
+                    const oscIndex = parseInt(m[1]) - 1;
+                    const oscillator = oscillators[oscIndex];
+                    if (!oscillator) return;
+                    if (paramType === "volume") {
+                      oscillator.tremolo.frequency.value = freq;
+                    } else if (paramType === "pan") {
+                      oscillator.autoPanner.frequency.value = freq;
+                    }
+                  });
                 }}
                 onTypeChange={(type) => {
                   handleLfoParamsUpdate(i, { type });
+                  routes.forEach((route) => {
+                    if (route.sourceIndex !== i) return;
+                    const re = /^osc(\d+)-(frequency|volume|pan)$/;
+                    const m = re.exec(route.destination);
+                    if (!m) return;
+                    const paramType = m[2];
+                    const oscIndex = parseInt(m[1]) - 1;
+                    const oscillator = oscillators[oscIndex];
+                    if (!oscillator) return;
+                    if (paramType === "volume") {
+                      (oscillator.tremolo as unknown as { type: string }).type =
+                        type as unknown as string;
+                    } else if (paramType === "pan") {
+                      const ap = oscillator.autoPanner as unknown as {
+                        type?: string;
+                      };
+                      if (ap.type !== undefined) {
+                        ap.type = type as unknown as string;
+                      }
+                    }
+                  });
                 }}
                 onAmplitudeChange={(amp) => {
                   handleLfoParamsUpdate(i, { amplitude: amp });
+                  routes.forEach((route) => {
+                    if (route.sourceIndex !== i) return;
+                    const re = /^osc(\d+)-(frequency|volume|pan)$/;
+                    const m = re.exec(route.destination);
+                    if (!m) return;
+                    const paramType = m[2];
+                    const oscIndex = parseInt(m[1]) - 1;
+                    const oscillator = oscillators[oscIndex];
+                    if (!oscillator) return;
+                    const target = Math.max(
+                      0,
+                      Math.min(1, 0.05 + (route.amount ?? 0) * amp * 1.25)
+                    );
+                    if (paramType === "volume") {
+                      oscillator.tremolo.depth.rampTo(target, 0.05);
+                    } else if (paramType === "pan") {
+                      oscillator.autoPanner.depth.rampTo(
+                        (route.amount ?? 0) * amp,
+                        0.05
+                      );
+                    }
+                  });
                 }}
                 onPolarityModeChange={(mode) => {
                   setPolarityMode(i, mode);

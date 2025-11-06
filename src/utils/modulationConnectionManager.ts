@@ -1,12 +1,15 @@
 import * as Tone from "tone";
-import { ModulationDestination, LFOPolarityMode } from "../types/ModulationMatrixParams";
+import {
+  ModulationDestination,
+  LFOPolarityMode,
+} from "../types/ModulationMatrixParams";
 
 /**
  * Tracks a single modulation connection including all intermediate nodes
  */
 interface ModulationConnection {
   type: "frequency" | "volume" | "pan";
-  source: Tone.Signal; // LFO output signal after polarity processing
+  source: Tone.ToneAudioNode; // LFO output node after polarity processing
   depthMultiplier: Tone.Multiply;
   destination: ModulationDestination;
   nodes: Tone.ToneAudioNode[]; // All intermediate nodes for cleanup
@@ -51,7 +54,7 @@ export class ModulationConnectionManager {
     // Connect: LFO signal → depth → scaler → detune
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(frequencyScaler);
-    (frequencyScaler as any).connect(detuneParam);
+    frequencyScaler.connect(detuneParam as unknown as Tone.ToneAudioNode);
 
     const cleanup = () => {
       lfoSignal.disconnect();
@@ -96,6 +99,8 @@ export class ModulationConnectionManager {
   ): void {
     // Create gain node for modulation
     const modulationGain = new Tone.Gain(1);
+    // Smoothing filter to prevent clicks on rate/amplitude/depth changes
+    const smooth = new Tone.Filter({ type: "lowpass", frequency: 20, Q: 0 });
 
     // Reconnect audio path: source → modGain → destination
     audioSource.disconnect();
@@ -106,10 +111,10 @@ export class ModulationConnectionManager {
 
     if (polarityMode === "unipolar") {
       // Unipolar: Direct modulation from 0 to 1 (full tremolo)
-      // Route: LFO signal → depthMultiplier → modGain.gain
+      // Route: LFO signal → depthMultiplier → smooth → modGain.gain
       lfoSignal.connect(depthMultiplier);
-      depthMultiplier.connect(modulationGain.gain);
-
+      depthMultiplier.connect(smooth);
+      smooth.connect(modulationGain.gain);
       // CRITICAL: Zero AFTER connecting
       modulationGain.gain.value = 0;
     } else {
@@ -122,14 +127,15 @@ export class ModulationConnectionManager {
       // Connect signal chain
       unity.connect(add);
       lfoSignal.connect(depthMultiplier);
-      depthMultiplier.connect(scale);
+      depthMultiplier.connect(smooth);
+      smooth.connect(scale);
       scale.connect(add);
       add.connect(modulationGain.gain);
 
       // CRITICAL: Zero AFTER connecting signal chain
       modulationGain.gain.value = 0;
 
-      intermediateNodes = [unity, add, scale];
+      intermediateNodes = [unity, add, scale, smooth];
     }
 
     // Store volume-specific state for cleanup
@@ -149,6 +155,8 @@ export class ModulationConnectionManager {
       // Dispose gain node and intermediate nodes
       modulationGain.disconnect();
       modulationGain.dispose();
+      smooth.disconnect();
+      smooth.dispose();
 
       intermediateNodes.forEach((node) => {
         node.disconnect();
@@ -179,7 +187,7 @@ export class ModulationConnectionManager {
    */
   connectPan(
     connectionId: string,
-    lfoSignal: Tone.Signal,
+    lfoSignal: Tone.ToneAudioNode,
     depthMultiplier: Tone.Multiply,
     destination: ModulationDestination,
     panParam: Tone.Param<"audioRange">
@@ -248,5 +256,72 @@ export class ModulationConnectionManager {
   getConnectionIds(): string[] {
     return Array.from(this.connections.keys());
   }
-}
 
+  /**
+   * Use a pre-inserted Tremolo for volume modulation to avoid clicks.
+   */
+  connectVolumeEffect(
+    connectionId: string,
+    lfo: Tone.LFO,
+    initialDepth: number,
+    destination: ModulationDestination,
+    tremolo: Tone.Tremolo
+  ): void {
+    // Configure tremolo from LFO UI params
+    tremolo.frequency.value = lfo.frequency.value;
+    // Apply perceptual depth mapping: small floor + scale up
+    const mapped = Math.max(0, Math.min(1, 0.05 + initialDepth * 1.25));
+    tremolo.depth.value = mapped;
+    // Oscillator type is a string union in Tone; cast through string to satisfy TS
+    // Tremolo.type expects ToneOscillatorType; cast through unknown to satisfy TS
+    tremolo.type = lfo.type as unknown as Tone.ToneOscillatorType;
+    tremolo.spread = 0;
+
+    const cleanup = () => {
+      tremolo.depth.value = 0;
+    };
+
+    this.connections.set(connectionId, {
+      type: "volume",
+      // dummy fields to satisfy interface; not used in effect mode
+      source: tremolo as unknown as Tone.ToneAudioNode,
+      depthMultiplier: new Tone.Multiply(1),
+      destination,
+      nodes: [tremolo],
+      cleanup,
+    });
+  }
+
+  /**
+   * Use a pre-inserted AutoPanner for pan modulation to avoid clicks.
+   */
+  connectPanEffect(
+    connectionId: string,
+    lfo: Tone.LFO,
+    initialDepth: number,
+    destination: ModulationDestination,
+    autoPanner: Tone.AutoPanner
+  ): void {
+    autoPanner.frequency.value = lfo.frequency.value;
+    autoPanner.depth.value = initialDepth;
+    // Map waveform type if available on AutoPanner in this Tone version
+    const ap = autoPanner as unknown as { type?: string };
+    const lt = lfo as unknown as { type?: string };
+    if (ap.type !== undefined && lt.type !== undefined) {
+      ap.type = lt.type;
+    }
+
+    const cleanup = () => {
+      autoPanner.depth.value = 0;
+    };
+
+    this.connections.set(connectionId, {
+      type: "pan",
+      source: autoPanner as unknown as Tone.ToneAudioNode,
+      depthMultiplier: new Tone.Multiply(1),
+      destination,
+      nodes: [autoPanner],
+      cleanup,
+    });
+  }
+}
