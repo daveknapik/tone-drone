@@ -51,6 +51,7 @@ export type ModulationDestination =
   | "micro-time"
   | "micro-feedback"
   | "bitcrusher-bits"
+  | "chebyshev-order"
   | "none";
 
 /**

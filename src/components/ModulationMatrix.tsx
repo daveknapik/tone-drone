@@ -66,6 +66,15 @@ function ModulationMatrix({
     []
   );
   const depthMultipliersRef = useRef<Tone.Multiply[]>([]);
+  // Control-rate routes for non-AudioParams
+  const controlRoutesRef = useRef<{
+    lfoIndex: number;
+    dest: "bitcrusher-bits" | "chebyshev-order";
+    amount: number;
+    update: () => void;
+  }[]>([]);
+  const lfoPhaseRef = useRef<number[]>([0, 0, 0, 0]);
+  const lastUpdateTimeRef = useRef<number>(0);
 
   // Track route structure separately from amounts to avoid unnecessary reconnections
   const routeStructureRef = useRef<string>("");
@@ -93,7 +102,9 @@ function ModulationMatrix({
       state.lfos.forEach((params, i) => {
         if (lfos[i]) {
           lfos[i].frequency.value = params.frequency;
-          lfos[i].type = params.type;
+          // Narrow to expected LFO waveform type
+          const wave = (params.type as unknown) as "sine" | "square" | "triangle" | "sawtooth";
+          (lfos[i] as unknown as { type: "sine" | "square" | "triangle" | "sawtooth" }).type = wave;
           lfos[i].amplitude.value = params.amplitude;
           if (params.polarityMode) {
             setPolarityMode(i, params.polarityMode);
@@ -137,6 +148,9 @@ function ModulationMatrix({
       const removed = depthMultipliers.pop();
       removed?.dispose();
     }
+
+    // Reset control routes
+    controlRoutesRef.current = [];
 
     // Connect each route
     routes.forEach((route, routeIndex) => {
@@ -251,21 +265,43 @@ function ModulationMatrix({
           );
           return;
         }
-        // wet destinations removed to preserve manual control
         if (
           route.destination === "bitcrusher-bits" &&
           effects?.bitCrusher?.current
         ) {
-          connectionManager.connectBitCrusherBits(
-            connectionId,
-            lfoSignal as unknown as Tone.Signal,
-            depthMultiplier,
-            route.destination,
-            effects.bitCrusher.current
-          );
+          const lfoIdx = route.sourceIndex;
+          const amount = route.amount;
+          const node = effects.bitCrusher.current;
+          controlRoutesRef.current.push({
+            lfoIndex: lfoIdx,
+            dest: "bitcrusher-bits",
+            amount,
+            update: () => {
+              const bitsParam = node.bits as unknown as Tone.Signal<"number">;
+              const val = computeControlValue(lfoIdx, amount, 1, 16);
+              bitsParam.value = Math.round(val);
+            },
+          });
           return;
         }
-        // Chebyshev order is not an AudioParam; skip audio-rate modulation to avoid runtime errors
+        if (
+          route.destination === "chebyshev-order" &&
+          effects?.chebyshev?.current
+        ) {
+          const lfoIdx = route.sourceIndex;
+          const amount = route.amount;
+          const node = effects.chebyshev.current;
+          controlRoutesRef.current.push({
+            lfoIndex: lfoIdx,
+            dest: "chebyshev-order",
+            amount,
+            update: () => {
+              const val = computeControlValue(lfoIdx, amount, 1, 100);
+              node.order = Math.round(val);
+            },
+          });
+          return;
+        }
         if (route.destination === "delay-feedback" && effects?.delay?.current) {
           connectionManager.connectDelayFeedback(
             connectionId,
@@ -301,7 +337,66 @@ function ModulationMatrix({
       connectionManager.disconnectAll();
       hasConnectedRef.current = false;
     };
-  }, [routes, signals, oscillators, lfoParams, connectionManager]);
+  }, [routes, signals, oscillators, lfoParams, connectionManager, effects]);
+
+  // Control-rate compute (maps LFO to [min,max] with amount and amplitude)
+  const computeControlValue = useCallback(
+    (lfoIdx: number, amount: number, min: number, max: number): number => {
+    const lp = lfoParams[lfoIdx];
+    const amp = lp?.amplitude ?? 1;
+    const depth = Math.max(0, Math.min(1, amount * amp));
+    const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string); // [-1,1]
+    const unipolar = (sample + 1) * 0.5; // 0..1
+    const scaled = min + unipolar * depth * (max - min);
+    return Math.max(min, Math.min(max, scaled));
+  }, [lfoParams]);
+
+  // Sample LFO at control-rate using stored phase
+  const sampleLfo = useCallback(
+    (lfoIdx: number, type: string): number => {
+      const phase = lfoPhaseRef.current[lfoIdx] ?? 0;
+      const x = phase * 2 * Math.PI;
+      switch (type) {
+        case "sine":
+          return Math.sin(x);
+        case "triangle": {
+          const t = phase % 1;
+          return 1 - 4 * Math.abs(Math.round(t - 0.25) - (t - 0.25));
+        }
+        case "square":
+          return (phase % 1) < 0.5 ? 1 : -1;
+        case "sawtooth": {
+          const t = phase % 1;
+          return 2 * (t - Math.floor(t + 0.5));
+        }
+        default:
+          return Math.sin(x);
+      }
+    },
+    []
+  );
+
+  // Control-rate updater (~60Hz)
+  useEffect(() => {
+    if (controlRoutesRef.current.length === 0) return;
+    let rafId = 0;
+    const tick = (nowMs: number) => {
+      const now = nowMs / 1000;
+      const last = lastUpdateTimeRef.current || now;
+      const dt = Math.max(0, now - last);
+      lastUpdateTimeRef.current = now;
+      // advance LFO phases
+      for (let i = 0; i < lfoPhaseRef.current.length; i++) {
+        const freq = lfoParams[i]?.frequency ?? 0;
+        lfoPhaseRef.current[i] = (lfoPhaseRef.current[i] + freq * dt) % 1;
+      }
+      // update targets
+      controlRoutesRef.current.forEach((r) => r.update());
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [lfoParams, routes]);
 
   // Direct immediate updates - exactly like modulation-reference.html
   const updateDepth = useCallback(
