@@ -125,25 +125,10 @@ function ModulationMatrix({
 
   // Live-apply per-route ranges to audio-rate routes by updating Scale nodes
   useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log(
-      `[ModMatrix] Range update useEffect running, routes count: ${routes.length}, timestamp: ${Date.now()}`
-    );
-    // eslint-disable-next-line no-console
-    console.log(
-      `[ModMatrix] Full routes object:`,
-      JSON.stringify(routes, null, 2)
-    );
     routes.forEach((route) => {
       const dest = route.destination;
-      // eslint-disable-next-line no-console
-      console.log(
-        `[ModMatrix] Checking route: source=${route.sourceIndex} dest=${dest}`
-      );
       const def = defaultsForDestination(dest);
       if (!def) {
-        // eslint-disable-next-line no-console
-        console.log(`[ModMatrix] No defaults for ${dest}, skipping`);
         return;
       }
       // Only destinations handled via audio-rate Scale nodes:
@@ -152,24 +137,12 @@ function ModulationMatrix({
         dest === "delay-feedback" ||
         dest === "micro-time" ||
         dest === "micro-feedback";
-      if (!isAudioScale) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `[ModMatrix] ${dest} is not audio-rate Scale destination, skipping`
-        );
-        return;
-      }
+      if (!isAudioScale) return;
       const connectionId = `${route.sourceIndex}-${route.destination}`;
       const hasConn = connectionManager.hasConnection(connectionId);
-      // eslint-disable-next-line no-console
-      console.log(`[ModMatrix] Connection ${connectionId} exists: ${hasConn}`);
       if (!hasConn) return;
       // Apply depth to the range for audio-rate Scale nodes
       const [min, max] = computeRouteRange(dest, route, def, true);
-      // eslint-disable-next-line no-console
-      console.log(
-        `[ModMatrix] Updating range for ${connectionId}: center=${route.center} amount=${route.rangeAmount} depth=${route.amount} → range [${min}, ${max}]`
-      );
       connectionManager.updateScaleRange(connectionId, min, max);
     });
   }, [routes, connectionManager]);
@@ -211,18 +184,10 @@ function ModulationMatrix({
   // Apply modulation routes ONLY when route structure changes (not amounts!)
   useEffect(() => {
     const routes = routesRef.current;
-    // eslint-disable-next-line no-console
-    console.log(
-      `[ModMatrix] Connection useEffect triggered, routes count: ${routes.length}`
-    );
     const currentStructure = routeStructure;
-    // eslint-disable-next-line no-console
-    console.log(`[ModMatrix] Current structure: ${currentStructure}`);
 
     const hasOscillators = oscillators.length > 0;
     if (!hasOscillators) {
-      // eslint-disable-next-line no-console
-      console.log(`[ModMatrix] No oscillators yet, waiting...`);
       hasConnectedRef.current = false;
       return;
     }
@@ -404,15 +369,7 @@ function ModulationMatrix({
 
     // Connect any missing routes, leave existing ones intact
     routes.forEach((route, routeIndex) => {
-      // eslint-disable-next-line no-console
-      console.log(
-        `[ModMatrix] Processing route ${routeIndex}: ${route.sourceIndex}-${route.destination}`
-      );
       if (route.destination === "none") {
-        // eslint-disable-next-line no-console
-        console.log(
-          `[ModMatrix] Route ${routeIndex} has destination=none, skipping`
-        );
         return;
       }
 
@@ -448,13 +405,13 @@ function ModulationMatrix({
         if (m) {
           const oscIndex = parseInt(m[1]) - 1;
           const paramType = m[2] as "frequency" | "volume" | "pan";
-          const oscillator = oscillators[oscIndex];
-          if (!oscillator) {
-            console.warn(`Oscillator ${oscIndex + 1} not found`);
-            return;
-          }
-          if (paramType === "frequency") {
-            connectionManager.connectFrequency(
+      const oscillator = oscillators[oscIndex];
+      if (!oscillator) {
+        console.warn(`Oscillator ${oscIndex + 1} not found`);
+        return;
+      }
+        if (paramType === "frequency") {
+          connectionManager.connectFrequency(
               connectionId,
               lfoSignal as unknown as Tone.Signal,
               depthMultiplier,
@@ -530,7 +487,7 @@ function ModulationMatrix({
                 if (span < 0) span = 0;
                 valNum = minVal + unipolar * depth * span;
               }
-              let v = Math.max(defMin, Math.min(defMax, valNum));
+              const v = Math.max(defMin, Math.min(defMax, valNum));
               node.Q.value = v;
               const now =
                 typeof performance !== "undefined"
@@ -584,7 +541,7 @@ function ModulationMatrix({
                 if (span < 0) span = 0;
                 valNum = minVal + unipolar * depth * span;
               }
-              let v = Math.max(defMin, Math.min(defMax, valNum));
+              const v = Math.max(defMin, Math.min(defMax, valNum));
               node.frequency.value = v;
               const now =
                 typeof performance !== "undefined"
@@ -630,7 +587,6 @@ function ModulationMatrix({
             dest: "bitcrusher-bits",
             amount,
             update: () => {
-              /* eslint-disable @typescript-eslint/no-unsafe-assignment */
               const r: ModulationRoute = route;
               const lp = lfoParams[lfoIdx];
               const amp = lp?.amplitude ?? 1;
@@ -667,7 +623,6 @@ function ModulationMatrix({
                 );
                 lastLogMs = now;
               }
-              /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             },
           });
           return;
@@ -685,7 +640,6 @@ function ModulationMatrix({
             dest: "chebyshev-order",
             amount,
             update: () => {
-              /* eslint-disable @typescript-eslint/no-unsafe-assignment */
               const r: ModulationRoute = route;
               const lp = lfoParams[lfoIdx];
               const amp = lp?.amplitude ?? 1;
@@ -722,7 +676,6 @@ function ModulationMatrix({
                 );
                 lastLogMs = now;
               }
-              /* eslint-enable @typescript-eslint/no-unsafe-assignment */
             },
           });
           return;
@@ -838,10 +791,10 @@ function ModulationMatrix({
       }
 
       // Frequency route: use depth multiplier
-      const depthMultiplier = depthMultipliersRef.current[routeIndex];
-      if (depthMultiplier && hasConnectedRef.current) {
+    const depthMultiplier = depthMultipliersRef.current[routeIndex];
+    if (depthMultiplier && hasConnectedRef.current) {
         depthMultiplier.factor.rampTo(amount, 0.02);
-      }
+    }
     },
     [routes, oscillators, lfoParams, hasConnectedRef.current]
   );
