@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug Tone.js Param Structure</title>
+  <script src="https://cdn.jsdelivr.net/npm/tone@15"></script>
+</head>
+<body>
+  <h1>Debug Tone.js Param Structure</h1>
+  <button id="analyze">Analyze Params</button>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById('analyze').addEventListener('click', async () => {
+      await Tone.start();
+
+      const filter = new Tone.Filter({ frequency: 300, Q: 5 });
+      const delay = new Tone.FeedbackDelay({ delayTime: 0.5, feedback: 0.7 });
+
+      const output = document.getElementById('output');
+
+      const analyzeParam = (name, param) => {
+        const info = {
+          name,
+          typeof: typeof param,
+          constructor: param?.constructor?.name,
+          hasValue: 'value' in param,
+          valueType: typeof param?.value,
+          valueConstructor: param?.value?.constructor?.name,
+          hasGetValueAtTime: typeof param?.getValueAtTime === 'function',
+          hasToSeconds: typeof param?.toSeconds === 'function',
+          hasToFrequency: typeof param?.toFrequency === 'function'
+        };
+
+        // Try to get value
+        if (param?.getValueAtTime) {
+          try {
+            info.getValueAtTimeResult = param.getValueAtTime(Tone.context.currentTime);
+            info.getValueAtTimeType = typeof info.getValueAtTimeResult;
+          } catch (e) {
+            info.getValueAtTimeError = e.message;
+          }
+        }
+
+        if ('value' in param) {
+          info.dotValue = param.value;
+          info.dotValueType = typeof param.value;
+
+          // Check if value itself has methods
+          if (param.value && typeof param.value === 'object') {
+            info.valueHasToSeconds = typeof param.value.toSeconds === 'function';
+            info.valueHasToFrequency = typeof param.value.toFrequency === 'function';
+
+            if (param.value.toSeconds) {
+              try {
+                info.valueToSecondsResult = param.value.toSeconds();
+              } catch (e) {
+                info.valueToSecondsError = e.message;
+              }
+            }
+            if (param.value.toFrequency) {
+              try {
+                info.valueToFrequencyResult = param.value.toFrequency();
+              } catch (e) {
+                info.valueToFrequencyError = e.message;
+              }
+            }
+          }
+        }
+
+        return info;
+      };
+
+      const results = {
+        filterFrequency: analyzeParam('filter.frequency', filter.frequency),
+        filterQ: analyzeParam('filter.Q', filter.Q),
+        delayTime: analyzeParam('delay.delayTime', delay.delayTime),
+        delayFeedback: analyzeParam('delay.feedback', delay.feedback)
+      };
+
+      output.textContent = JSON.stringify(results, null, 2);
+
+      console.log('Full analysis:', results);
+      console.log('filter.frequency object:', filter.frequency);
+      console.log('delay.delayTime object:', delay.delayTime);
+
+      filter.dispose();
+      delay.dispose();
+    });
+  </script>
+</body>
+</html>

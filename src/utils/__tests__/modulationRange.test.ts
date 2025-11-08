@@ -21,7 +21,8 @@ vi.mock("tone", () => {
       return Number.isFinite(n) ? n : 0;
     }
   }
-  return { Time, Frequency };
+  const getContext = () => ({ currentTime: 0 });
+  return { Time, Frequency, getContext };
 });
 import {
   coerceParamToNumber,
@@ -40,6 +41,44 @@ describe("coerceParamToNumber", () => {
   });
   it("coerces frequency to Hz", () => {
     expect(coerceParamToNumber(440, "frequency")).toBeCloseTo(440, 6);
+  });
+  it("coerces Param-like with .value number", () => {
+    const param = { value: 300 };
+    expect(coerceParamToNumber(param, "frequency")).toBe(300);
+  });
+  it("coerces Param-like with .getValueAtTime", () => {
+    const param = { getValueAtTime: () => 1 };
+    expect(coerceParamToNumber(param, "time")).toBe(1);
+  });
+  it("coerces Param-like with nested unit objects", () => {
+    const freqObj = { toFrequency: () => 555 };
+    const timeObj = { toSeconds: () => 0.75 };
+    expect(coerceParamToNumber({ value: freqObj }, "frequency")).toBe(555);
+    expect(coerceParamToNumber({ value: timeObj }, "time")).toBe(0.75);
+  });
+  it("coerces Tone.js Param-like object with getValueAtTime (simulates real Filter.frequency)", () => {
+    // Simulate Tone.Filter.frequency Param which has getValueAtTime
+    const filterFreqParam = {
+      getValueAtTime: () => 300,
+      value: 300,
+    };
+    expect(coerceParamToNumber(filterFreqParam, "frequency")).toBe(300);
+  });
+  it("coerces Tone.js Param-like object with getValueAtTime (simulates real Delay.delayTime)", () => {
+    // Simulate Tone.FeedbackDelay.delayTime Param
+    const delayTimeParam = {
+      getValueAtTime: () => 0.5,
+      value: 0.5,
+    };
+    expect(coerceParamToNumber(delayTimeParam, "time")).toBe(0.5);
+  });
+  it("handles Param objects where getValueAtTime is preferred over .value", () => {
+    // This tests that getValueAtTime takes precedence (which is more reliable)
+    const param = {
+      getValueAtTime: () => 123,
+      value: 456, // Different value to verify getValueAtTime is used
+    };
+    expect(coerceParamToNumber(param, "normal")).toBe(123);
   });
 });
 
@@ -63,6 +102,41 @@ describe("computeRouteRange", () => {
     );
     expect(min).toBe(1);
     expect(max).toBe(16);
+  });
+  it("applies depth to center±amount when applyDepth=true", () => {
+    const d = { min: 0, max: 1 };
+    // Center=0.5, Amount=0.3, Depth=0.5 should give range [0.35, 0.65]
+    const [min, max] = computeRouteRange(
+      "delay-time",
+      { sourceIndex: 0, destination: "delay-time", amount: 0.5, rangeMode: "center", center: 0.5, rangeAmount: 0.3 },
+      d,
+      true // applyDepth
+    );
+    expect(min).toBeCloseTo(0.35, 6); // 0.5 - (0.3 * 0.5)
+    expect(max).toBeCloseTo(0.65, 6); // 0.5 + (0.3 * 0.5)
+  });
+  it("applies depth to min/max mode when applyDepth=true", () => {
+    const d = { min: 30, max: 7000 };
+    // Min=300, Max=700, Depth=0.5 should narrow around center (500)
+    const [min, max] = computeRouteRange(
+      "filter-frequency",
+      { sourceIndex: 0, destination: "filter-frequency", amount: 0.5, rangeMode: "minmax", min: 300, max: 700 },
+      d,
+      true // applyDepth
+    );
+    expect(min).toBeCloseTo(400, 6); // 500 - (200 * 0.5)
+    expect(max).toBeCloseTo(600, 6); // 500 + (200 * 0.5)
+  });
+  it("does not apply depth when applyDepth=false (default)", () => {
+    const d = { min: 0, max: 1 };
+    const [min, max] = computeRouteRange(
+      "delay-time",
+      { sourceIndex: 0, destination: "delay-time", amount: 0.5, rangeMode: "center", center: 0.5, rangeAmount: 0.3 },
+      d,
+      false // applyDepth=false
+    );
+    expect(min).toBeCloseTo(0.2, 6); // 0.5 - 0.3 (full amount, no depth applied)
+    expect(max).toBeCloseTo(0.8, 6); // 0.5 + 0.3
   });
 });
 

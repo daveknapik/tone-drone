@@ -28,7 +28,10 @@ export function useOscillators(
       type === "fat"
         ? new Tone.FatOscillator(DEFAULT_OSCILLATOR_PARAMS.frequency, "sine")
         : new Tone.Oscillator(DEFAULT_OSCILLATOR_PARAMS.frequency, "sine");
-    const channel = new Tone.Channel(0, 0);
+    const channel = new Tone.Channel(
+      DEFAULT_OSCILLATOR_PARAMS.volume,
+      DEFAULT_OSCILLATOR_PARAMS.pan
+    );
     // Pre-create effects for smooth, click-free modulation routing
     const tremolo = new Tone.Tremolo({
       frequency: 2,
