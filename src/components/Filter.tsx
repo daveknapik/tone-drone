@@ -47,11 +47,13 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
     },
   }));
 
-  filter.current.set({
-    frequency,
-    Q,
-    type,
-  });
+  // Update Params - direct .value assignment works for Tone.Signal params
+  // This ensures Anchor To Current can read the correct values
+  useEffect(() => {
+    filter.current.frequency.value = frequency;
+    filter.current.Q.value = Q;
+    filter.current.type = type;
+  }, [filter, frequency, Q, type]);
 
   // rolloff can't go via the set method or it makes the filter stutter and glitch, but this works
   useEffect(() => {

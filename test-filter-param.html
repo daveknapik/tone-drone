@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Filter Param Behavior</title>
+  <script src="https://cdn.jsdelivr.net/npm/tone@15"></script>
+</head>
+<body>
+  <h1>Test Filter Param Behavior</h1>
+  <button id="test">Run Test</button>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById('test').addEventListener('click', async () => {
+      await Tone.start();
+
+      const output = document.getElementById('output');
+      let log = '';
+
+      // Create a filter with initial frequency 300
+      const filter = new Tone.Filter({
+        frequency: 300,
+        rolloff: -12,
+        Q: 1,
+        type: 'highpass'
+      });
+
+      log += '=== Initial Creation ===\n';
+      log += `filter.frequency: ${filter.frequency}\n`;
+      log += `filter.frequency.value: ${filter.frequency.value}\n`;
+      log += `filter.frequency.getValueAtTime(now): ${filter.frequency.getValueAtTime(Tone.context.currentTime)}\n\n`;
+
+      // Now use .set() to change it
+      filter.set({
+        frequency: 500,
+        Q: 2,
+        type: 'lowpass'
+      });
+
+      log += '=== After .set({ frequency: 500, Q: 2, type: "lowpass" }) ===\n';
+      log += `filter.frequency: ${filter.frequency}\n`;
+      log += `filter.frequency.value: ${filter.frequency.value}\n`;
+      log += `filter.frequency.getValueAtTime(now): ${filter.frequency.getValueAtTime(Tone.context.currentTime)}\n\n`;
+
+      // Try accessing .get()
+      const got = filter.get();
+      log += '=== Using .get() ===\n';
+      log += `filter.get(): ${JSON.stringify(got, null, 2)}\n`;
+      log += `filter.get().frequency: ${got.frequency}\n\n`;
+
+      // Check if .get().frequency is the Param object or a number
+      log += '=== Type checking .get().frequency ===\n';
+      log += `typeof got.frequency: ${typeof got.frequency}\n`;
+      log += `got.frequency constructor: ${got.frequency?.constructor?.name}\n`;
+
+      output.textContent = log;
+      console.log(log);
+
+      filter.dispose();
+    });
+  </script>
+</body>
+</html>

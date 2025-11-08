@@ -20,6 +20,10 @@ import {
   LFOParams,
 } from "../types/ModulationMatrixParams";
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
+import { FilterHandle } from "../types/FilterParams";
+import { DelayHandle } from "../types/DelayParams";
+import { BitCrusherHandle } from "../types/BitCrusherParams";
+import { ChebyshevHandle } from "../types/ChebyshevParams";
 import { ModulationConnectionManager } from "../utils/modulationConnectionManager";
 import {
   coerceParamToNumber,
@@ -47,6 +51,13 @@ interface ModulationMatrixProps {
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
   };
+  effectRefs?: {
+    filterRef?: React.RefObject<FilterHandle | null>;
+    delayRef?: React.RefObject<DelayHandle | null>;
+    microRef?: React.RefObject<DelayHandle | null>;
+    bitCrusherRef?: React.RefObject<BitCrusherHandle | null>;
+    chebyshevRef?: React.RefObject<ChebyshevHandle | null>;
+  };
 }
 
 function ModulationMatrix({
@@ -54,6 +65,7 @@ function ModulationMatrix({
   onParameterChange,
   oscillators = [],
   effects,
+  effectRefs,
 }: ModulationMatrixProps) {
   const [expandMatrix, setExpandMatrix] = useState(false);
   const [lfoParams, setLfoParams] = useState<LFOParams[]>(DEFAULT_LFOS);
@@ -86,9 +98,22 @@ function ModulationMatrix({
   // Track route structure separately from amounts to avoid unnecessary reconnections
   const routeStructureRef = useRef<string>("");
   const hasConnectedRef = useRef<boolean>(false);
+  const routesRef = useRef<ModulationRoute[]>(routes);
+  const [routeStructure, setRouteStructure] = useState<string>("");
+  const lastConnectionIdsRef = useRef<Set<string>>(new Set());
+
   const getRouteStructure = (routes: ModulationRoute[]): string => {
     return routes.map((r) => `${r.sourceIndex}-${r.destination}`).join("|");
   };
+
+  // Update route structure state only when it actually changes
+  useEffect(() => {
+    routesRef.current = routes;
+    const newStructure = getRouteStructure(routes);
+    if (newStructure !== routeStructure) {
+      setRouteStructure(newStructure);
+    }
+  }, [routes, routeStructure]);
 
   // Update ref whenever state changes
   useEffect(() => {
@@ -100,22 +125,51 @@ function ModulationMatrix({
 
   // Live-apply per-route ranges to audio-rate routes by updating Scale nodes
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log(
+      `[ModMatrix] Range update useEffect running, routes count: ${routes.length}, timestamp: ${Date.now()}`
+    );
+    // eslint-disable-next-line no-console
+    console.log(
+      `[ModMatrix] Full routes object:`,
+      JSON.stringify(routes, null, 2)
+    );
     routes.forEach((route) => {
       const dest = route.destination;
+      // eslint-disable-next-line no-console
+      console.log(
+        `[ModMatrix] Checking route: source=${route.sourceIndex} dest=${dest}`
+      );
       const def = defaultsForDestination(dest);
-      if (!def) return;
+      if (!def) {
+        // eslint-disable-next-line no-console
+        console.log(`[ModMatrix] No defaults for ${dest}, skipping`);
+        return;
+      }
       // Only destinations handled via audio-rate Scale nodes:
       const isAudioScale =
-        dest === "filter-q" ||
-        dest === "filter-frequency" ||
         dest === "delay-time" ||
         dest === "delay-feedback" ||
         dest === "micro-time" ||
         dest === "micro-feedback";
-      if (!isAudioScale) return;
+      if (!isAudioScale) {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[ModMatrix] ${dest} is not audio-rate Scale destination, skipping`
+        );
+        return;
+      }
       const connectionId = `${route.sourceIndex}-${route.destination}`;
-      if (!connectionManager.hasConnection(connectionId)) return;
-      const [min, max] = computeRouteRange(dest, route, def);
+      const hasConn = connectionManager.hasConnection(connectionId);
+      // eslint-disable-next-line no-console
+      console.log(`[ModMatrix] Connection ${connectionId} exists: ${hasConn}`);
+      if (!hasConn) return;
+      // Apply depth to the range for audio-rate Scale nodes
+      const [min, max] = computeRouteRange(dest, route, def, true);
+      // eslint-disable-next-line no-console
+      console.log(
+        `[ModMatrix] Updating range for ${connectionId}: center=${route.center} amount=${route.rangeAmount} depth=${route.amount} → range [${min}, ${max}]`
+      );
       connectionManager.updateScaleRange(connectionId, min, max);
     });
   }, [routes, connectionManager]);
@@ -151,29 +205,186 @@ function ModulationMatrix({
     },
   }));
 
+  // Capture parameter values when destinations are first set, BEFORE LFO connections override them
+  // Auto-capture useEffect removed - user prefers manual range entry
+
   // Apply modulation routes ONLY when route structure changes (not amounts!)
   useEffect(() => {
-    const currentStructure = getRouteStructure(routes);
+    const routes = routesRef.current;
+    // eslint-disable-next-line no-console
+    console.log(
+      `[ModMatrix] Connection useEffect triggered, routes count: ${routes.length}`
+    );
+    const currentStructure = routeStructure;
+    // eslint-disable-next-line no-console
+    console.log(`[ModMatrix] Current structure: ${currentStructure}`);
 
-    // Skip if structure unchanged AND we've already connected with current oscillators
-    const structureUnchanged = currentStructure === routeStructureRef.current;
     const hasOscillators = oscillators.length > 0;
-
-    if (structureUnchanged && hasConnectedRef.current && hasOscillators) {
-      return; // Skip reconnection, structure hasn't changed and we're already connected
-    }
-
-    // If no oscillators yet, wait for them
     if (!hasOscillators) {
+      // eslint-disable-next-line no-console
+      console.log(`[ModMatrix] No oscillators yet, waiting...`);
       hasConnectedRef.current = false;
       return;
     }
 
-    routeStructureRef.current = currentStructure;
+    // Reconcile: compute new set of connection IDs
+    const newIds = new Set<string>();
+    routes.forEach((r) => {
+      if (r.destination !== "none")
+        newIds.add(`${r.sourceIndex}-${r.destination}`);
+    });
 
-    // Disconnect all previous connections
-    connectionManager.disconnectAll();
-    hasConnectedRef.current = false;
+    // Disconnect only those that no longer exist
+    lastConnectionIdsRef.current.forEach((id) => {
+      if (!newIds.has(id)) {
+        connectionManager.disconnect(id);
+        // After disconnect, restore target param to current UI value to avoid stale/extreme values
+        const [, dest] = id.split("-");
+        try {
+          if (
+            dest === "filter-frequency" &&
+            effects?.filter?.current &&
+            effectRefs?.filterRef?.current
+          ) {
+            const p = effectRefs.filterRef.current.getParams();
+            effects.filter.current.set({
+              frequency: p.frequency,
+              Q: p.Q,
+              type: p.type,
+            });
+            effects.filter.current.rolloff = p.rolloff;
+            (
+              effects.filter.current.frequency as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            (
+              effects.filter.current.Q as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            // Nudge underlying biquad to ensure state is refreshed
+            const prevType = effects.filter.current.type;
+            effects.filter.current.type =
+              prevType === "lowpass" ? "highpass" : "lowpass";
+            effects.filter.current.type = prevType;
+            const prevRolloff = effects.filter.current.rolloff;
+            effects.filter.current.rolloff = -24;
+            effects.filter.current.rolloff = prevRolloff;
+          } else if (
+            dest === "filter-q" &&
+            effects?.filter?.current &&
+            effectRefs?.filterRef?.current
+          ) {
+            const p = effectRefs.filterRef.current.getParams();
+            effects.filter.current.set({
+              frequency: p.frequency,
+              Q: p.Q,
+              type: p.type,
+            });
+            effects.filter.current.rolloff = p.rolloff;
+            (
+              effects.filter.current.Q as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            (
+              effects.filter.current.frequency as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            // Nudge underlying biquad to ensure state is refreshed
+            const prevType = effects.filter.current.type;
+            effects.filter.current.type =
+              prevType === "lowpass" ? "highpass" : "lowpass";
+            effects.filter.current.type = prevType;
+            const prevRolloff = effects.filter.current.rolloff;
+            effects.filter.current.rolloff = -24;
+            effects.filter.current.rolloff = prevRolloff;
+          } else if (
+            dest === "delay-time" &&
+            effects?.delay?.current &&
+            effectRefs?.delayRef?.current
+          ) {
+            const p = effectRefs.delayRef.current.getParams();
+            effects.delay.current.delayTime.value = p.time as unknown as number;
+            effects.delay.current.feedback.value =
+              p.feedback as unknown as number;
+            (
+              effects.delay.current.delayTime as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            (
+              effects.delay.current.feedback as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+          } else if (
+            dest === "delay-feedback" &&
+            effects?.delay?.current &&
+            effectRefs?.delayRef?.current
+          ) {
+            const p = effectRefs.delayRef.current.getParams();
+            effects.delay.current.delayTime.value = p.time as unknown as number;
+            effects.delay.current.feedback.value =
+              p.feedback as unknown as number;
+            (
+              effects.delay.current.feedback as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            (
+              effects.delay.current.delayTime as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+          } else if (
+            dest === "micro-time" &&
+            effects?.micro?.current &&
+            effectRefs?.microRef?.current
+          ) {
+            const p = effectRefs.microRef.current.getParams();
+            effects.micro.current.delayTime.value = p.time as unknown as number;
+            effects.micro.current.feedback.value =
+              p.feedback as unknown as number;
+            (
+              effects.micro.current.delayTime as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            (
+              effects.micro.current.feedback as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+          } else if (
+            dest === "micro-feedback" &&
+            effects?.micro?.current &&
+            effectRefs?.microRef?.current
+          ) {
+            const p = effectRefs.microRef.current.getParams();
+            effects.micro.current.delayTime.value = p.time as unknown as number;
+            effects.micro.current.feedback.value =
+              p.feedback as unknown as number;
+            (
+              effects.micro.current.feedback as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+            (
+              effects.micro.current.delayTime as unknown as {
+                cancelScheduledValues?: (t: number) => void;
+              }
+            ).cancelScheduledValues?.(0);
+          }
+        } catch {
+          // noop: defensive only
+        }
+      }
+    });
+
+    routeStructureRef.current = currentStructure;
 
     const depthMultipliers = depthMultipliersRef.current;
 
@@ -189,9 +400,21 @@ function ModulationMatrix({
     // Reset control routes
     controlRoutesRef.current = [];
 
-    // Connect each route
+    hasConnectedRef.current = true;
+
+    // Connect any missing routes, leave existing ones intact
     routes.forEach((route, routeIndex) => {
-      if (route.destination === "none") return;
+      // eslint-disable-next-line no-console
+      console.log(
+        `[ModMatrix] Processing route ${routeIndex}: ${route.sourceIndex}-${route.destination}`
+      );
+      if (route.destination === "none") {
+        // eslint-disable-next-line no-console
+        console.log(
+          `[ModMatrix] Route ${routeIndex} has destination=none, skipping`
+        );
+        return;
+      }
 
       const lfoSignal = signals[route.sourceIndex];
       const depthMultiplier = depthMultipliers[routeIndex];
@@ -203,10 +426,20 @@ function ModulationMatrix({
         return;
       }
 
-      // Set initial depth multiplier value
-      depthMultiplier.factor.value = route.amount;
+      const isAudioScaleDest =
+        route.destination === "filter-q" ||
+        route.destination === "filter-frequency" ||
+        route.destination === "delay-time" ||
+        route.destination === "delay-feedback" ||
+        route.destination === "micro-time" ||
+        route.destination === "micro-feedback";
+
+      // Set depth multiplier value: 1 for audio-rate Scale destinations, route.amount for others
+      depthMultiplier.factor.value = isAudioScaleDest ? 1 : route.amount;
 
       const connectionId = `${route.sourceIndex}-${route.destination}`;
+      const alreadyConnected = connectionManager.hasConnection(connectionId);
+      if (alreadyConnected) return; // keep existing wiring
 
       try {
         // Oscillator destinations
@@ -260,26 +493,108 @@ function ModulationMatrix({
 
         // Effect destinations
         if (route.destination === "filter-q" && effects?.filter?.current) {
-          connectionManager.connectFilterQ(
-            connectionId,
-            lfoSignal as unknown as Tone.Signal,
-            depthMultiplier,
-            route.destination,
-            effects.filter.current
-          );
+          const lfoIdx = route.sourceIndex;
+          const amount = route.amount;
+          const node = effects.filter.current;
+          let lastLogMs = 0;
+          controlRoutesRef.current.push({
+            lfoIndex: lfoIdx,
+            dest: "chebyshev-order", // unused here, but keep shape
+            amount,
+            update: () => {
+              const r: ModulationRoute = route;
+              const lp = lfoParams[lfoIdx];
+              const amp = lp?.amplitude ?? 1;
+              const depth = Math.max(0, Math.min(1, amount * amp));
+              const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
+              const unipolar = (sample + 1) * 0.5;
+              const defMin = 0;
+              const defMax = 9;
+              let valNum: number;
+              if ((r.rangeMode ?? "center") === "center") {
+                const centerVal =
+                  typeof r.center === "number"
+                    ? r.center
+                    : (defMin + defMax) / 2;
+                let amountRangeVal =
+                  typeof r.rangeAmount === "number"
+                    ? r.rangeAmount
+                    : (defMax - defMin) / 4;
+                if (amountRangeVal < 0) amountRangeVal = 0;
+                const bipolar = sample * depth;
+                valNum = centerVal + bipolar * amountRangeVal;
+              } else {
+                const minVal = typeof r.min === "number" ? r.min : defMin;
+                const maxVal = typeof r.max === "number" ? r.max : defMax;
+                let span = maxVal - minVal;
+                if (span < 0) span = 0;
+                valNum = minVal + unipolar * depth * span;
+              }
+              let v = Math.max(defMin, Math.min(defMax, valNum));
+              node.Q.value = v;
+              const now =
+                typeof performance !== "undefined"
+                  ? performance.now()
+                  : Date.now();
+              if (now - lastLogMs > 100) {
+                lastLogMs = now;
+              }
+            },
+          });
           return;
         }
         if (
           route.destination === "filter-frequency" &&
           effects?.filter?.current
         ) {
-          connectionManager.connectFilterFrequency(
-            connectionId,
-            lfoSignal as unknown as Tone.Signal,
-            depthMultiplier,
-            route.destination,
-            effects.filter.current
-          );
+          const lfoIdx = route.sourceIndex;
+          const amount = route.amount;
+          const node = effects.filter.current;
+          let lastLogMs = 0;
+          controlRoutesRef.current.push({
+            lfoIndex: lfoIdx,
+            dest: "chebyshev-order", // unused here, but keep shape
+            amount,
+            update: () => {
+              const r: ModulationRoute = route;
+              const lp = lfoParams[lfoIdx];
+              const amp = lp?.amplitude ?? 1;
+              const depth = Math.max(0, Math.min(1, amount * amp));
+              const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
+              const unipolar = (sample + 1) * 0.5;
+              const defMin = 30;
+              const defMax = 7000;
+              let valNum: number;
+              if ((r.rangeMode ?? "center") === "center") {
+                const centerVal =
+                  typeof r.center === "number"
+                    ? r.center
+                    : (defMin + defMax) / 2;
+                let amountRangeVal =
+                  typeof r.rangeAmount === "number"
+                    ? r.rangeAmount
+                    : (defMax - defMin) / 4;
+                if (amountRangeVal < 0) amountRangeVal = 0;
+                const bipolar = sample * depth;
+                valNum = centerVal + bipolar * amountRangeVal;
+              } else {
+                const minVal = typeof r.min === "number" ? r.min : defMin;
+                const maxVal = typeof r.max === "number" ? r.max : defMax;
+                let span = maxVal - minVal;
+                if (span < 0) span = 0;
+                valNum = minVal + unipolar * depth * span;
+              }
+              let v = Math.max(defMin, Math.min(defMax, valNum));
+              node.frequency.value = v;
+              const now =
+                typeof performance !== "undefined"
+                  ? performance.now()
+                  : Date.now();
+              if (now - lastLogMs > 100) {
+                lastLogMs = now;
+              }
+            },
+          });
           return;
         }
         if (route.destination === "micro-time" && effects?.micro?.current) {
@@ -346,7 +661,6 @@ function ModulationMatrix({
                   ? performance.now()
                   : Date.now();
               if (now - lastLogMs > 100) {
-                // log at most ~10/sec per route
                 console.log(
                   `[ModMatrix] LFO ${lfoIdx + 1} → BitCrusher bits:`,
                   val
@@ -440,15 +754,18 @@ function ModulationMatrix({
       }
     });
 
-    // Mark as connected after successful setup
-    hasConnectedRef.current = true;
+    // Update active connection IDs after reconciliation
+    lastConnectionIdsRef.current = newIds;
+  }, [routeStructure, signals, oscillators, lfoParams, connectionManager]);
 
-    // Cleanup function to disconnect all on unmount
+  // On unmount only: disconnect all
+  useEffect(() => {
     return () => {
       connectionManager.disconnectAll();
       hasConnectedRef.current = false;
+      lastConnectionIdsRef.current.clear();
     };
-  }, [routes, signals, oscillators, lfoParams, connectionManager, effects]);
+  }, [connectionManager]);
 
   // (computeControlValue removed; custom per-route mapping is used directly)
 
@@ -474,9 +791,8 @@ function ModulationMatrix({
     }
   }, []);
 
-  // Control-rate updater (~60Hz)
+  // Control-rate updater (~60Hz) + Debug logging for audio-rate params
   useEffect(() => {
-    if (controlRoutesRef.current.length === 0) return;
     let rafId = 0;
     const tick = (nowMs: number) => {
       const now = nowMs / 1000;
@@ -488,13 +804,14 @@ function ModulationMatrix({
         const freq = lfoParams[i]?.frequency ?? 0;
         lfoPhaseRef.current[i] = (lfoPhaseRef.current[i] + freq * dt) % 1;
       }
-      // update targets
+      // update control-rate targets
       controlRoutesRef.current.forEach((r) => r.update());
+
       rafId = requestAnimationFrame(tick);
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [lfoParams, routes]);
+  }, [lfoParams, routes, effects]);
 
   // Direct immediate updates - exactly like modulation-reference.html
   const updateDepth = useCallback(
@@ -660,7 +977,10 @@ function ModulationMatrix({
             const dest = route.destination;
             // Control-rate destinations
             if (dest === "bitcrusher-bits" && effects?.bitCrusher?.current) {
-              const current = coerceParamToNumber(effects.bitCrusher.current.bits.value, "normal");
+              const current = coerceParamToNumber(
+                effects.bitCrusher.current.bits.value,
+                "normal"
+              );
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
                   ? { center: Math.max(1, Math.min(16, Math.round(current))) }
@@ -675,7 +995,10 @@ function ModulationMatrix({
               return;
             }
             if (dest === "chebyshev-order" && effects?.chebyshev?.current) {
-              const current = coerceParamToNumber(effects.chebyshev.current.order, "normal");
+              const current = coerceParamToNumber(
+                effects.chebyshev.current.order,
+                "normal"
+              );
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
                   ? { center: Math.max(1, Math.min(100, Math.round(current))) }
@@ -689,9 +1012,11 @@ function ModulationMatrix({
               setRoutes(newRoutes);
               return;
             }
-            // Effect AudioParams
-            if (dest === "filter-frequency" && effects?.filter?.current) {
-              const current = coerceParamToNumber(effects.filter.current.frequency.value, "frequency");
+            // Effect AudioParams - read from component state, not Tone.js params
+            // (Tone.js params show 0 when LFO is connected)
+            if (dest === "filter-frequency" && effectRefs?.filterRef?.current) {
+              const params = effectRefs.filterRef.current.getParams();
+              const current = params.frequency;
               const clamp = (v: number) => Math.max(30, Math.min(7000, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -706,8 +1031,9 @@ function ModulationMatrix({
               setRoutes(newRoutes);
               return;
             }
-            if (dest === "filter-q" && effects?.filter?.current) {
-              const current = coerceParamToNumber(effects.filter.current.Q.value, "normal");
+            if (dest === "filter-q" && effectRefs?.filterRef?.current) {
+              const params = effectRefs.filterRef.current.getParams();
+              const current = params.Q;
               const clamp = (v: number) => Math.max(0, Math.min(9, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -722,8 +1048,9 @@ function ModulationMatrix({
               setRoutes(newRoutes);
               return;
             }
-            if (dest === "delay-time" && effects?.delay?.current) {
-              const current = coerceParamToNumber(effects.delay.current.delayTime.value, "time");
+            if (dest === "delay-time" && effectRefs?.delayRef?.current) {
+              const params = effectRefs.delayRef.current.getParams();
+              const current = params.time;
               const clamp = (v: number) => Math.max(0, Math.min(1, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -738,8 +1065,9 @@ function ModulationMatrix({
               setRoutes(newRoutes);
               return;
             }
-            if (dest === "delay-feedback" && effects?.delay?.current) {
-              const current = coerceParamToNumber(effects.delay.current.feedback.value, "normal");
+            if (dest === "delay-feedback" && effectRefs?.delayRef?.current) {
+              const params = effectRefs.delayRef.current.getParams();
+              const current = params.feedback;
               const clamp = (v: number) => Math.max(0, Math.min(0.95, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -754,8 +1082,9 @@ function ModulationMatrix({
               setRoutes(newRoutes);
               return;
             }
-            if (dest === "micro-time" && effects?.micro?.current) {
-              const current = coerceParamToNumber(effects.micro.current.delayTime.value, "time");
+            if (dest === "micro-time" && effectRefs?.microRef?.current) {
+              const params = effectRefs.microRef.current.getParams();
+              const current = params.time;
               const clamp = (v: number) => Math.max(0, Math.min(1, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
@@ -770,8 +1099,9 @@ function ModulationMatrix({
               setRoutes(newRoutes);
               return;
             }
-            if (dest === "micro-feedback" && effects?.micro?.current) {
-              const current = coerceParamToNumber(effects.micro.current.feedback.value, "normal");
+            if (dest === "micro-feedback" && effectRefs?.microRef?.current) {
+              const params = effectRefs.microRef.current.getParams();
+              const current = params.feedback;
               const clamp = (v: number) => Math.max(0, Math.min(0.95, v));
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"

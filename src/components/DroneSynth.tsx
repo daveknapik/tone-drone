@@ -203,6 +203,13 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             bitCrusher: bitCrusher,
             chebyshev: chebyshev,
           }}
+          effectRefs={{
+            filterRef: afterFilterRef,
+            delayRef: delayRef,
+            microRef: microlooperRef,
+            bitCrusherRef: bitCrusherRef,
+            chebyshevRef: chebyshevRef,
+          }}
         />
         <PolySynths
           polysynths={polysynths}

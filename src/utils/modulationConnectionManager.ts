@@ -53,7 +53,12 @@ export class ModulationConnectionManager {
     frequencyScaler.connect(detuneParam as unknown as Tone.ToneAudioNode);
 
     const cleanup = () => {
-      lfoSignal.disconnect();
+      try {
+        // Disconnect only this path; do not sever other LFO routes
+        (lfoSignal as unknown as { disconnect: (dest?: Tone.ToneAudioNode) => void }).disconnect(
+          depthMultiplier as unknown as Tone.ToneAudioNode
+        );
+      } catch {}
       depthMultiplier.disconnect();
       frequencyScaler.disconnect();
       frequencyScaler.dispose();
@@ -205,7 +210,11 @@ export class ModulationConnectionManager {
     this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
-      lfoSignal.disconnect();
+      try {
+        (lfoSignal as unknown as { disconnect: (dest?: Tone.ToneAudioNode) => void }).disconnect(
+          depthMultiplier as unknown as Tone.ToneAudioNode
+        );
+      } catch {}
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -237,7 +246,11 @@ export class ModulationConnectionManager {
     this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
-      lfoSignal.disconnect();
+      try {
+        (lfoSignal as unknown as { disconnect: (dest?: Tone.ToneAudioNode) => void }).disconnect(
+          depthMultiplier as unknown as Tone.ToneAudioNode
+        );
+      } catch {}
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -269,7 +282,11 @@ export class ModulationConnectionManager {
     this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
-      lfoSignal.disconnect();
+      try {
+        (lfoSignal as unknown as { disconnect: (dest?: Tone.ToneAudioNode) => void }).disconnect(
+          depthMultiplier as unknown as Tone.ToneAudioNode
+        );
+      } catch {}
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -294,11 +311,15 @@ export class ModulationConnectionManager {
     destination: ModulationDestination,
     delay: Tone.FeedbackDelay
   ): void {
+    // eslint-disable-next-line no-console
+    console.log(`[ConnectionManager] connectDelayTime(${connectionId}) called`);
     const scale = new Tone.Scale({ min: 0, max: 1 });
     lfoSignal.connect(depthMultiplier);
     depthMultiplier.connect(scale);
     scale.connect(delay.delayTime as unknown as Tone.ToneAudioNode);
     this.scaleNodes.set(connectionId, scale);
+    // eslint-disable-next-line no-console
+    console.log(`[ConnectionManager] connectDelayTime(${connectionId}) Scale node stored`);
 
     const cleanup = () => {
       lfoSignal.disconnect();
@@ -316,6 +337,8 @@ export class ModulationConnectionManager {
       nodes: [scale],
       cleanup,
     });
+    // eslint-disable-next-line no-console
+    console.log(`[ConnectionManager] connectDelayTime(${connectionId}) Connection stored, total connections: ${this.connections.size}`);
   }
 
   /** Connect to BitCrusher bits (2..8) */
@@ -346,7 +369,11 @@ export class ModulationConnectionManager {
     seed.dispose();
 
     const cleanup = () => {
-      lfoSignal.disconnect();
+      try {
+        (lfoSignal as unknown as { disconnect: (dest?: Tone.ToneAudioNode) => void }).disconnect(
+          depthMultiplier as unknown as Tone.ToneAudioNode
+        );
+      } catch {}
       depthMultiplier.disconnect();
       // dispose wiring
       one.disconnect();
@@ -385,7 +412,11 @@ export class ModulationConnectionManager {
     this.scaleNodes.set(connectionId, scale);
 
     const cleanup = () => {
-      lfoSignal.disconnect();
+      try {
+        (lfoSignal as unknown as { disconnect: (dest?: Tone.ToneAudioNode) => void }).disconnect(
+          depthMultiplier as unknown as Tone.ToneAudioNode
+        );
+      } catch {}
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -428,7 +459,10 @@ export class ModulationConnectionManager {
 
   /** Check if a connection exists */
   hasConnection(connectionId: string): boolean {
-    return this.connections.has(connectionId);
+    const exists = this.connections.has(connectionId);
+    // eslint-disable-next-line no-console
+    console.log(`[ConnectionManager] hasConnection(${connectionId}): ${exists}, total connections: ${this.connections.size}, all IDs: [${Array.from(this.connections.keys()).join(', ')}]`);
+    return exists;
   }
 
   /** Get count of active connections */
@@ -444,10 +478,22 @@ export class ModulationConnectionManager {
   /** Update range (min/max) for connections that use a Scale node */
   updateScaleRange(connectionId: string, min: number, max: number): void {
     const scale = this.scaleNodes.get(connectionId);
-    if (!scale) return;
+    if (!scale) {
+      // eslint-disable-next-line no-console
+      console.warn(`[ConnectionManager] No scale node found for ${connectionId}`);
+      return;
+    }
+    const beforeMin = (scale as unknown as { min: number }).min;
+    const beforeMax = (scale as unknown as { max: number }).max;
+    // eslint-disable-next-line no-console
+    console.log(`[ConnectionManager] updateScaleRange(${connectionId}): ${beforeMin}→${min}, ${beforeMax}→${max}`);
     // Tone.Scale exposes min/max as properties in v15
     (scale as unknown as { min: number }).min = min;
     (scale as unknown as { max: number }).max = max;
+    const afterMin = (scale as unknown as { min: number }).min;
+    const afterMax = (scale as unknown as { max: number }).max;
+    // eslint-disable-next-line no-console
+    console.log(`[ConnectionManager] updateScaleRange(${connectionId}): CONFIRMED min=${afterMin} max=${afterMax}`);
   }
 
   /**
