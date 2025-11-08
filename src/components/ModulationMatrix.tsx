@@ -405,13 +405,13 @@ function ModulationMatrix({
         if (m) {
           const oscIndex = parseInt(m[1]) - 1;
           const paramType = m[2] as "frequency" | "volume" | "pan";
-      const oscillator = oscillators[oscIndex];
-      if (!oscillator) {
-        console.warn(`Oscillator ${oscIndex + 1} not found`);
-        return;
-      }
-        if (paramType === "frequency") {
-          connectionManager.connectFrequency(
+          const oscillator = oscillators[oscIndex];
+          if (!oscillator) {
+            console.warn(`Oscillator ${oscIndex + 1} not found`);
+            return;
+          }
+          if (paramType === "frequency") {
+            connectionManager.connectFrequency(
               connectionId,
               lfoSignal as unknown as Tone.Signal,
               depthMultiplier,
@@ -791,10 +791,10 @@ function ModulationMatrix({
       }
 
       // Frequency route: use depth multiplier
-    const depthMultiplier = depthMultipliersRef.current[routeIndex];
-    if (depthMultiplier && hasConnectedRef.current) {
+      const depthMultiplier = depthMultipliersRef.current[routeIndex];
+      if (depthMultiplier && hasConnectedRef.current) {
         depthMultiplier.factor.rampTo(amount, 0.02);
-    }
+      }
     },
     [routes, oscillators, lfoParams, hasConnectedRef.current]
   );
