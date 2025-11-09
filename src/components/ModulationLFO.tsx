@@ -37,8 +37,6 @@ function ModulationLFO({
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
-  // Track active drag for Rate to avoid repeatedly ducking
-  const endRateDrag = useDebounceCallback(() => {}, 120);
 
   // Direct immediate updates - exactly like modulation-reference.html
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
@@ -111,7 +109,6 @@ function ModulationLFO({
             // Debounced state persistence (for serialization)
             persistFrequency(newFreq);
             // Debounced end (no-op)
-            endRateDrag();
           }}
         />
         <Slider
@@ -129,7 +126,6 @@ function ModulationLFO({
             setAmplitude(newAmp);
             // Debounced state persistence (for serialization)
             persistAmplitude(newAmp);
-            endRateDrag();
           }}
         />
         <OptionsSelector<OscillatorType>

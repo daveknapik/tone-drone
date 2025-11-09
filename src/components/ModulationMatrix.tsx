@@ -87,7 +87,11 @@ function ModulationMatrix({
   const controlRoutesRef = useRef<
     {
       lfoIndex: number;
-      dest: "bitcrusher-bits" | "chebyshev-order";
+      dest:
+        | "filter-frequency"
+        | "filter-q"
+        | "bitcrusher-bits"
+        | "chebyshev-order";
       amount: number;
       update: () => void;
     }[]
@@ -383,9 +387,8 @@ function ModulationMatrix({
         return;
       }
 
+      // Audio-rate destinations wired via Tone.Scale nodes (filters are handled at control-rate)
       const isAudioScaleDest =
-        route.destination === "filter-q" ||
-        route.destination === "filter-frequency" ||
         route.destination === "delay-time" ||
         route.destination === "delay-feedback" ||
         route.destination === "micro-time" ||
@@ -456,38 +459,22 @@ function ModulationMatrix({
           let lastLogMs = 0;
           controlRoutesRef.current.push({
             lfoIndex: lfoIdx,
-            dest: "chebyshev-order", // unused here, but keep shape
+            dest: "filter-q",
             amount,
             update: () => {
-              const r: ModulationRoute = route;
               const lp = lfoParams[lfoIdx];
-              const amp = lp?.amplitude ?? 1;
-              const depth = Math.max(0, Math.min(1, amount * amp));
               const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
               const unipolar = (sample + 1) * 0.5;
-              const defMin = 0;
-              const defMax = 9;
-              let valNum: number;
-              if ((r.rangeMode ?? "center") === "center") {
-                const centerVal =
-                  typeof r.center === "number"
-                    ? r.center
-                    : (defMin + defMax) / 2;
-                let amountRangeVal =
-                  typeof r.rangeAmount === "number"
-                    ? r.rangeAmount
-                    : (defMax - defMin) / 4;
-                if (amountRangeVal < 0) amountRangeVal = 0;
-                const bipolar = sample * depth;
-                valNum = centerVal + bipolar * amountRangeVal;
-              } else {
-                const minVal = typeof r.min === "number" ? r.min : defMin;
-                const maxVal = typeof r.max === "number" ? r.max : defMax;
-                let span = maxVal - minVal;
-                if (span < 0) span = 0;
-                valNum = minVal + unipolar * depth * span;
-              }
-              const v = Math.max(defMin, Math.min(defMax, valNum));
+              const def = defaultsForDestination("filter-q")!;
+              const [min, max] = computeRouteRange("filter-q", route, def, true);
+              const mode = route.rangeMode ?? "center";
+              const center = (min + max) / 2;
+              const span = max - min;
+              const amountAroundCenter = max - center;
+              const v =
+                mode === "center"
+                  ? Math.max(def.min, Math.min(def.max, center + sample * amountAroundCenter))
+                  : Math.max(def.min, Math.min(def.max, min + unipolar * span));
               node.Q.value = v;
               const now =
                 typeof performance !== "undefined"
@@ -510,38 +497,22 @@ function ModulationMatrix({
           let lastLogMs = 0;
           controlRoutesRef.current.push({
             lfoIndex: lfoIdx,
-            dest: "chebyshev-order", // unused here, but keep shape
+            dest: "filter-frequency",
             amount,
             update: () => {
-              const r: ModulationRoute = route;
               const lp = lfoParams[lfoIdx];
-              const amp = lp?.amplitude ?? 1;
-              const depth = Math.max(0, Math.min(1, amount * amp));
               const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
               const unipolar = (sample + 1) * 0.5;
-              const defMin = 30;
-              const defMax = 7000;
-              let valNum: number;
-              if ((r.rangeMode ?? "center") === "center") {
-                const centerVal =
-                  typeof r.center === "number"
-                    ? r.center
-                    : (defMin + defMax) / 2;
-                let amountRangeVal =
-                  typeof r.rangeAmount === "number"
-                    ? r.rangeAmount
-                    : (defMax - defMin) / 4;
-                if (amountRangeVal < 0) amountRangeVal = 0;
-                const bipolar = sample * depth;
-                valNum = centerVal + bipolar * amountRangeVal;
-              } else {
-                const minVal = typeof r.min === "number" ? r.min : defMin;
-                const maxVal = typeof r.max === "number" ? r.max : defMax;
-                let span = maxVal - minVal;
-                if (span < 0) span = 0;
-                valNum = minVal + unipolar * depth * span;
-              }
-              const v = Math.max(defMin, Math.min(defMax, valNum));
+              const def = defaultsForDestination("filter-frequency")!;
+              const [min, max] = computeRouteRange("filter-frequency", route, def, true);
+              const mode = route.rangeMode ?? "center";
+              const center = (min + max) / 2;
+              const span = max - min;
+              const amountAroundCenter = max - center;
+              const v =
+                mode === "center"
+                  ? Math.max(def.min, Math.min(def.max, center + sample * amountAroundCenter))
+                  : Math.max(def.min, Math.min(def.max, min + unipolar * span));
               node.frequency.value = v;
               const now =
                 typeof performance !== "undefined"
@@ -587,30 +558,17 @@ function ModulationMatrix({
             dest: "bitcrusher-bits",
             amount,
             update: () => {
-              const r: ModulationRoute = route;
-              const lp = lfoParams[lfoIdx];
-              const amp = lp?.amplitude ?? 1;
-              const depth = Math.max(0, Math.min(1, amount * amp));
-              const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
+              const sample = sampleLfo(lfoIdx, (lfoParams[lfoIdx]?.type ?? "sine") as string);
               const unipolar = (sample + 1) * 0.5;
-              let valNum: number;
-              if ((r.rangeMode ?? "center") === "center") {
-                const centerVal = typeof r.center === "number" ? r.center : 8.5;
-                let amountRangeVal =
-                  typeof r.rangeAmount === "number" ? r.rangeAmount : 4;
-                if (amountRangeVal < 0) amountRangeVal = 0;
-                const bipolar = sample * depth;
-                valNum = centerVal + bipolar * amountRangeVal;
-              } else {
-                const minVal = typeof r.min === "number" ? r.min : 1;
-                const maxVal = typeof r.max === "number" ? r.max : 16;
-                let span = maxVal - minVal;
-                if (span < 0) span = 0;
-                valNum = minVal + unipolar * depth * span;
-              }
-              let val = Math.round(valNum);
-              if (val < 1) val = 1;
-              if (val > 16) val = 16;
+              const def = defaultsForDestination("bitcrusher-bits")!;
+              const [min, max] = computeRouteRange("bitcrusher-bits", route, def, true);
+              const mode = route.rangeMode ?? "center";
+              const center = (min + max) / 2;
+              const span = max - min;
+              const amountAroundCenter = max - center;
+              const continuous =
+                mode === "center" ? center + sample * amountAroundCenter : min + unipolar * span;
+              let val = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
               node.bits.value = val;
               const now =
                 typeof performance !== "undefined"
@@ -640,30 +598,17 @@ function ModulationMatrix({
             dest: "chebyshev-order",
             amount,
             update: () => {
-              const r: ModulationRoute = route;
-              const lp = lfoParams[lfoIdx];
-              const amp = lp?.amplitude ?? 1;
-              const depth = Math.max(0, Math.min(1, amount * amp));
-              const sample = sampleLfo(lfoIdx, (lp?.type ?? "sine") as string);
+              const sample = sampleLfo(lfoIdx, (lfoParams[lfoIdx]?.type ?? "sine") as string);
               const unipolar = (sample + 1) * 0.5;
-              let valNum: number;
-              if ((r.rangeMode ?? "center") === "center") {
-                const centerVal = typeof r.center === "number" ? r.center : 50;
-                let amountRangeVal =
-                  typeof r.rangeAmount === "number" ? r.rangeAmount : 20;
-                if (amountRangeVal < 0) amountRangeVal = 0;
-                const bipolar = sample * depth;
-                valNum = centerVal + bipolar * amountRangeVal;
-              } else {
-                const minVal = typeof r.min === "number" ? r.min : 1;
-                const maxVal = typeof r.max === "number" ? r.max : 100;
-                let span = maxVal - minVal;
-                if (span < 0) span = 0;
-                valNum = minVal + unipolar * depth * span;
-              }
-              let rounded = Math.round(valNum);
-              if (rounded < 1) rounded = 1;
-              if (rounded > 100) rounded = 100;
+              const def = defaultsForDestination("chebyshev-order")!;
+              const [min, max] = computeRouteRange("chebyshev-order", route, def, true);
+              const mode = route.rangeMode ?? "center";
+              const center = (min + max) / 2;
+              const span = max - min;
+              const amountAroundCenter = max - center;
+              const continuous =
+                mode === "center" ? center + sample * amountAroundCenter : min + unipolar * span;
+              let rounded = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
               node.order = rounded;
               const now =
                 typeof performance !== "undefined"
@@ -796,7 +741,7 @@ function ModulationMatrix({
         depthMultiplier.factor.rampTo(amount, 0.02);
       }
     },
-    [routes, oscillators, lfoParams, hasConnectedRef.current]
+    [routes, oscillators, lfoParams]
   );
 
   const toggleExpandMatrix = (): void => {
