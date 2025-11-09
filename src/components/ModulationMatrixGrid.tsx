@@ -47,7 +47,11 @@ const DESTINATIONS: DestinationInfo[] = [
   { value: "delay-feedback", label: "Delay Feedback", category: "Effects" },
   // Microlooper (FeedbackDelay under the hood)
   { value: "micro-time", label: "Microlooper Time", category: "Effects" },
-  { value: "micro-feedback", label: "Microlooper Feedback", category: "Effects" },
+  {
+    value: "micro-feedback",
+    label: "Microlooper Feedback",
+    category: "Effects",
+  },
   // BitCrusher
   { value: "bitcrusher-bits", label: "BitCrusher Bits", category: "Effects" },
   // Chebyshev
@@ -176,7 +180,7 @@ function ModulationMatrixGrid({
 
             {/* Route Details (Expanded) */}
             {expandedRoute === index && (
-              <div className="p-4 border-t-2 border-pink-500 dark:border-sky-300 bg-pink-50 dark:bg-gray-900 space-y-4">
+              <div className="p-4 border-t-2 border-pink-500 dark:border-sky-300 bg-pink-100 dark:bg-gray-900 space-y-4">
                 {/* Source Selection */}
                 <div>
                   <label className="block text-sm mb-1">Source LFO</label>
