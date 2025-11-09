@@ -63,7 +63,9 @@ export class ModulationConnectionManager {
             disconnect: (dest?: Tone.ToneAudioNode) => void;
           }
         ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {}
+      } catch {
+        /* noop */
+      }
       depthMultiplier.disconnect();
       frequencyScaler.disconnect();
       frequencyScaler.dispose();
@@ -221,7 +223,9 @@ export class ModulationConnectionManager {
             disconnect: (dest?: Tone.ToneAudioNode) => void;
           }
         ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {}
+      } catch {
+        /* noop */
+      }
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -259,7 +263,9 @@ export class ModulationConnectionManager {
             disconnect: (dest?: Tone.ToneAudioNode) => void;
           }
         ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {}
+      } catch {
+        /* noop */
+      }
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -297,7 +303,9 @@ export class ModulationConnectionManager {
             disconnect: (dest?: Tone.ToneAudioNode) => void;
           }
         ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {}
+      } catch {
+        /* noop */
+      }
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -336,7 +344,9 @@ export class ModulationConnectionManager {
             disconnect: (dest?: Tone.ToneAudioNode) => void;
           }
         ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {}
+      } catch {
+        /* noop */
+      }
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -387,7 +397,9 @@ export class ModulationConnectionManager {
             disconnect: (dest?: Tone.ToneAudioNode) => void;
           }
         ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {}
+      } catch {
+        /* noop */
+      }
       depthMultiplier.disconnect();
       // dispose wiring
       one.disconnect();
@@ -432,7 +444,9 @@ export class ModulationConnectionManager {
             disconnect: (dest?: Tone.ToneAudioNode) => void;
           }
         ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {}
+      } catch {
+        /* noop */
+      }
       depthMultiplier.disconnect();
       scale.disconnect();
       scale.dispose();
@@ -477,7 +491,6 @@ export class ModulationConnectionManager {
   hasConnection(connectionId: string): boolean {
     const exists = this.connections.has(connectionId);
     if (DEBUG_CONNECTIONS) {
-      // eslint-disable-next-line no-console
       console.log(
         `[ConnectionManager] hasConnection(${connectionId}): ${exists}, total connections: ${this.connections.size}, all IDs: [${Array.from(this.connections.keys()).join(", ")}]`
       );
@@ -500,7 +513,6 @@ export class ModulationConnectionManager {
     const scale = this.scaleNodes.get(connectionId);
     if (!scale) {
       if (DEBUG_CONNECTIONS) {
-        // eslint-disable-next-line no-console
         console.warn(
           `[ConnectionManager] No scale node found for ${connectionId}`
         );
@@ -510,7 +522,6 @@ export class ModulationConnectionManager {
     if (DEBUG_CONNECTIONS) {
       const beforeMin = (scale as unknown as { min: number }).min;
       const beforeMax = (scale as unknown as { max: number }).max;
-      // eslint-disable-next-line no-console
       console.log(
         `[ConnectionManager] updateScaleRange(${connectionId}): ${beforeMin}→${min}, ${beforeMax}→${max}`
       );
@@ -521,7 +532,6 @@ export class ModulationConnectionManager {
     if (DEBUG_CONNECTIONS) {
       const afterMin = (scale as unknown as { min: number }).min;
       const afterMax = (scale as unknown as { max: number }).max;
-      // eslint-disable-next-line no-console
       console.log(
         `[ConnectionManager] updateScaleRange(${connectionId}): CONFIRMED min=${afterMin} max=${afterMax}`
       );
