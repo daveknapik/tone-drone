@@ -45,7 +45,7 @@ export function useModulationLFOs() {
       const outputSignal = new Tone.Signal(0);
 
       // Initial routing based on polarity mode
-      const polarityMode = params.polarityMode || "bipolar";
+      const polarityMode = params.polarityMode ?? "bipolar";
       if (polarityMode === "unipolar") {
         // Route: LFO -> Scaler -> Output
         lfo.connect(unipolarScaler);
@@ -116,7 +116,7 @@ export function useModulationLFOs() {
    * Get the current polarity mode for an LFO
    */
   const getPolarityMode = useCallback((lfoIndex: number): LFOPolarityMode => {
-    return lfoStatesRef.current[lfoIndex]?.polarityMode || "bipolar";
+    return lfoStatesRef.current[lfoIndex]?.polarityMode ?? "bipolar";
   }, []);
 
   return {

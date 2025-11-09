@@ -3,6 +3,9 @@ import type { ModulationDestination, ModulationRoute } from "../types/Modulation
 
 export type UnitKind = "time" | "frequency" | "normal";
 
+type TimeCtor = new (v: unknown) => { toSeconds: () => number };
+type FreqCtor = new (v: unknown) => { toFrequency: () => number };
+
 export function coerceParamToNumber(value: unknown, kind: UnitKind): number {
   // 1) Fast paths for primitives
   if (typeof value === "number") {
@@ -11,10 +14,12 @@ export function coerceParamToNumber(value: unknown, kind: UnitKind): number {
   if (typeof value === "string") {
     try {
       if (kind === "time") {
-        return new (Tone as any).Time(value).toSeconds();
+        const TimeKlass = (Tone as unknown as { Time: TimeCtor }).Time;
+        return new TimeKlass(value).toSeconds();
       }
       if (kind === "frequency") {
-        return new (Tone as any).Frequency(value).toFrequency();
+        const FreqKlass = (Tone as unknown as { Frequency: FreqCtor }).Frequency;
+        return new FreqKlass(value).toFrequency();
       }
       const n = Number(value);
       return Number.isFinite(n) ? n : 0;
@@ -26,13 +31,18 @@ export function coerceParamToNumber(value: unknown, kind: UnitKind): number {
 
   // 2) Handle common Tone.js wrappers and Params
   if (value && typeof value === "object") {
-    const anyVal = value as any;
+    const anyVal = value as {
+      getValueAtTime?: (t: number) => unknown;
+      toSeconds?: () => number;
+      toFrequency?: () => number;
+      value?: unknown;
+    };
 
     // Try getValueAtTime first (for Tone.Param objects)
     // This is the most reliable way to read Tone.Param values
     if (typeof anyVal.getValueAtTime === "function") {
       try {
-        const ctx = (Tone as any).getContext?.();
+        const ctx = Tone.getContext?.();
         const t = ctx?.currentTime ?? 0;
         const v = anyVal.getValueAtTime(t);
         // The result should be a number, so use "normal" kind
@@ -68,15 +78,17 @@ export function coerceParamToNumber(value: unknown, kind: UnitKind): number {
   // 3) Fallback to Tone converters or numeric cast
   try {
     if (kind === "time") {
-      return new (Tone as any).Time(value as any).toSeconds();
+      const TimeKlass = (Tone as unknown as { Time: TimeCtor }).Time;
+      return new TimeKlass(value).toSeconds();
     }
     if (kind === "frequency") {
-      return new (Tone as any).Frequency(value as any).toFrequency();
+      const FreqKlass = (Tone as unknown as { Frequency: FreqCtor }).Frequency;
+      return new FreqKlass(value).toFrequency();
     }
   } catch {
     // ignore and fall through
   }
-  const n = Number((value as any) ?? 0);
+  const n = typeof value === "number" ? value : Number(value ?? 0);
   return Number.isFinite(n) ? n : 0;
 }
 

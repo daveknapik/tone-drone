@@ -88,9 +88,10 @@ function ModulationLFO({
             const newFreq = parseFloat(e.target.value);
             // Reset phase to avoid discontinuity when changing rate
             if (lfo) {
-              try {
-                (lfo as any).phase = 0;
-              } catch {}
+              const withPhase = lfo as unknown as { phase?: number };
+              if (typeof withPhase.phase === "number") {
+                withPhase.phase = 0;
+              }
             }
             // Update Tone.js immediately (like modulation-reference.html)
             updateLFOFrequencyImmediate(newFreq);

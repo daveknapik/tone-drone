@@ -34,7 +34,7 @@ vi.mock("tone", () => {
       dispose: mockDispose,
       connect: vi.fn(),
     })),
-    Tremolo: vi.fn().mockImplementation((opts: any) => {
+    Tremolo: vi.fn().mockImplementation((opts: { frequency?: number; depth?: number; type?: string }) => {
       const inst = {
         frequency: { value: opts?.frequency ?? 2 },
         depth: { value: opts?.depth ?? 0 },
@@ -47,7 +47,7 @@ vi.mock("tone", () => {
       };
       return inst;
     }),
-    AutoPanner: vi.fn().mockImplementation((opts: any) => {
+    AutoPanner: vi.fn().mockImplementation((opts: { frequency?: number; depth?: number }) => {
       const inst = {
         frequency: { value: opts?.frequency ?? 2 },
         depth: { value: opts?.depth ?? 0 },

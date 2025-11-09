@@ -112,7 +112,7 @@ function ModulationMatrixGrid({
 
   const getRouteLabel = (route: ModulationRoute): string => {
     const destInfo = DESTINATIONS.find((d) => d.value === route.destination);
-    const destLabel = destInfo?.label || "None";
+    const destLabel = destInfo?.label ?? "None";
     return `LFO ${route.sourceIndex + 1} → ${destLabel}`;
   };
 

@@ -568,7 +568,7 @@ function ModulationMatrix({
               const amountAroundCenter = max - center;
               const continuous =
                 mode === "center" ? center + sample * amountAroundCenter : min + unipolar * span;
-              let val = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
+              const val = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
               node.bits.value = val;
               const now =
                 typeof performance !== "undefined"
@@ -608,7 +608,7 @@ function ModulationMatrix({
               const amountAroundCenter = max - center;
               const continuous =
                 mode === "center" ? center + sample * amountAroundCenter : min + unipolar * span;
-              let rounded = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
+              const rounded = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
               node.order = rounded;
               const now =
                 typeof performance !== "undefined"

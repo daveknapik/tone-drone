@@ -1,3 +1,4 @@
+/* eslint-disable no-undef, no-unused-vars */
 // Quick test script to verify anchor functionality
 // Run with: node test-anchor.js
 
