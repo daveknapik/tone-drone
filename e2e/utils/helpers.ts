@@ -14,6 +14,19 @@ export async function clearLocalStorage(page: Page): Promise<void> {
 export async function startAudioContext(page: Page): Promise<void> {
   // Click anywhere on the page to initialize audio context
   await page.click("body");
+
+  // Expand Oscillators section if collapsed (needed after localStorage clear)
+  // The Oscillators section contains the play/pause button
+  const oscillatorsHeading = page.locator("text=Oscillators").first();
+  const isCollapsed = await oscillatorsHeading.evaluate((el) => {
+    const parent = el.closest("button");
+    return parent ? parent.getAttribute("aria-expanded") === "false" : false;
+  });
+
+  if (isCollapsed) {
+    await oscillatorsHeading.click();
+  }
+
   // Wait for app to be ready by checking that transport controls are visible
   await expect(
     page.getByRole("button", { name: /^(play|pause)$/i })

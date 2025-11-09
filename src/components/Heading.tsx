@@ -12,13 +12,15 @@ function Heading({
   toggleExpanded,
 }: React.PropsWithChildren<HeadingProps>) {
   return (
-    <div
-      className="flex items-center align-items-center my-5"
+    <button
+      className="flex items-center align-items-center my-5 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0"
       onClick={toggleExpanded}
+      aria-expanded={expanded}
+      type="button"
     >
       {expanded ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
       {children}
-    </div>
+    </button>
   );
 }
 
