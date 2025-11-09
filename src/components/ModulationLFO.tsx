@@ -41,26 +41,16 @@ function ModulationLFO({
   // Direct immediate updates - exactly like modulation-reference.html
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
     if (!lfo) return;
-    const now = Tone.now();
-    const hasTarget = typeof (lfo.frequency as any).setTargetAtTime === "function";
-    if (hasTarget) {
-      (lfo.frequency as any).cancelScheduledValues?.(now);
-      (lfo.frequency as any).setTargetAtTime?.(freq, now, 0.08);
-    } else {
-      (lfo.frequency as any).value = freq;
-    }
+    // Use typed Param and a short ramp for smooth, click-free updates
+    const freqParam = lfo.frequency as unknown as Tone.Param<"frequency">;
+    freqParam.rampTo(freq, 0.08);
   }, [lfo]);
 
   const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
     if (!lfo) return;
-    const now = Tone.now();
-    const hasTarget = typeof (lfo.amplitude as any).setTargetAtTime === "function";
-    if (hasTarget) {
-      (lfo.amplitude as any).cancelScheduledValues?.(now);
-      (lfo.amplitude as any).setTargetAtTime?.(amp, now, 0.08);
-    } else {
-      (lfo.amplitude as any).value = amp;
-    }
+    // Use typed Param and a short ramp for smooth, click-free updates
+    const ampParam = lfo.amplitude as unknown as Tone.Param<"normalRange">;
+    ampParam.rampTo(amp, 0.08);
   }, [lfo]);
 
   // Debounced state persistence callbacks (for serialization only)
