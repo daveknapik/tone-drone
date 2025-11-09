@@ -50,14 +50,31 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
   // Update Params - direct .value assignment works for Tone.Signal params
   // This ensures Anchor To Current can read the correct values
   useEffect(() => {
-    filter.current.frequency.value = frequency;
-    filter.current.Q.value = Q;
-    filter.current.type = type;
+    const node = filter.current;
+    if (!node) return;
+    // Frequency (Tone.Param-like) if present
+    const freqParam = (node as unknown as { frequency?: { value: number } }).frequency;
+    if (freqParam) {
+      freqParam.value = frequency;
+    }
+    // Q (Tone.Param-like) if present
+    const qParam = (node as unknown as { Q?: { value: number } }).Q;
+    if (qParam) {
+      qParam.value = Q;
+    }
+    // Type (property) if present
+    if ("type" in node) {
+      (node as unknown as { type: BiquadFilterType }).type = type;
+    }
   }, [filter, frequency, Q, type]);
 
   // rolloff can't go via the set method or it makes the filter stutter and glitch, but this works
   useEffect(() => {
-    filter.current.rolloff = rolloff;
+    const node = filter.current;
+    if (!node) return;
+    if ("rolloff" in node) {
+      (node as unknown as { rolloff: Tone.FilterRollOff }).rolloff = rolloff;
+    }
   }, [filter, rolloff]);
 
   return (
