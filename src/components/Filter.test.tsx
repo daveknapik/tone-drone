@@ -13,6 +13,9 @@ vi.mock("tone", () => {
     Filter: vi.fn().mockImplementation(() => ({
       set: mockSet,
       rolloff: -12,
+      frequency: { value: 300 },
+      Q: { value: 1 },
+      type: "highpass",
       dispose: vi.fn(),
     })),
   };
