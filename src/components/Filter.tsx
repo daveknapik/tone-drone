@@ -52,29 +52,19 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
   useEffect(() => {
     const node = filter.current;
     if (!node) return;
-    // Frequency (Tone.Param-like) if present
-    const freqParam = (node as unknown as { frequency?: { value: number } }).frequency;
-    if (freqParam) {
-      freqParam.value = frequency;
-    }
-    // Q (Tone.Param-like) if present
-    const qParam = (node as unknown as { Q?: { value: number } }).Q;
-    if (qParam) {
-      qParam.value = Q;
-    }
-    // Type (property) if present
-    if ("type" in node) {
-      (node as unknown as { type: BiquadFilterType }).type = type;
-    }
+
+    // Using augmented Tone.js types from src/types/tone.d.ts
+    node.frequency.value = frequency;
+    node.Q.value = Q;
+    node.type = type;
   }, [filter, frequency, Q, type]);
 
   // rolloff can't go via the set method or it makes the filter stutter and glitch, but this works
   useEffect(() => {
     const node = filter.current;
     if (!node) return;
-    if ("rolloff" in node) {
-      (node as unknown as { rolloff: Tone.FilterRollOff }).rolloff = rolloff;
-    }
+
+    node.rolloff = rolloff;
   }, [filter, rolloff]);
 
   return (

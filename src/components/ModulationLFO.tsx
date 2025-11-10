@@ -42,15 +42,15 @@ function ModulationLFO({
   const updateLFOFrequencyImmediate = useCallback((freq: number) => {
     if (!lfo) return;
     // Use typed Param and a short ramp for smooth, click-free updates
-    const freqParam = lfo.frequency as unknown as Tone.Param<"frequency">;
-    freqParam.rampTo(freq, 0.08);
+    // Using augmented Tone.js types from src/types/tone.d.ts
+    lfo.frequency.rampTo(freq, 0.08);
   }, [lfo]);
 
   const updateLFOAmplitudeImmediate = useCallback((amp: number) => {
     if (!lfo) return;
     // Use typed Param and a short ramp for smooth, click-free updates
-    const ampParam = lfo.amplitude as unknown as Tone.Param<"normalRange">;
-    ampParam.rampTo(amp, 0.08);
+    // Using augmented Tone.js types from src/types/tone.d.ts
+    lfo.amplitude.rampTo(amp, 0.08);
   }, [lfo]);
 
   // Debounced state persistence callbacks (for serialization only)
@@ -87,11 +87,9 @@ function ModulationLFO({
           handleChange={(e) => {
             const newFreq = parseFloat(e.target.value);
             // Reset phase to avoid discontinuity when changing rate
+            // Using augmented Tone.js types from src/types/tone.d.ts
             if (lfo) {
-              const withPhase = lfo as unknown as { phase?: number };
-              if (typeof withPhase.phase === "number") {
-                withPhase.phase = 0;
-              }
+              lfo.phase = 0;
             }
             // Update Tone.js immediately (like modulation-reference.html)
             updateLFOFrequencyImmediate(newFreq);

@@ -416,6 +416,139 @@ Both randomization features integrate seamlessly with the preset system:
 - Muted sequence state is saved in presets (backwards compatible - missing mutedSequences defaults to all unmuted)
 - Pattern density is UI-only and intentionally NOT saved (users set it when they randomize)
 
+## Modulation Matrix
+
+The modulation matrix provides 4 LFOs that can modulate various synthesis parameters in real-time, creating evolving, dynamic sounds.
+
+### Architecture Overview
+
+The modulation system uses a **hybrid approach** with three different modulation techniques depending on the destination parameter:
+
+1. **Audio-rate modulation** (via Tone.Scale nodes) - Used for oscillator frequency/detune, delay time/feedback
+2. **Pre-inserted effects** (Tremolo/AutoPanner) - Used for volume and pan to avoid clicks
+3. **Control-rate modulation** (RAF polling at ~60Hz) - Used for filter frequency/Q, BitCrusher bits, Chebyshev order
+
+This hybrid architecture was developed through extensive testing to solve specific technical challenges with each parameter type.
+
+### Key Components
+
+**Location:** `src/components/ModulationMatrix.tsx` (main container)
+
+**Related files:**
+- `src/components/ModulationLFO.tsx` - Individual LFO controls (rate, amplitude, waveform, polarity mode)
+- `src/components/ModulationMatrixGrid.tsx` - Routing grid UI component
+- `src/hooks/useModulationLFOs.ts` - LFO creation and polarity mode switching
+- `src/utils/modulationConnectionManager.ts` - Audio graph connection management
+- `src/utils/modulationRange.ts` - Parameter coercion and range computation helpers
+- `src/types/tone.d.ts` - TypeScript declaration merging for Tone.js types
+
+### Modulation Destinations
+
+**18 Oscillator Destinations:**
+- 6 oscillators × 3 parameters each (frequency, volume, pan)
+
+**8 Effect Destinations:**
+- Filter: frequency, Q
+- Delay: time, feedback
+- Microlooper: time, feedback
+- BitCrusher: bits
+- Chebyshev: order
+
+**Total: 26 modulation destinations**
+
+### LFO Features
+
+Each of the 4 LFOs has:
+- **Rate:** 0.01-20 Hz
+- **Amplitude:** 0-1 (modulation depth at LFO level)
+- **Waveform:** Sine, Triangle, Square, Sawtooth
+- **Polarity Mode:** Bipolar (-1 to +1) or Unipolar (0 to +1)
+
+**Polarity Modes:**
+- **Bipolar** (-1 to +1): Best for frequency (vibrato), pan. Oscillates equally above/below center value.
+- **Unipolar** (0 to +1): Best for volume (tremolo), filter cutoff. Starts from zero, prevents negative values.
+
+Polarity switching uses smooth fade transitions to prevent audio clicks.
+
+### Per-Route Range Controls
+
+Each modulation route has configurable range settings:
+
+**Two Range Modes:**
+1. **Center ± Amount**: Defines a center point and deviation amount (e.g., center=500Hz, amount=200Hz → modulates 300-700Hz)
+2. **Min...Max**: Explicit minimum and maximum bounds (e.g., min=100Hz, max=1000Hz)
+
+**"Anchor To Current" feature**: Quickly set the range center/min/max to the current parameter value with one click.
+
+### Technical Implementation Notes
+
+#### Why Three Different Modulation Approaches?
+
+**Audio-rate (via Tone.Scale):**
+- Sample-accurate, smooth modulation
+- Used for: oscillator detune, delay parameters
+- Works because these are proper AudioParams that support audio-rate signals
+
+**Pre-inserted Effects (Tremolo/AutoPanner):**
+- Avoids clicks when changing LFO parameters during active modulation
+- Used for: volume and pan
+- Tremolo/AutoPanner are inserted into the signal chain at oscillator creation time
+- LFO parameters (rate, type, amplitude) are mapped to the effect, not connected via audio graph
+
+**Control-rate (RAF at ~60Hz):**
+- For parameters that don't support audio-rate modulation or cause instability
+- Used for: filter frequency/Q (caused stuck values with audio-rate), BitCrusher bits, Chebyshev order (not AudioParams)
+- Implemented via `requestAnimationFrame` polling
+- Safe but lower resolution than audio-rate
+
+#### Connection Management
+
+`ModulationConnectionManager` class handles all audio graph connections:
+- Reconciles connections (only disconnects/reconnects what changed)
+- Tracks Tone.Scale nodes for dynamic range updates
+- Provides type-specific connection methods
+- Safe cleanup on route removal
+
+#### Parameter Coercion
+
+`modulationRange.ts` provides helpers for reading Tone.js parameter values:
+- `coerceParamToNumber()` - Handles Tone.Param objects, Tone.Time, Tone.Frequency, plain numbers
+- `defaultsForDestination()` - Provides sensible default ranges for each destination type
+- `computeRouteRange()` - Calculates min/max from route settings, with optional depth scaling
+
+#### Type Safety
+
+`src/types/tone.d.ts` uses TypeScript declaration merging to augment Tone.js types:
+- Eliminates need for type casts throughout codebase
+- Provides proper types for Tone.Filter, Tone.LFO, Tone.FeedbackDelay, etc.
+- Defines `ToneParam` interface with `value`, `cancelScheduledValues()`, `rampTo()`, etc.
+
+### Preset Integration
+
+Modulation matrix state is fully integrated with the preset system:
+- LFO parameters (rate, type, amplitude, polarity mode)
+- All modulation routes (source, destination, depth, range settings)
+- Saved in `modulationMatrix` field of preset state
+
+### Critical Lessons Learned
+
+**Volume Modulation Architecture:**
+- Web Audio parameters use **additive** modulation (signals ADD to parameter values, not multiply)
+- Direct LFO → Tone.Channel.volume causes baseline shift + distortion
+- Solution: Use Tone.Gain nodes with unity signal (1.0) + LFO modulation
+- Limitation: Modulates in linear gain space, not dB space (asymmetric perceived loudness)
+
+**Filter Modulation:**
+- Audio-rate modulation of filter frequency/Q caused stuck/glitchy values
+- Solution: Moved to control-rate updates via RAF
+- Must restore parameters and cancel scheduled values on disconnect
+- "Nudge" filter type/rolloff to refresh internal biquad state
+
+**Polarity Mode Switching:**
+- Create unipolar scaler (Tone.Scale -1→1 to 0→1) at LFO initialization
+- Route signal through scaler when in unipolar mode, bypass when bipolar
+- Use smooth fade-out/in transitions to prevent clicks during mode changes
+
 ## Preset System
 
 The app includes a comprehensive preset management system:
@@ -436,3 +569,4 @@ Preset state includes:
 - Effects bus send level
 - PolySynth settings (2 polysynths with independent parameters)
 - Min/max frequency range
+- Modulation matrix state (LFO parameters and routing configuration)

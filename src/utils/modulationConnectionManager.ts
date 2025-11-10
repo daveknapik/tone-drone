@@ -583,7 +583,11 @@ export class ModulationConnectionManager {
     destination: ModulationDestination,
     autoPanner: Tone.AutoPanner
   ): void {
-    autoPanner.frequency.value = lfo.frequency.value;
+    // Coerce LFO frequency to number in case it's a Frequency object
+    const lfoFreqValue = typeof lfo.frequency.value === 'number'
+      ? lfo.frequency.value
+      : Number(lfo.frequency.value);
+    autoPanner.frequency.value = lfoFreqValue;
     autoPanner.depth.value = initialDepth;
     // Map waveform type if available on AutoPanner in this Tone version
     const ap = autoPanner as unknown as { type?: string };
