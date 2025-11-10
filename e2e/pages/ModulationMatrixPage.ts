@@ -49,7 +49,7 @@ export class ModulationMatrixPage extends BasePage {
 
   getRouteHeader(routeIndex: number): Locator {
     // Route headers are clickable divs with the route label
-    return this.getRouteContainer(routeIndex);
+    return this.page.getByTestId(`route-header-${routeIndex}`);
   }
 
   getRemoveRouteButton(routeIndex: number): Locator {
@@ -209,7 +209,8 @@ export class ModulationMatrixPage extends BasePage {
 
     if (isExpanded) {
       await header.click();
-      await expect(sourceSelector).not.toBeVisible();
+      // When collapsed, React removes the element from DOM entirely, so check count instead of visibility
+      await expect(sourceSelector).toHaveCount(0);
     }
   }
 

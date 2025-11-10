@@ -160,6 +160,7 @@ function ModulationMatrixGrid({
               onClick={() =>
                 setExpandedRoute(expandedRoute === index ? null : index)
               }
+              data-testid={`route-header-${index}`}
             >
               <span className="font-medium">{getRouteLabel(route)}</span>
               <div className="flex items-center gap-2">
