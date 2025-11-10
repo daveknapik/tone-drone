@@ -72,7 +72,7 @@ function ModulationLFO({
   }, [lfo, type]);
 
   return (
-    <div className="border-2 rounded border-pink-500 dark:border-sky-300 p-4">
+    <div className="border-2 rounded border-pink-500 dark:border-sky-300 p-4" data-testid={`lfo-${lfoIndex}`}>
       <h4 className="text-center font-semibold mb-3 text-pink-500 dark:text-sky-300">
         LFO {lfoIndex + 1}
       </h4>
