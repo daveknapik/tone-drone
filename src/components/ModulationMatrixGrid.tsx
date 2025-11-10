@@ -152,6 +152,7 @@ function ModulationMatrixGrid({
           <div
             key={index}
             className="border-2 rounded border-pink-500 dark:border-sky-300 overflow-hidden"
+            data-testid={`modulation-route-${index}`}
           >
             {/* Route Header */}
             <div

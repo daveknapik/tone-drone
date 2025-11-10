@@ -27,20 +27,14 @@ export class ModulationMatrixPage extends BasePage {
     // The OptionsSelector uses radio inputs with name pattern option-{id}
     // On small screens it's a select, on large screens it's radio buttons
     // We'll return the first radio input for the sine wave option as our locator
-    const lfoContainer = this.page
-      .locator(".border-2")
-      .filter({ hasText: `LFO ${lfoIndex + 1}` })
-      .first();
+    const lfoContainer = this.page.getByTestId(`lfo-${lfoIndex}`);
     // Try to find the select first (mobile), then radio group (desktop)
     return lfoContainer.locator('select, input[type="radio"][value="sine"]').first();
   }
 
   getLfoPolarityButton(lfoIndex: number): Locator {
     // Polarity button is within the LFO container
-    const lfoContainer = this.page
-      .locator(".border-2")
-      .filter({ hasText: `LFO ${lfoIndex + 1}` })
-      .first();
+    const lfoContainer = this.page.getByTestId(`lfo-${lfoIndex}`);
     return lfoContainer.getByRole("button", { name: /bipolar|unipolar/i });
   }
 
@@ -49,12 +43,13 @@ export class ModulationMatrixPage extends BasePage {
     return this.page.getByRole("button", { name: /add route/i });
   }
 
+  getRouteContainer(routeIndex: number): Locator {
+    return this.page.getByTestId(`modulation-route-${routeIndex}`);
+  }
+
   getRouteHeader(routeIndex: number): Locator {
     // Route headers are clickable divs with the route label
-    return this.page
-      .locator(".border-2.rounded")
-      .filter({ hasText: /LFO \d+ →/ })
-      .nth(routeIndex);
+    return this.getRouteContainer(routeIndex);
   }
 
   getRemoveRouteButton(routeIndex: number): Locator {
@@ -66,18 +61,14 @@ export class ModulationMatrixPage extends BasePage {
 
   getSourceSelector(routeIndex: number): Locator {
     // Within expanded route details
-    return this.page
-      .locator(".border-2.rounded")
-      .nth(routeIndex)
+    return this.getRouteContainer(routeIndex)
       .getByRole("combobox")
       .first();
   }
 
   getDestinationSelector(routeIndex: number): Locator {
     // Within expanded route details - second combobox
-    return this.page
-      .locator(".border-2.rounded")
-      .nth(routeIndex)
+    return this.getRouteContainer(routeIndex)
       .getByRole("combobox")
       .nth(1);
   }
@@ -88,16 +79,14 @@ export class ModulationMatrixPage extends BasePage {
 
   getRangeModeSelector(routeIndex: number): Locator {
     // Third combobox in expanded route
-    return this.page
-      .locator(".border-2.rounded")
-      .nth(routeIndex)
+    return this.getRouteContainer(routeIndex)
       .getByRole("combobox")
       .nth(2);
   }
 
   getCenterInput(routeIndex: number): Locator {
     // Input labeled "Center" within route details
-    const routeContainer = this.page.locator(".border-2.rounded").nth(routeIndex);
+    const routeContainer = this.getRouteContainer(routeIndex);
     return routeContainer.getByRole("spinbutton").filter({ has: this.page.locator('label:has-text("Center")') }).or(
       routeContainer.locator('input[type="number"]').nth(0)
     );
@@ -105,24 +94,24 @@ export class ModulationMatrixPage extends BasePage {
 
   getRangeAmountInput(routeIndex: number): Locator {
     // Input labeled "Amount" within route details (not the depth slider)
-    const routeContainer = this.page.locator(".border-2.rounded").nth(routeIndex);
+    const routeContainer = this.getRouteContainer(routeIndex);
     return routeContainer.locator('input[type="number"]').nth(1);
   }
 
   getMinInput(routeIndex: number): Locator {
     // Input labeled "Min" within route details
-    const routeContainer = this.page.locator(".border-2.rounded").nth(routeIndex);
+    const routeContainer = this.getRouteContainer(routeIndex);
     return routeContainer.locator('input[type="number"]').nth(0);
   }
 
   getMaxInput(routeIndex: number): Locator {
     // Input labeled "Max" within route details
-    const routeContainer = this.page.locator(".border-2.rounded").nth(routeIndex);
+    const routeContainer = this.getRouteContainer(routeIndex);
     return routeContainer.locator('input[type="number"]').nth(1);
   }
 
   getAnchorToCurrentButton(routeIndex: number): Locator {
-    const routeContainer = this.page.locator(".border-2.rounded").nth(routeIndex);
+    const routeContainer = this.getRouteContainer(routeIndex);
     return routeContainer.getByRole("button", { name: /anchor to current/i });
   }
 
@@ -162,10 +151,7 @@ export class ModulationMatrixPage extends BasePage {
   }
 
   async setLfoWaveform(lfoIndex: number, waveform: string): Promise<void> {
-    const lfoContainer = this.page
-      .locator(".border-2")
-      .filter({ hasText: `LFO ${lfoIndex + 1}` })
-      .first();
+    const lfoContainer = this.page.getByTestId(`lfo-${lfoIndex}`);
 
     // Try select first (mobile view)
     const selectElement = lfoContainer.locator('select');
@@ -311,7 +297,8 @@ export class ModulationMatrixPage extends BasePage {
       const emptyMessage = this.page.getByText(/no modulation routes/i);
       await expect(emptyMessage).toBeVisible();
     } else {
-      const routes = this.page.locator(".border-2.rounded").filter({ hasText: /LFO \d+ →/ });
+      // Count routes by test ID prefix
+      const routes = this.page.locator('[data-testid^="modulation-route-"]');
       await expect(routes).toHaveCount(count);
     }
   }
