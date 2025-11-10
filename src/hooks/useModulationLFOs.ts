@@ -90,8 +90,8 @@ export function useModulationLFOs() {
     // Smooth fade-out the output
     state.outputSignal.linearRampToValueAtTime(0, now + 0.05);
 
-    // After fade-out, reconfigure routing
-    setTimeout(() => {
+    // After fade-out at audio time, reconfigure routing (audio-time scheduled for determinism)
+    Tone.Draw.schedule(() => {
       // Disconnect all
       state.lfo.disconnect();
       state.unipolarScaler.disconnect();
@@ -109,7 +109,7 @@ export function useModulationLFOs() {
       state.polarityMode = mode;
 
       // Fade back in (signal will resume automatically)
-    }, 60); // Slightly longer than fade-out time
+    }, now + 0.06); // Slightly longer than fade-out time
   }, []);
 
   /**

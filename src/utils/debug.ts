@@ -1,3 +1,9 @@
+export const DEBUG_AUDIO =
+  typeof window !== "undefined" &&
+  typeof (window as unknown as { __DEBUG_AUDIO__?: boolean }).__DEBUG_AUDIO__ === "boolean"
+    ? (window as unknown as { __DEBUG_AUDIO__?: boolean }).__DEBUG_AUDIO__!
+    : false;
+
 /**
  * Centralized debug flag for audio/modulation subsystems
  *
