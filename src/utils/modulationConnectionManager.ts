@@ -3,9 +3,7 @@ import {
   ModulationDestination,
   LFOPolarityMode,
 } from "../types/ModulationMatrixParams";
-
-// Toggle for development logging in this module
-const DEBUG_CONNECTIONS = false;
+import { DEBUG_AUDIO } from "./debug";
 
 /**
  * Tracks a single modulation connection including all intermediate nodes
@@ -490,7 +488,7 @@ export class ModulationConnectionManager {
   /** Check if a connection exists */
   hasConnection(connectionId: string): boolean {
     const exists = this.connections.has(connectionId);
-    if (DEBUG_CONNECTIONS) {
+    if (DEBUG_AUDIO) {
       console.log(
         `[ConnectionManager] hasConnection(${connectionId}): ${exists}, total connections: ${this.connections.size}, all IDs: [${Array.from(this.connections.keys()).join(", ")}]`
       );
@@ -512,14 +510,14 @@ export class ModulationConnectionManager {
   updateScaleRange(connectionId: string, min: number, max: number): void {
     const scale = this.scaleNodes.get(connectionId);
     if (!scale) {
-      if (DEBUG_CONNECTIONS) {
+      if (DEBUG_AUDIO) {
         console.warn(
           `[ConnectionManager] No scale node found for ${connectionId}`
         );
       }
       return;
     }
-    if (DEBUG_CONNECTIONS) {
+    if (DEBUG_AUDIO) {
       const beforeMin = (scale as unknown as { min: number }).min;
       const beforeMax = (scale as unknown as { max: number }).max;
       console.log(
@@ -529,7 +527,7 @@ export class ModulationConnectionManager {
     // Tone.Scale exposes min/max as properties in v15
     (scale as unknown as { min: number }).min = min;
     (scale as unknown as { max: number }).max = max;
-    if (DEBUG_CONNECTIONS) {
+    if (DEBUG_AUDIO) {
       const afterMin = (scale as unknown as { min: number }).min;
       const afterMax = (scale as unknown as { max: number }).max;
       console.log(
@@ -553,9 +551,12 @@ export class ModulationConnectionManager {
     // Apply perceptual depth mapping: small floor + scale up
     const mapped = Math.max(0, Math.min(1, 0.05 + initialDepth * 1.25));
     tremolo.depth.value = mapped;
-    // Oscillator type is a string union in Tone; cast through string to satisfy TS
-    // Tremolo.type expects ToneOscillatorType; cast through unknown to satisfy TS
-    tremolo.type = lfo.type as unknown as Tone.ToneOscillatorType;
+    // Map waveform type if available on Tremolo in this Tone version
+    const tr = tremolo as unknown as { type?: string };
+    const lt = lfo as unknown as { type?: string };
+    if (tr.type !== undefined && lt.type !== undefined) {
+      tr.type = lt.type;
+    }
     tremolo.spread = 0;
 
     const cleanup = () => {

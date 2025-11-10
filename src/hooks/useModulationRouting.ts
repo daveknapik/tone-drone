@@ -6,9 +6,7 @@ import { FilterHandle } from "../types/FilterParams";
 import { DelayHandle } from "../types/DelayParams";
 import { ModulationConnectionManager } from "../utils/modulationConnectionManager";
 import { computeRouteRange, defaultsForDestination } from "../utils/modulationRange";
-
-// Debug flag for development logging
-const DEBUG_MODULATION = false;
+import { DEBUG_AUDIO } from "../utils/debug";
 
 interface ControlRateRoute {
   lfoIndex: number;
@@ -452,7 +450,7 @@ export function useModulationRouting({
               mode === "center" ? center + sample * amountAroundCenter : min + unipolar * span;
             const val = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
             (cr.node as Tone.BitCrusher).bits.value = val;
-            if (DEBUG_MODULATION) {
+            if (DEBUG_AUDIO) {
               const now =
                 typeof performance !== "undefined"
                   ? performance.now()
@@ -470,7 +468,7 @@ export function useModulationRouting({
               mode === "center" ? center + sample * amountAroundCenter : min + unipolar * span;
             const rounded = Math.round(Math.max(def.min, Math.min(def.max, continuous)));
             (cr.node as Tone.Chebyshev).order = rounded;
-            if (DEBUG_MODULATION) {
+            if (DEBUG_AUDIO) {
               const now =
                 typeof performance !== "undefined"
                   ? performance.now()
