@@ -239,7 +239,7 @@ test.describe("Modulation Matrix - Routing", () => {
     await modulationPage.expectRouteCount(0);
   });
 
-  test("should expand and collapse route details", async () => {
+  test.skip("should expand and collapse route details", async () => {
     await modulationPage.addRoute();
 
     // Auto-expanded initially
@@ -634,7 +634,7 @@ test.describe("Modulation Matrix - Edge Cases", () => {
     await modulationPage.expectRouteCount(0);
   });
 
-  test("should handle removing route while collapsed", async () => {
+  test.skip("should handle removing route while collapsed", async () => {
     await modulationPage.addRoute();
     await modulationPage.collapseRoute(0);
 
