@@ -2,9 +2,11 @@ import * as Tone from "tone";
 import { useRef, useEffect, useState } from "react";
 
 export function useReverb() {
+  // Initialize with minimal decay (0.1s) for fast IR generation during page load.
+  // The Reverb component will set actual values (decay: 2.5) shortly after.
   const reverb = useRef<Tone.Reverb>(
     new Tone.Reverb({
-      decay: 2.5,
+      decay: 0.1,
       preDelay: 0.01,
       wet: 0,
     })
