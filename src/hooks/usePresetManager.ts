@@ -7,6 +7,7 @@ import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
+import type { ReverbHandle } from "../types/ReverbParams";
 import type { EffectsBusSendHandle } from "../components/EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
 import type { ModulationMatrixHandle } from "../types/ModulationMatrixParams";
@@ -36,6 +37,7 @@ export interface PresetComponentRefs {
   microlooper: React.RefObject<DelayHandle | null>;
   afterFilter: React.RefObject<FilterHandle | null>;
   delay: React.RefObject<DelayHandle | null>;
+  reverb: React.RefObject<ReverbHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControl: React.RefObject<BpmControlHandle | null>;
   modulationMatrix: React.RefObject<ModulationMatrixHandle | null>;
@@ -104,6 +106,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
     const microlooperParams = refs.microlooper.current?.getParams();
     const afterFilterParams = refs.afterFilter.current?.getParams();
     const delayParams = refs.delay.current?.getParams();
+    const reverbParams = refs.reverb.current?.getParams();
     const effectsBusSend = refs.effectsBusSendRef.current?.value ?? 0;
     const bpm = refs.bpmControl.current?.getValue() ?? DEFAULT_BPM;
     const modulationMatrixState =
@@ -118,7 +121,8 @@ export function usePresetManager(refs: PresetComponentRefs) {
       !chebyshevParams ||
       !microlooperParams ||
       !afterFilterParams ||
-      !delayParams
+      !delayParams ||
+      !reverbParams
     ) {
       throw new Error(
         "Cannot capture state: some component refs are not available"
@@ -135,6 +139,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
         microlooper: microlooperParams,
         afterFilter: afterFilterParams,
         delay: delayParams,
+        reverb: reverbParams,
       },
       effectsBusSend,
       modulationMatrix: modulationMatrixState,
@@ -162,6 +167,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
       refs.microlooper.current?.setParams(state.effects.microlooper);
       refs.afterFilter.current?.setParams(state.effects.afterFilter);
       refs.delay.current?.setParams(state.effects.delay);
+      refs.reverb.current?.setParams(state.effects.reverb);
 
       // Apply effects bus send
       if (refs.effectsBusSendRef.current) {

@@ -121,6 +121,11 @@ describe("presetStorage", () => {
         feedback: 0.5,
         wet: 0.5,
       },
+      reverb: {
+        decay: 2.5,
+        preDelay: 0.01,
+        wet: 0,
+      },
     },
     effectsBusSend: 0.5,
     bpm: 120,

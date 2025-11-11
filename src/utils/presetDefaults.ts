@@ -3,6 +3,7 @@ import type { BitCrusherParams } from "../types/BitCrusherParams";
 import type { ChebyshevParams } from "../types/ChebyshevParams";
 import type { DelayParams } from "../types/DelayParams";
 import type { FilterParams } from "../types/FilterParams";
+import type { ReverbParams } from "../types/ReverbParams";
 import type {
   PolySynthParams,
   PolySynthsState,
@@ -138,6 +139,12 @@ export const DEFAULT_DELAY_PARAMS: DelayParams = {
   wet: 0.5,
 };
 
+export const DEFAULT_REVERB_PARAMS: ReverbParams = {
+  decay: 2.5,
+  preDelay: 0.01,
+  wet: 0,
+};
+
 export const DEFAULT_EFFECTS_BUS_SEND = -15;
 
 // ============================================================================
@@ -174,6 +181,7 @@ export const DEFAULT_PRESET_STATE: PresetState = {
     microlooper: DEFAULT_MICROLOOPER_PARAMS,
     afterFilter: DEFAULT_AFTER_FILTER_PARAMS,
     delay: DEFAULT_DELAY_PARAMS,
+    reverb: DEFAULT_REVERB_PARAMS,
   },
   effectsBusSend: DEFAULT_EFFECTS_BUS_SEND,
   modulationMatrix: DEFAULT_MODULATION_MATRIX_STATE,

@@ -85,7 +85,8 @@ export function useModulationRouting({
         dest === "delay-time" ||
         dest === "delay-feedback" ||
         dest === "micro-time" ||
-        dest === "micro-feedback";
+        dest === "micro-feedback" ||
+        dest === "reverb-wet";
       if (!isAudioScale) return;
       const connectionId = `${route.sourceIndex}-${route.destination}`;
       const hasConn = connectionManager.hasConnection(connectionId);
@@ -204,6 +205,14 @@ export function useModulationRouting({
             effects.micro.current.feedback.value = p.feedback;
             effects.micro.current.feedback.cancelScheduledValues(0);
             effects.micro.current.delayTime.cancelScheduledValues(0);
+          } else if (
+            dest === "reverb-wet" &&
+            effects?.reverb?.current &&
+            effectRefs?.reverbRef?.current
+          ) {
+            const p = effectRefs.reverbRef.current.getParams();
+            effects.reverb.current.wet.value = p.wet;
+            effects.reverb.current.wet.cancelScheduledValues(0);
           }
         } catch {
           // noop: defensive only
@@ -248,7 +257,8 @@ export function useModulationRouting({
         route.destination === "delay-time" ||
         route.destination === "delay-feedback" ||
         route.destination === "micro-time" ||
-        route.destination === "micro-feedback";
+        route.destination === "micro-feedback" ||
+        route.destination === "reverb-wet";
 
       // Set depth multiplier value: 1 for audio-rate Scale destinations, route.amount for others
       depthMultiplier.factor.value = isAudioScaleDest ? 1 : route.amount;
@@ -394,6 +404,16 @@ export function useModulationRouting({
             depthMultiplier,
             route.destination,
             effects.delay.current
+          );
+          return;
+        }
+        if (route.destination === "reverb-wet" && effects?.reverb?.current) {
+          connectionManager.connectReverbWet(
+            connectionId,
+            lfoSignal as unknown as Tone.Signal,
+            depthMultiplier,
+            route.destination,
+            effects.reverb.current
           );
           return;
         }
