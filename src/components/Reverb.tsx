@@ -69,8 +69,9 @@ function Reverb({
     onParameterChange?.();
   };
 
-  // Wet is real-time safe
-  reverb.current.wet.value = wet;
+  // Only update wet via .set() to avoid conflicts with modulation
+  // (decay/preDelay handled separately due to async IR generation)
+  reverb.current.set({ wet });
 
   return (
     <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
