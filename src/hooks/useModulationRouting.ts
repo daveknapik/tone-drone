@@ -211,7 +211,12 @@ export function useModulationRouting({
             effectRefs?.reverbRef?.current
           ) {
             const p = effectRefs.reverbRef.current.getParams();
-            effects.reverb.current.wet.value = p.wet;
+            // Restore all parameters using .set() like filter does
+            effects.reverb.current.set({
+              decay: p.decay,
+              preDelay: p.preDelay,
+              wet: p.wet,
+            });
             effects.reverb.current.wet.cancelScheduledValues(0);
           }
         } catch {
