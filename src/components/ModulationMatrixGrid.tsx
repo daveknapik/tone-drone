@@ -56,6 +56,8 @@ const DESTINATIONS: DestinationInfo[] = [
   { value: "bitcrusher-bits", label: "BitCrusher Bits", category: "Effects" },
   // Chebyshev
   { value: "chebyshev-order", label: "Chebyshev Order", category: "Effects" },
+  // Reverb
+  { value: "reverb-wet", label: "Reverb Wet", category: "Effects" },
 ];
 
 function ModulationMatrixGrid({

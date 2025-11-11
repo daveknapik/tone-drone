@@ -3,6 +3,7 @@ import { BitCrusherParams } from "./BitCrusherParams";
 import { ChebyshevParams } from "./ChebyshevParams";
 import { DelayParams } from "./DelayParams";
 import { FilterParams } from "./FilterParams";
+import { ReverbParams } from "./ReverbParams";
 import { Sequence } from "./Sequence";
 import { PolySynthsState } from "./PolySynthParams";
 import { OscillatorParams } from "./OscillatorParams";
@@ -39,6 +40,7 @@ export interface PresetState {
     microlooper: DelayParams;
     afterFilter: FilterParams;
     delay: DelayParams;
+    reverb: ReverbParams;
   };
 
   // Effects bus send level

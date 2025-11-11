@@ -10,6 +10,7 @@ import Filter from "./Filter.tsx";
 import Oscillators from "./Oscillators.tsx";
 import PolySynths from "./Polysynths";
 import Recorder from "./Recorder.tsx";
+import Reverb from "./Reverb";
 import ModulationMatrix from "./ModulationMatrix";
 
 import { useAudioEffectsBus } from "../hooks/useAudioEffectsBus.ts";
@@ -18,6 +19,7 @@ import { useBitCrusher } from "../hooks/useBitCrusher";
 import { useChebyshev } from "../hooks/useChebyshev";
 import { useDelay } from "../hooks/useDelay";
 import { useFilter } from "../hooks/useFilter.ts";
+import { useReverb } from "../hooks/useReverb";
 
 import { useRecorder } from "../hooks/useRecorder.ts";
 
@@ -31,6 +33,7 @@ import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
+import type { ReverbHandle } from "../types/ReverbParams";
 import type { PolySynthsHandle } from "./Polysynths";
 import type { EffectsBusSendHandle } from "./EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
@@ -46,6 +49,7 @@ export interface DroneSynthHandle {
   microlooperRef: React.RefObject<DelayHandle | null>;
   afterFilterRef: React.RefObject<FilterHandle | null>;
   delayRef: React.RefObject<DelayHandle | null>;
+  reverbRef: React.RefObject<ReverbHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControlRef: React.RefObject<BpmControlHandle | null>;
   modulationMatrixRef: React.RefObject<ModulationMatrixHandle | null>;
@@ -65,6 +69,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const microlooper = useDelay();
   const afterFilter = useFilter();
   const delay = useDelay();
+  const { reverb } = useReverb();
 
   const compressor = new Tone.Compressor(-30, 3);
 
@@ -75,6 +80,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
     microlooper.current,
     afterFilter.current,
     delay.current,
+    reverb.current,
     compressor,
   ];
 
@@ -101,6 +107,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const microlooperRef = useRef<DelayHandle>(null);
   const afterFilterRef = useRef<FilterHandle>(null);
   const delayRef = useRef<DelayHandle>(null);
+  const reverbRef = useRef<ReverbHandle>(null);
   const effectsBusSendRef = useRef<EffectsBusSendHandle | null>(null);
   const bpmControlRef = useRef<BpmControlHandle | null>(null);
   const modulationMatrixRef = useRef<ModulationMatrixHandle | null>(null);
@@ -142,6 +149,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
     microlooperRef,
     afterFilterRef,
     delayRef,
+    reverbRef,
     effectsBusSendRef,
     bpmControlRef,
     modulationMatrixRef,
@@ -186,6 +194,11 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             ref={delayRef}
             onParameterChange={onParameterChange}
           />
+          <Reverb
+            reverb={reverb}
+            ref={reverbRef}
+            onParameterChange={onParameterChange}
+          />
           <EffectsBusSendControl
             bus={mainAudioEffectsBus}
             ref={effectsBusSendRef}
@@ -202,6 +215,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             micro: microlooper,
             bitCrusher: bitCrusher,
             chebyshev: chebyshev,
+            reverb: reverb,
           }}
           effectRefs={{
             filterRef: afterFilterRef,
@@ -209,6 +223,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             microRef: microlooperRef,
             bitCrusherRef: bitCrusherRef,
             chebyshevRef: chebyshevRef,
+            reverbRef: reverbRef,
           }}
         />
         <PolySynths
