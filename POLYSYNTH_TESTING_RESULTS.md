@@ -118,5 +118,5 @@ lfo.connect(depthMultiplier).connect(channel.pan);
 
 ## Files
 - **Test page**: `modulation-test.html` - Standalone testing environment
-- **Documentation**: See `MODULATION_*.md` files for detailed implementation notes
+- **Documentation**: See CLAUDE.md for modulation matrix architecture documentation
 
