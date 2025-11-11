@@ -25,9 +25,8 @@ import { FilterHandle } from "../types/FilterParams";
 import { DelayHandle } from "../types/DelayParams";
 import { BitCrusherHandle } from "../types/BitCrusherParams";
 import { ChebyshevHandle } from "../types/ChebyshevParams";
-import {
-  coerceParamToNumber,
-} from "../utils/modulationRange";
+import { ReverbHandle } from "../types/ReverbParams";
+import { coerceParamToNumber } from "../utils/modulationRange";
 
 const DEFAULT_LFOS: LFOParams[] = [
   { frequency: 0.5, type: "sine", amplitude: 1, polarityMode: "bipolar" },
@@ -48,6 +47,7 @@ interface ModulationMatrixProps {
     micro?: React.RefObject<Tone.FeedbackDelay>;
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
+    reverb?: React.RefObject<Tone.Reverb | null>;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;
@@ -55,6 +55,7 @@ interface ModulationMatrixProps {
     microRef?: React.RefObject<DelayHandle | null>;
     bitCrusherRef?: React.RefObject<BitCrusherHandle | null>;
     chebyshevRef?: React.RefObject<ChebyshevHandle | null>;
+    reverbRef?: React.RefObject<ReverbHandle | null>;
   };
 }
 
@@ -105,21 +106,18 @@ function ModulationMatrix({
   });
 
   // Modulation routing hook (handles all audio graph connections)
-  const {
-    depthMultipliersRef,
-    hasConnectedRef,
-    buildControlRateUpdaters,
-  } = useModulationRouting({
-    routes,
-    routeStructure,
-    signals,
-    lfos,
-    lfoParams,
-    oscillators,
-    effects,
-    effectRefs,
-    sampleLfo,
-  });
+  const { depthMultipliersRef, hasConnectedRef, buildControlRateUpdaters } =
+    useModulationRouting({
+      routes,
+      routeStructure,
+      signals,
+      lfos,
+      lfoParams,
+      oscillators,
+      effects,
+      effectRefs,
+      sampleLfo,
+    });
 
   // Modulation depth hook (handles real-time depth updates)
   const { updateDepth } = useModulationDepth({
@@ -142,7 +140,11 @@ function ModulationMatrix({
       state.lfos.forEach((params, i) => {
         if (lfos[i]) {
           lfos[i].frequency.value = params.frequency;
-          lfos[i].type = params.type as "sine" | "square" | "triangle" | "sawtooth";
+          lfos[i].type = params.type as
+            | "sine"
+            | "square"
+            | "triangle"
+            | "sawtooth";
           lfos[i].amplitude.value = params.amplitude;
           if (params.polarityMode) {
             setPolarityMode(i, params.polarityMode);
@@ -305,10 +307,7 @@ function ModulationMatrix({
             if (dest === "chebyshev-order") {
               const chebyshev = effects?.chebyshev?.current;
               if (!chebyshev) return;
-              const current = coerceParamToNumber(
-                chebyshev.order,
-                "normal"
-              );
+              const current = coerceParamToNumber(chebyshev.order, "normal");
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
                   ? { center: Math.max(1, Math.min(100, Math.round(current))) }
@@ -419,6 +418,26 @@ function ModulationMatrix({
                   : {
                       min: clamp(current - 0.1),
                       max: clamp(current + 0.1),
+                    };
+              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
+                i === routeIndex ? { ...rt, ...updated } : rt
+              );
+              setRoutes(newRoutes);
+              return;
+            }
+            if (dest === "reverb-wet" && effectRefs?.reverbRef?.current) {
+              const params = effectRefs.reverbRef.current.getParams();
+              const current = params.wet;
+              const clamp = (v: number) => Math.max(0, Math.min(1, v));
+              const updated: Partial<ModulationRoute> =
+                (route.rangeMode ?? "center") === "center"
+                  ? { center: clamp(current) }
+                  : {
+                      min: clamp(current * 0.8),
+                      max:
+                        clamp(current * 1.0 + 0.2) > 1
+                          ? 1
+                          : clamp(current * 1.2),
                     };
               const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
                 i === routeIndex ? { ...rt, ...updated } : rt
