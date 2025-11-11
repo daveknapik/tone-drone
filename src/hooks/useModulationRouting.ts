@@ -4,6 +4,7 @@ import { ModulationRoute, LFOParams } from "../types/ModulationMatrixParams";
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { FilterHandle } from "../types/FilterParams";
 import { DelayHandle } from "../types/DelayParams";
+import { ReverbHandle } from "../types/ReverbParams";
 import { ModulationConnectionManager } from "../utils/modulationConnectionManager";
 import { computeRouteRange, defaultsForDestination } from "../utils/modulationRange";
 import { DEBUG_AUDIO } from "../utils/debug";
@@ -14,10 +15,11 @@ interface ControlRateRoute {
     | "filter-frequency"
     | "filter-q"
     | "bitcrusher-bits"
-    | "chebyshev-order";
+    | "chebyshev-order"
+    | "reverb-wet";
   amount: number;
   route: ModulationRoute;
-  node: Tone.Filter | Tone.BitCrusher | Tone.Chebyshev;
+  node: Tone.Filter | Tone.BitCrusher | Tone.Chebyshev | Tone.Reverb;
 }
 
 interface UseModulationRoutingProps {
@@ -33,11 +35,13 @@ interface UseModulationRoutingProps {
     micro?: React.RefObject<Tone.FeedbackDelay>;
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
+    reverb?: React.RefObject<Tone.Reverb | null>;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;
     delayRef?: React.RefObject<DelayHandle | null>;
     microRef?: React.RefObject<DelayHandle | null>;
+    reverbRef?: React.RefObject<ReverbHandle | null>;
   };
   sampleLfo: (lfoIdx: number, type: string) => number;
 }
@@ -85,8 +89,7 @@ export function useModulationRouting({
         dest === "delay-time" ||
         dest === "delay-feedback" ||
         dest === "micro-time" ||
-        dest === "micro-feedback" ||
-        dest === "reverb-wet";
+        dest === "micro-feedback";
       if (!isAudioScale) return;
       const connectionId = `${route.sourceIndex}-${route.destination}`;
       const hasConn = connectionManager.hasConnection(connectionId);
@@ -262,8 +265,7 @@ export function useModulationRouting({
         route.destination === "delay-time" ||
         route.destination === "delay-feedback" ||
         route.destination === "micro-time" ||
-        route.destination === "micro-feedback" ||
-        route.destination === "reverb-wet";
+        route.destination === "micro-feedback";
 
       // Set depth multiplier value: 1 for audio-rate Scale destinations, route.amount for others
       depthMultiplier.factor.value = isAudioScaleDest ? 1 : route.amount;
@@ -412,14 +414,15 @@ export function useModulationRouting({
           );
           return;
         }
+        // Reverb wet handled at control-rate (requires existing node)
         if (route.destination === "reverb-wet" && effects?.reverb?.current) {
-          connectionManager.connectReverbWet(
-            connectionId,
-            lfoSignal as unknown as Tone.Signal,
-            depthMultiplier,
-            route.destination,
-            effects.reverb.current
-          );
+          controlRoutesRef.current.push({
+            lfoIndex: route.sourceIndex,
+            dest: "reverb-wet",
+            amount: route.amount,
+            route,
+            node: effects.reverb.current,
+          });
           return;
         }
 
@@ -502,6 +505,25 @@ export function useModulationRouting({
                 console.log(
                   `[ModMatrix] LFO ${cr.lfoIndex + 1} → Chebyshev order:`,
                   rounded
+                );
+                lastLogMs = now;
+              }
+            }
+          } else if (cr.dest === "reverb-wet") {
+            const v =
+              mode === "center"
+                ? Math.max(def.min, Math.min(def.max, center + sample * amountAroundCenter))
+                : Math.max(def.min, Math.min(def.max, min + unipolar * span));
+            (cr.node as Tone.Reverb).wet.value = v;
+            if (DEBUG_AUDIO) {
+              const now =
+                typeof performance !== "undefined"
+                  ? performance.now()
+                  : Date.now();
+              if (now - lastLogMs > 100) {
+                console.log(
+                  `[ModMatrix] LFO ${cr.lfoIndex + 1} → Reverb wet:`,
+                  v.toFixed(3)
                 );
                 lastLogMs = now;
               }

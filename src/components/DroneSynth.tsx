@@ -25,7 +25,13 @@ import { useRecorder } from "../hooks/useRecorder.ts";
 
 import { usePolysynths } from "../hooks/usePolysynths";
 
-import { useEffect, useRef, useImperativeHandle, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  useState,
+  useMemo,
+} from "react";
 
 import type { OscillatorsHandle } from "../types/OscillatorsParams";
 import type { AutoFilterHandle } from "../types/AutoFilterParams";
@@ -69,20 +75,43 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const microlooper = useDelay();
   const afterFilter = useFilter();
   const delay = useDelay();
-  const { reverb } = useReverb();
+  const { reverb, isReady: reverbReady } = useReverb();
 
-  const compressor = new Tone.Compressor(-30, 3);
+  // Create compressor once; recreating per-render is expensive in dev (and StrictMode doubles this).
+  const compressorRef = useRef<Tone.Compressor | null>(null);
+  if (compressorRef.current === null) {
+    compressorRef.current = new Tone.Compressor(-30, 3);
+  }
+  useEffect(() => {
+    return () => {
+      compressorRef.current?.dispose();
+      compressorRef.current = null;
+    };
+  }, []);
 
-  const effects = [
-    beforeFilter.current,
-    bitCrusher.current,
-    chebyshev.current,
-    microlooper.current,
-    afterFilter.current,
-    delay.current,
-    reverb.current,
-    compressor,
-  ];
+  // Memoize effects list to avoid re-chaining on every render
+  const effects = useMemo(
+    () => [
+      beforeFilter.current,
+      bitCrusher.current,
+      chebyshev.current,
+      microlooper.current,
+      afterFilter.current,
+      delay.current,
+      ...(reverb.current ? ([reverb.current] as const) : []),
+      compressorRef.current!,
+    ],
+    [
+      beforeFilter.current,
+      bitCrusher.current,
+      chebyshev.current,
+      microlooper.current,
+      afterFilter.current,
+      delay.current,
+      reverb.current,
+      compressorRef.current,
+    ]
+  );
 
   const mainAudioEffectsBus = useAudioEffectsBus(effects);
 
@@ -196,6 +225,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
           />
           <Reverb
             reverb={reverb}
+            isReady={reverbReady}
             ref={reverbRef}
             onParameterChange={onParameterChange}
           />
