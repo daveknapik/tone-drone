@@ -11,6 +11,7 @@ interface ReverbProps {
   ref?: React.Ref<ReverbHandle>;
   onParameterChange?: () => void;
   isReady?: boolean;
+  ensureCreated?: () => Tone.Reverb;
 }
 
 function Reverb({
@@ -19,6 +20,7 @@ function Reverb({
   ref,
   onParameterChange,
   isReady,
+  ensureCreated,
 }: ReverbProps) {
   const [decay, setDecay] = useState(2.5);
   const [preDelay, setPreDelay] = useState(0.01);
@@ -54,10 +56,11 @@ function Reverb({
   // Handle decay changes with async IR regeneration
   const handleDecayChange = async (newDecay: number) => {
     setDecay(newDecay);
-    if (reverb.current) {
+    const inst = reverb.current ?? ensureCreated?.();
+    if (inst) {
       setIsUpdating(true);
-      reverb.current.decay = newDecay;
-      await reverb.current.ready;
+      inst.decay = newDecay;
+      await inst.ready;
       setIsUpdating(false);
     }
     onParameterChange?.();
@@ -66,10 +69,11 @@ function Reverb({
   // Handle preDelay changes with async IR regeneration
   const handlePreDelayChange = async (newPreDelay: number) => {
     setPreDelay(newPreDelay);
-    if (reverb.current) {
+    const inst = reverb.current ?? ensureCreated?.();
+    if (inst) {
       setIsUpdating(true);
-      reverb.current.preDelay = newPreDelay;
-      await reverb.current.ready;
+      inst.preDelay = newPreDelay;
+      await inst.ready;
       setIsUpdating(false);
     }
     onParameterChange?.();
@@ -128,6 +132,11 @@ function Reverb({
         labelText="Dry / Wet"
         handleChange={(e) => {
           setWet(parseFloat(e.target.value));
+          if (!reverb.current) {
+            ensureCreated?.();
+          } else {
+            reverb.current.set({ wet: parseFloat(e.target.value) });
+          }
           onParameterChange?.();
         }}
       />

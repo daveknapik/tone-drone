@@ -36,6 +36,7 @@ interface UseModulationRoutingProps {
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
     reverb?: React.RefObject<Tone.Reverb | null>;
+    ensureReverb?: () => Tone.Reverb;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;
@@ -414,16 +415,23 @@ export function useModulationRouting({
           );
           return;
         }
-        // Reverb wet handled at control-rate (requires existing node)
-        if (route.destination === "reverb-wet" && effects?.reverb?.current) {
-          controlRoutesRef.current.push({
-            lfoIndex: route.sourceIndex,
-            dest: "reverb-wet",
-            amount: route.amount,
-            route,
-            node: effects.reverb.current,
-          });
-          return;
+        // Reverb wet handled at control-rate. Ensure node exists on first routing use.
+        if (route.destination === "reverb-wet") {
+          const node =
+            effects?.reverb?.current ??
+            (typeof effects?.ensureReverb === "function"
+              ? effects.ensureReverb()
+              : null);
+          if (node) {
+            controlRoutesRef.current.push({
+              lfoIndex: route.sourceIndex,
+              dest: "reverb-wet",
+              amount: route.amount,
+              route,
+              node,
+            });
+            return;
+          }
         }
 
         console.warn(`Unsupported destination: ${route.destination}`);

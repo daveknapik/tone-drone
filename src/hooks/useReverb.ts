@@ -1,27 +1,29 @@
 import * as Tone from "tone";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 
 export function useReverb() {
-  // Initialize with minimal decay (0.1s) for fast IR generation during page load.
-  // The Reverb component will set actual values (decay: 2.5) shortly after.
-  const reverb = useRef<Tone.Reverb>(
-    new Tone.Reverb({
-      decay: 0.1,
-      preDelay: 0.01,
-      wet: 0,
-    })
-  );
+  // Gate creation to first actual use (manual control or modulation).
+  const reverb = useRef<Tone.Reverb | null>(null);
 
   const [isReady, setIsReady] = useState(false);
 
-  // Handle async initialization
-  useEffect(() => {
-    const initReverb = async () => {
-      await reverb.current.ready;
-      setIsReady(true);
-    };
-    initReverb();
+  // Create immediately if missing; returns the instance without awaiting IR readiness.
+  const ensureCreated = useCallback((): Tone.Reverb => {
+    if (reverb.current) return reverb.current;
+    reverb.current = new Tone.Reverb({
+      // Extremely small defaults to minimize initial IR cost; UI applies real values later.
+      decay: 0.01,
+      preDelay: 0.01,
+      wet: 0,
+    });
+    // Kick off readiness in background; not blocking the caller.
+    reverb.current.ready
+      .then(() => setIsReady(true))
+      .catch(() => {
+        /* best-effort only */
+      });
+    return reverb.current;
   }, []);
 
-  return { reverb, isReady };
+  return { reverb, isReady, ensureCreated };
 }
