@@ -75,7 +75,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const microlooper = useDelay();
   const afterFilter = useFilter();
   const delay = useDelay();
-  const { reverb, isReady: reverbReady } = useReverb();
+  const { reverb, isReady: reverbReady, ensureCreated: ensureReverb } = useReverb();
 
   // Create compressor once; recreating per-render is expensive in dev (and StrictMode doubles this).
   const compressorRef = useRef<Tone.Compressor | null>(null);
@@ -226,6 +226,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
           <Reverb
             reverb={reverb}
             isReady={reverbReady}
+            ensureCreated={ensureReverb}
             ref={reverbRef}
             onParameterChange={onParameterChange}
           />
@@ -246,6 +247,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             bitCrusher: bitCrusher,
             chebyshev: chebyshev,
             reverb: reverb,
+            ensureReverb,
           }}
           effectRefs={{
             filterRef: afterFilterRef,
