@@ -29,7 +29,7 @@ import {
   computeRouteRange,
   defaultsForDestination,
   clamp,
-} from "../../utils/modulationRange";
+} from "./modulationRange";
 
 describe("coerceParamToNumber", () => {
   it("coerces normal numbers", () => {
