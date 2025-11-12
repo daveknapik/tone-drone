@@ -7,7 +7,7 @@ import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
-import type { ReverbHandle } from "../types/ReverbParams";
+import type { ReverbHandle, ReverbParams } from "../types/ReverbParams";
 import type { EffectsBusSendHandle } from "../components/EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
 import type { ModulationMatrixHandle } from "../types/ModulationMatrixParams";
@@ -175,12 +175,13 @@ export function usePresetManager(refs: PresetComponentRefs) {
       refs.delay.current?.setParams(state.effects.delay);
       // Backward compatibility: if reverb1/reverb2 exist, use them; otherwise use reverb for both
       // Fallback to default if reverb doesn't exist (for very old presets)
-      const reverb1Params =
-        (state.effects as any).reverb1 ??
+      const effects = state.effects as Record<string, unknown>;
+      const reverb1Params: ReverbParams =
+        (effects.reverb1 as ReverbParams | undefined) ??
         state.effects.reverb ??
         DEFAULT_REVERB_PARAMS;
-      const reverb2Params =
-        (state.effects as any).reverb2 ??
+      const reverb2Params: ReverbParams =
+        (effects.reverb2 as ReverbParams | undefined) ??
         state.effects.reverb ??
         DEFAULT_REVERB_PARAMS;
       refs.reverb1.current?.setParams(reverb1Params);

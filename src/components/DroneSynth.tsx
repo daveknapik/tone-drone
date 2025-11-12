@@ -89,9 +89,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
 
   // Create compressor once; recreating per-render is expensive in dev (and StrictMode doubles this).
   const compressorRef = useRef<Tone.Compressor | null>(null);
-  if (compressorRef.current === null) {
-    compressorRef.current = new Tone.Compressor(-30, 3);
-  }
+  compressorRef.current ??= new Tone.Compressor(-30, 3);
   useEffect(() => {
     return () => {
       compressorRef.current?.dispose();

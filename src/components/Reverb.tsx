@@ -118,7 +118,7 @@ function Reverb({
         labelText="Decay"
         step={0.1}
         handleChange={(e) => {
-          handleDecayChange(parseFloat(e.target.value));
+          void handleDecayChange(parseFloat(e.target.value));
         }}
       />
       <Slider
@@ -129,7 +129,7 @@ function Reverb({
         labelText="Pre-Delay"
         step={0.001}
         handleChange={(e) => {
-          handlePreDelayChange(parseFloat(e.target.value));
+          void handlePreDelayChange(parseFloat(e.target.value));
         }}
       />
       <Slider
