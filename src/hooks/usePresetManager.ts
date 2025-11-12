@@ -23,6 +23,7 @@ import { extractPresetFromUrl } from "../utils/presetUrl";
 import {
   DEFAULT_BPM,
   DEFAULT_MODULATION_MATRIX_STATE,
+  DEFAULT_REVERB_PARAMS,
 } from "../utils/presetDefaults";
 
 /**
@@ -173,8 +174,15 @@ export function usePresetManager(refs: PresetComponentRefs) {
       refs.afterFilter.current?.setParams(state.effects.afterFilter);
       refs.delay.current?.setParams(state.effects.delay);
       // Backward compatibility: if reverb1/reverb2 exist, use them; otherwise use reverb for both
-      const reverb1Params = (state.effects as any).reverb1 ?? state.effects.reverb;
-      const reverb2Params = (state.effects as any).reverb2 ?? state.effects.reverb;
+      // Fallback to default if reverb doesn't exist (for very old presets)
+      const reverb1Params =
+        (state.effects as any).reverb1 ??
+        state.effects.reverb ??
+        DEFAULT_REVERB_PARAMS;
+      const reverb2Params =
+        (state.effects as any).reverb2 ??
+        state.effects.reverb ??
+        DEFAULT_REVERB_PARAMS;
       refs.reverb1.current?.setParams(reverb1Params);
       refs.reverb2.current?.setParams(reverb2Params);
 
