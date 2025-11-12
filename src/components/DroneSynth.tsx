@@ -55,7 +55,8 @@ export interface DroneSynthHandle {
   microlooperRef: React.RefObject<DelayHandle | null>;
   afterFilterRef: React.RefObject<FilterHandle | null>;
   delayRef: React.RefObject<DelayHandle | null>;
-  reverbRef: React.RefObject<ReverbHandle | null>;
+  reverb1Ref: React.RefObject<ReverbHandle | null>;
+  reverb2Ref: React.RefObject<ReverbHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControlRef: React.RefObject<BpmControlHandle | null>;
   modulationMatrixRef: React.RefObject<ModulationMatrixHandle | null>;
@@ -75,7 +76,16 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const microlooper = useDelay();
   const afterFilter = useFilter();
   const delay = useDelay();
-  const { reverb, isReady: reverbReady, ensureCreated: ensureReverb } = useReverb();
+  const {
+    reverb: reverb1,
+    isReady: reverb1Ready,
+    ensureCreated: ensureReverb1,
+  } = useReverb();
+  const {
+    reverb: reverb2,
+    isReady: reverb2Ready,
+    ensureCreated: ensureReverb2,
+  } = useReverb();
 
   // Create compressor once; recreating per-render is expensive in dev (and StrictMode doubles this).
   const compressorRef = useRef<Tone.Compressor | null>(null);
@@ -90,25 +100,28 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   }, []);
 
   // Memoize effects list to avoid re-chaining on every render
+  // Order: AutoFilter → Reverb 1 → BitCrusher → Chebyshev → Microlooper → Filter → Delay → Reverb 2 → Compressor
   const effects = useMemo(
     () => [
       beforeFilter.current,
+      ...(reverb1.current ? ([reverb1.current] as const) : []), // Reverb 1 after AutoFilter
       bitCrusher.current,
       chebyshev.current,
       microlooper.current,
       afterFilter.current,
       delay.current,
-      ...(reverb.current ? ([reverb.current] as const) : []),
+      ...(reverb2.current ? ([reverb2.current] as const) : []), // Reverb 2 at the end before compressor
       compressorRef.current!,
     ],
     [
       beforeFilter.current,
+      reverb1.current,
       bitCrusher.current,
       chebyshev.current,
       microlooper.current,
       afterFilter.current,
       delay.current,
-      reverb.current,
+      reverb2.current,
       compressorRef.current,
     ]
   );
@@ -136,7 +149,8 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const microlooperRef = useRef<DelayHandle>(null);
   const afterFilterRef = useRef<FilterHandle>(null);
   const delayRef = useRef<DelayHandle>(null);
-  const reverbRef = useRef<ReverbHandle>(null);
+  const reverb1Ref = useRef<ReverbHandle>(null);
+  const reverb2Ref = useRef<ReverbHandle>(null);
   const effectsBusSendRef = useRef<EffectsBusSendHandle | null>(null);
   const bpmControlRef = useRef<BpmControlHandle | null>(null);
   const modulationMatrixRef = useRef<ModulationMatrixHandle | null>(null);
@@ -178,7 +192,8 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
     microlooperRef,
     afterFilterRef,
     delayRef,
-    reverbRef,
+    reverb1Ref,
+    reverb2Ref,
     effectsBusSendRef,
     bpmControlRef,
     modulationMatrixRef,
@@ -194,6 +209,14 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             filter={beforeFilter}
             ref={autoFilterRef}
             onParameterChange={onParameterChange}
+          />
+          <Reverb
+            reverb={reverb1}
+            isReady={reverb1Ready}
+            ensureCreated={ensureReverb1}
+            ref={reverb1Ref}
+            onParameterChange={onParameterChange}
+            label="Reverb 1"
           />
           <BitCrusher
             bitCrusher={bitCrusher}
@@ -224,11 +247,12 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             onParameterChange={onParameterChange}
           />
           <Reverb
-            reverb={reverb}
-            isReady={reverbReady}
-            ensureCreated={ensureReverb}
-            ref={reverbRef}
+            reverb={reverb2}
+            isReady={reverb2Ready}
+            ensureCreated={ensureReverb2}
+            ref={reverb2Ref}
             onParameterChange={onParameterChange}
+            label="Reverb 2"
           />
           <EffectsBusSendControl
             bus={mainAudioEffectsBus}
@@ -246,8 +270,10 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             micro: microlooper,
             bitCrusher: bitCrusher,
             chebyshev: chebyshev,
-            reverb: reverb,
-            ensureReverb,
+            reverb1: reverb1,
+            reverb2: reverb2,
+            ensureReverb1,
+            ensureReverb2,
           }}
           effectRefs={{
             filterRef: afterFilterRef,
@@ -255,7 +281,8 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
             microRef: microlooperRef,
             bitCrusherRef: bitCrusherRef,
             chebyshevRef: chebyshevRef,
-            reverbRef: reverbRef,
+            reverb1Ref: reverb1Ref,
+            reverb2Ref: reverb2Ref,
           }}
         />
         <PolySynths

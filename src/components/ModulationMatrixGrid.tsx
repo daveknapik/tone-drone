@@ -57,7 +57,8 @@ const DESTINATIONS: DestinationInfo[] = [
   // Chebyshev
   { value: "chebyshev-order", label: "Chebyshev Order", category: "Effects" },
   // Reverb
-  { value: "reverb-wet", label: "Reverb Wet", category: "Effects" },
+  { value: "reverb1-wet", label: "Reverb 1 Wet", category: "Effects" },
+  { value: "reverb2-wet", label: "Reverb 2 Wet", category: "Effects" },
 ];
 
 function ModulationMatrixGrid({
