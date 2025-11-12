@@ -47,9 +47,18 @@ function Reverb({
   useImperativeHandle(ref, () => ({
     getParams: (): ReverbParams => paramsRef.current,
     setParams: (params: ReverbParams) => {
+      if (!params) return; // Guard against undefined params
+      // Ensure reverb instance exists before setting params
+      const inst = reverb.current ?? ensureCreated?.();
       setDecay(params.decay);
       setPreDelay(params.preDelay);
       setWet(params.wet);
+      // Apply params to reverb instance if it exists
+      if (inst) {
+        inst.set({ wet: params.wet });
+        inst.decay = params.decay;
+        inst.preDelay = params.preDelay;
+      }
     },
   }));
 
