@@ -16,7 +16,8 @@ interface ControlRateRoute {
     | "filter-q"
     | "bitcrusher-bits"
     | "chebyshev-order"
-    | "reverb-wet";
+    | "reverb1-wet"
+    | "reverb2-wet";
   amount: number;
   route: ModulationRoute;
   node: Tone.Filter | Tone.BitCrusher | Tone.Chebyshev | Tone.Reverb;
@@ -35,14 +36,17 @@ interface UseModulationRoutingProps {
     micro?: React.RefObject<Tone.FeedbackDelay>;
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
-    reverb?: React.RefObject<Tone.Reverb | null>;
-    ensureReverb?: () => Tone.Reverb;
+    reverb1?: React.RefObject<Tone.Reverb | null>;
+    reverb2?: React.RefObject<Tone.Reverb | null>;
+    ensureReverb1?: () => Tone.Reverb;
+    ensureReverb2?: () => Tone.Reverb;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;
     delayRef?: React.RefObject<DelayHandle | null>;
     microRef?: React.RefObject<DelayHandle | null>;
-    reverbRef?: React.RefObject<ReverbHandle | null>;
+    reverb1Ref?: React.RefObject<ReverbHandle | null>;
+    reverb2Ref?: React.RefObject<ReverbHandle | null>;
   };
   sampleLfo: (lfoIdx: number, type: string) => number;
 }
@@ -209,19 +213,31 @@ export function useModulationRouting({
             effects.micro.current.feedback.value = p.feedback;
             effects.micro.current.feedback.cancelScheduledValues(0);
             effects.micro.current.delayTime.cancelScheduledValues(0);
-          } else if (
-            dest === "reverb-wet" &&
-            effects?.reverb?.current &&
-            effectRefs?.reverbRef?.current
-          ) {
-            const p = effectRefs.reverbRef.current.getParams();
-            // Restore all parameters using .set() like filter does
-            effects.reverb.current.set({
-              decay: p.decay,
-              preDelay: p.preDelay,
-              wet: p.wet,
-            });
-            effects.reverb.current.wet.cancelScheduledValues(0);
+          } else if (dest === "reverb1-wet") {
+            if (effects?.reverb1?.current && effectRefs?.reverb1Ref?.current) {
+              const p = effectRefs.reverb1Ref.current.getParams();
+              effects.reverb1.current.set({
+                decay: p.decay,
+                preDelay: p.preDelay,
+                wet: p.wet,
+              });
+              effects.reverb1.current.wet.cancelScheduledValues(0);
+            } else if (effects?.reverb1?.current) {
+              // Fallback: cancel schedules only
+              effects.reverb1.current.wet.cancelScheduledValues(0);
+            }
+          } else if (dest === "reverb2-wet") {
+            if (effects?.reverb2?.current && effectRefs?.reverb2Ref?.current) {
+              const p = effectRefs.reverb2Ref.current.getParams();
+              effects.reverb2.current.set({
+                decay: p.decay,
+                preDelay: p.preDelay,
+                wet: p.wet,
+              });
+              effects.reverb2.current.wet.cancelScheduledValues(0);
+            } else if (effects?.reverb2?.current) {
+              effects.reverb2.current.wet.cancelScheduledValues(0);
+            }
           }
         } catch {
           // noop: defensive only
@@ -415,17 +431,35 @@ export function useModulationRouting({
           );
           return;
         }
-        // Reverb wet handled at control-rate. Ensure node exists on first routing use.
-        if (route.destination === "reverb-wet") {
+        // Reverb 1 wet handled at control-rate. Ensure node exists on first routing use.
+        if (route.destination === "reverb1-wet") {
           const node =
-            effects?.reverb?.current ??
-            (typeof effects?.ensureReverb === "function"
-              ? effects.ensureReverb()
+            effects?.reverb1?.current ??
+            (typeof effects?.ensureReverb1 === "function"
+              ? effects.ensureReverb1()
               : null);
           if (node) {
             controlRoutesRef.current.push({
               lfoIndex: route.sourceIndex,
-              dest: "reverb-wet",
+              dest: "reverb1-wet",
+              amount: route.amount,
+              route,
+              node,
+            });
+            return;
+          }
+        }
+        // Reverb 2 wet handled at control-rate. Ensure node exists on first routing use.
+        if (route.destination === "reverb2-wet") {
+          const node =
+            effects?.reverb2?.current ??
+            (typeof effects?.ensureReverb2 === "function"
+              ? effects.ensureReverb2()
+              : null);
+          if (node) {
+            controlRoutesRef.current.push({
+              lfoIndex: route.sourceIndex,
+              dest: "reverb2-wet",
               amount: route.amount,
               route,
               node,
@@ -517,7 +551,7 @@ export function useModulationRouting({
                 lastLogMs = now;
               }
             }
-          } else if (cr.dest === "reverb-wet") {
+          } else if (cr.dest === "reverb1-wet" || cr.dest === "reverb2-wet") {
             const v =
               mode === "center"
                 ? Math.max(def.min, Math.min(def.max, center + sample * amountAroundCenter))

@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { useRef, useEffect, useState, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 
 export function useReverb() {
   // Gate creation to first actual use (manual control or modulation).

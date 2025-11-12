@@ -37,7 +37,8 @@ export interface PresetComponentRefs {
   microlooper: React.RefObject<DelayHandle | null>;
   afterFilter: React.RefObject<FilterHandle | null>;
   delay: React.RefObject<DelayHandle | null>;
-  reverb: React.RefObject<ReverbHandle | null>;
+  reverb1: React.RefObject<ReverbHandle | null>;
+  reverb2: React.RefObject<ReverbHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControl: React.RefObject<BpmControlHandle | null>;
   modulationMatrix: React.RefObject<ModulationMatrixHandle | null>;
@@ -106,7 +107,8 @@ export function usePresetManager(refs: PresetComponentRefs) {
     const microlooperParams = refs.microlooper.current?.getParams();
     const afterFilterParams = refs.afterFilter.current?.getParams();
     const delayParams = refs.delay.current?.getParams();
-    const reverbParams = refs.reverb.current?.getParams();
+    const reverb1Params = refs.reverb1.current?.getParams();
+    const reverb2Params = refs.reverb2.current?.getParams();
     const effectsBusSend = refs.effectsBusSendRef.current?.value ?? 0;
     const bpm = refs.bpmControl.current?.getValue() ?? DEFAULT_BPM;
     const modulationMatrixState =
@@ -122,7 +124,8 @@ export function usePresetManager(refs: PresetComponentRefs) {
       !microlooperParams ||
       !afterFilterParams ||
       !delayParams ||
-      !reverbParams
+      !reverb1Params ||
+      !reverb2Params
     ) {
       throw new Error(
         "Cannot capture state: some component refs are not available"
@@ -139,7 +142,9 @@ export function usePresetManager(refs: PresetComponentRefs) {
         microlooper: microlooperParams,
         afterFilter: afterFilterParams,
         delay: delayParams,
-        reverb: reverbParams,
+        reverb: reverb1Params, // Backward compatibility: save reverb1 as "reverb"
+        reverb1: reverb1Params,
+        reverb2: reverb2Params,
       },
       effectsBusSend,
       modulationMatrix: modulationMatrixState,
@@ -167,7 +172,11 @@ export function usePresetManager(refs: PresetComponentRefs) {
       refs.microlooper.current?.setParams(state.effects.microlooper);
       refs.afterFilter.current?.setParams(state.effects.afterFilter);
       refs.delay.current?.setParams(state.effects.delay);
-      refs.reverb.current?.setParams(state.effects.reverb);
+      // Backward compatibility: if reverb1/reverb2 exist, use them; otherwise use reverb for both
+      const reverb1Params = (state.effects as any).reverb1 ?? state.effects.reverb;
+      const reverb2Params = (state.effects as any).reverb2 ?? state.effects.reverb;
+      refs.reverb1.current?.setParams(reverb1Params);
+      refs.reverb2.current?.setParams(reverb2Params);
 
       // Apply effects bus send
       if (refs.effectsBusSendRef.current) {
