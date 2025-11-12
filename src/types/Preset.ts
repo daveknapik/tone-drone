@@ -40,7 +40,9 @@ export interface PresetState {
     microlooper: DelayParams;
     afterFilter: FilterParams;
     delay: DelayParams;
-    reverb: ReverbParams;
+    reverb: ReverbParams; // Backward compatibility: old presets have single reverb
+    reverb1?: ReverbParams; // New presets: reverb early in chain (can be distorted)
+    reverb2?: ReverbParams; // New presets: reverb at end of chain (clean ambience)
   };
 
   // Effects bus send level

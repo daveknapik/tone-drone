@@ -47,10 +47,8 @@ interface ModulationMatrixProps {
     micro?: React.RefObject<Tone.FeedbackDelay>;
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
-    reverb1?: React.RefObject<Tone.Reverb | null>;
-    reverb2?: React.RefObject<Tone.Reverb | null>;
-    ensureReverb1?: () => Tone.Reverb;
-    ensureReverb2?: () => Tone.Reverb;
+    reverb1?: React.RefObject<Tone.Reverb>;
+    reverb2?: React.RefObject<Tone.Reverb>;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;

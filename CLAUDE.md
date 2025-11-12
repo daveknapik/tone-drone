@@ -232,7 +232,11 @@ test("should do something", async ({ page }) => {
 
 - **Audio Context**: Managed via `src/context/audio.tsx` - handles browser audio initialization and Tone.js transport control
 - **Effects Bus**: Central audio routing through `useAudioEffectsBus` hook - connects all audio sources through a chain of effects
-- **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, etc.) has its own custom hook in `src/hooks/`
+- **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, Reverb, etc.) has its own custom hook in `src/hooks/`
+- **Dual Reverb Design**: Two independent reverb instances serve different creative purposes:
+  - **Reverb 1** (early in chain): Positioned after AutoFilter, before distortion effects. Creates interesting artifacts when processed by BitCrusher/Chebyshev
+  - **Reverb 2** (end of chain): Positioned before compressor. Adds clean, standard ambience without being colored by other effects
+  - Both reverbs use Tone.Reverb with configurable decay (0.1-10s), preDelay (0-0.1s), and wet (0-1) parameters
 - **Oscillators**: Created with Tone.Oscillator or Tone.FatOscillator, each paired with a Tone.Channel for individual volume/pan control. Users can toggle between basic and fat oscillator types for thicker, chorus-like sounds
 - **Synths**: Monophonic synthesizers for step sequencer note triggering, managed via `useSynths` hook. Each synth has a configurable ADSR envelope for shaping the amplitude of triggered notes
 - **PolySynths**: Two polyphonic synthesizers for melodic elements, managed via `usePolysynths` hook
@@ -565,7 +569,8 @@ Preset state includes:
 - Sequencer patterns (16 steps per oscillator)
 - Sequence mute state (boolean array indicating which sequences are muted)
 - Synth envelope parameters (attack, decay, sustain, release for step sequencer notes)
-- All audio effect parameters
+- All audio effect parameters (AutoFilter, BitCrusher, Chebyshev, Microlooper, Filter, Delay)
+- Reverb settings (two independent reverb instances: reverb1 and reverb2, with backward compatibility for old presets)
 - Effects bus send level
 - PolySynth settings (2 polysynths with independent parameters)
 - Min/max frequency range

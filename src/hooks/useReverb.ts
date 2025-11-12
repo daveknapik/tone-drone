@@ -1,29 +1,43 @@
 import * as Tone from "tone";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useEffect } from "react";
+import type { ReverbParams } from "../types/ReverbParams";
 
-export function useReverb() {
-  // Gate creation to first actual use (manual control or modulation).
-  const reverb = useRef<Tone.Reverb | null>(null);
+interface UseReverbOptions {
+  /**
+   * Initial reverb parameters. Defaults optimize for fast page load:
+   * - decay: 0.1s (minimal IR generation time)
+   * - preDelay: 0.01s
+   * - wet: 0 (inaudible during initialization)
+   * Component will apply actual values after mount.
+   */
+  initialParams?: Partial<ReverbParams>;
+}
+
+export function useReverb(options: UseReverbOptions = {}) {
+  const { initialParams } = options;
+
+  // Create reverb immediately on mount with fast initialization defaults
+  const reverb = useRef<Tone.Reverb>(
+    new Tone.Reverb({
+      decay: initialParams?.decay ?? 0.1, // Fast IR generation
+      preDelay: initialParams?.preDelay ?? 0.01,
+      wet: initialParams?.wet ?? 0, // Inaudible during init
+    })
+  );
 
   const [isReady, setIsReady] = useState(false);
 
-  // Create immediately if missing; returns the instance without awaiting IR readiness.
-  const ensureCreated = useCallback((): Tone.Reverb => {
-    if (reverb.current) return reverb.current;
-    reverb.current = new Tone.Reverb({
-      // Extremely small defaults to minimize initial IR cost; UI applies real values later.
-      decay: 0.01,
-      preDelay: 0.01,
-      wet: 0,
-    });
-    // Kick off readiness in background; not blocking the caller.
+  // Track IR readiness in background
+  useEffect(() => {
     reverb.current.ready
       .then(() => setIsReady(true))
       .catch(() => {
         /* best-effort only */
       });
-    return reverb.current;
+
+    // NOTE: No cleanup/disposal here - following pattern of other effect hooks
+    // The parent component manages lifecycle of all audio effects
   }, []);
 
-  return { reverb, isReady, ensureCreated };
+  return { reverb, isReady };
 }
