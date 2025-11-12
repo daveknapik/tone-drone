@@ -36,10 +36,8 @@ interface UseModulationRoutingProps {
     micro?: React.RefObject<Tone.FeedbackDelay>;
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
-    reverb1?: React.RefObject<Tone.Reverb | null>;
-    reverb2?: React.RefObject<Tone.Reverb | null>;
-    ensureReverb1?: () => Tone.Reverb;
-    ensureReverb2?: () => Tone.Reverb;
+    reverb1?: React.RefObject<Tone.Reverb>;
+    reverb2?: React.RefObject<Tone.Reverb>;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;
@@ -431,13 +429,9 @@ export function useModulationRouting({
           );
           return;
         }
-        // Reverb 1 wet handled at control-rate. Ensure node exists on first routing use.
+        // Reverb 1 wet handled at control-rate
         if (route.destination === "reverb1-wet") {
-          const node =
-            effects?.reverb1?.current ??
-            (typeof effects?.ensureReverb1 === "function"
-              ? effects.ensureReverb1()
-              : null);
+          const node = effects?.reverb1?.current;
           if (node) {
             controlRoutesRef.current.push({
               lfoIndex: route.sourceIndex,
@@ -449,13 +443,9 @@ export function useModulationRouting({
             return;
           }
         }
-        // Reverb 2 wet handled at control-rate. Ensure node exists on first routing use.
+        // Reverb 2 wet handled at control-rate
         if (route.destination === "reverb2-wet") {
-          const node =
-            effects?.reverb2?.current ??
-            (typeof effects?.ensureReverb2 === "function"
-              ? effects.ensureReverb2()
-              : null);
+          const node = effects?.reverb2?.current;
           if (node) {
             controlRoutesRef.current.push({
               lfoIndex: route.sourceIndex,

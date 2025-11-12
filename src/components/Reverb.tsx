@@ -6,12 +6,11 @@ import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { ReverbHandle, ReverbParams } from "../types/ReverbParams";
 
 interface ReverbProps {
-  reverb: React.RefObject<Tone.Reverb | null>;
+  reverb: React.RefObject<Tone.Reverb>;
   label?: string;
   ref?: React.Ref<ReverbHandle>;
   onParameterChange?: () => void;
   isReady?: boolean;
-  ensureCreated?: () => Tone.Reverb;
 }
 
 function Reverb({
@@ -20,7 +19,6 @@ function Reverb({
   ref,
   onParameterChange,
   isReady,
-  ensureCreated,
 }: ReverbProps) {
   const [decay, setDecay] = useState(2.5);
   const [preDelay, setPreDelay] = useState(0.01);
@@ -48,43 +46,33 @@ function Reverb({
     getParams: (): ReverbParams => paramsRef.current,
     setParams: (params: ReverbParams) => {
       if (!params) return; // Guard against undefined params
-      // Ensure reverb instance exists before setting params
-      const inst = reverb.current ?? ensureCreated?.();
       setDecay(params.decay);
       setPreDelay(params.preDelay);
       setWet(params.wet);
-      // Apply params to reverb instance if it exists
-      if (inst) {
-        inst.set({ wet: params.wet });
-        inst.decay = params.decay;
-        inst.preDelay = params.preDelay;
-      }
+      // Apply params to reverb instance
+      reverb.current.set({ wet: params.wet });
+      reverb.current.decay = params.decay;
+      reverb.current.preDelay = params.preDelay;
     },
   }));
 
   // Handle decay changes with async IR regeneration
   const handleDecayChange = async (newDecay: number) => {
     setDecay(newDecay);
-    const inst = reverb.current ?? ensureCreated?.();
-    if (inst) {
-      setIsUpdating(true);
-      inst.decay = newDecay;
-      await inst.ready;
-      setIsUpdating(false);
-    }
+    setIsUpdating(true);
+    reverb.current.decay = newDecay;
+    await reverb.current.ready;
+    setIsUpdating(false);
     onParameterChange?.();
   };
 
   // Handle preDelay changes with async IR regeneration
   const handlePreDelayChange = async (newPreDelay: number) => {
     setPreDelay(newPreDelay);
-    const inst = reverb.current ?? ensureCreated?.();
-    if (inst) {
-      setIsUpdating(true);
-      inst.preDelay = newPreDelay;
-      await inst.ready;
-      setIsUpdating(false);
-    }
+    setIsUpdating(true);
+    reverb.current.preDelay = newPreDelay;
+    await reverb.current.ready;
+    setIsUpdating(false);
     onParameterChange?.();
   };
 
@@ -140,12 +128,9 @@ function Reverb({
         step={0.01}
         labelText="Dry / Wet"
         handleChange={(e) => {
-          setWet(parseFloat(e.target.value));
-          if (!reverb.current) {
-            ensureCreated?.();
-          } else {
-            reverb.current.set({ wet: parseFloat(e.target.value) });
-          }
+          const newWet = parseFloat(e.target.value);
+          setWet(newWet);
+          reverb.current.set({ wet: newWet });
           onParameterChange?.();
         }}
       />
