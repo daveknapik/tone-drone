@@ -6,7 +6,7 @@ import {
   CURRENT_PRESET_VERSION,
 } from "./presetMigration";
 import type { Preset, PresetState } from "../types/Preset";
-import { DEFAULT_BPM } from "./presetDefaults";
+import { DEFAULT_BPM, DEFAULT_REVERB_PARAMS } from "./presetDefaults";
 
 describe("presetMigration", () => {
   const createV1Preset = (): Preset => ({
@@ -167,7 +167,7 @@ describe("presetMigration", () => {
 
     it("should return correct migration path from v2", () => {
       const path = getMigrationPath(2);
-      expect(path).toEqual([2, 3, 4]); // v2→v3, v3→v4, v4→v5
+      expect(path).toEqual([2, 3, 4, 5]); // v2→v3, v3→v4, v4→v5, v5→v6
     });
 
     it("should return empty array for current version", () => {
@@ -193,7 +193,11 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
+        // Effects should be preserved, but reverb is added by v5→v6 migration
+        expect(migrated.state.effects).toEqual({
+          ...v1Preset.state.effects,
+          reverb: DEFAULT_REVERB_PARAMS,
+        });
         expect(migrated.state.effectsBusSend).toBe(
           v1Preset.state.effectsBusSend
         );
@@ -322,7 +326,11 @@ describe("presetMigration", () => {
         });
         // Second polysynth should be added during v3→v4 migration
         expect(migrated.state.polysynths.polysynths).toHaveLength(2);
-        expect(migrated.state.effects).toEqual(v2Preset.state.effects);
+        // Effects should be preserved, but reverb is added by v5→v6 migration
+        expect(migrated.state.effects).toEqual({
+          ...v2Preset.state.effects,
+          reverb: DEFAULT_REVERB_PARAMS,
+        });
         expect(migrated.state.effectsBusSend).toBe(
           v2Preset.state.effectsBusSend
         );
@@ -346,7 +354,11 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
+        // Effects should be preserved, but reverb is added by v5→v6 migration
+        expect(migrated.state.effects).toEqual({
+          ...v1Preset.state.effects,
+          reverb: DEFAULT_REVERB_PARAMS,
+        });
       });
     });
 
