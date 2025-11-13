@@ -73,7 +73,7 @@ function SynthEnvelopeControl({
         inputName="synth-decay"
         labelText="Decay"
         min={0}
-        max={2}
+        max={1}
         step={0.01}
         value={decay}
         handleChange={(e) => {
@@ -101,7 +101,7 @@ function SynthEnvelopeControl({
         inputName="synth-release"
         labelText="Release"
         min={0}
-        max={5}
+        max={2}
         step={0.01}
         value={release}
         handleChange={(e) => {

@@ -33,6 +33,7 @@ import {
 import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
 import { BpmControlHandle } from "../types/BpmParams";
 import { SynthEnvelopeHandle, SynthEnvelopeParams } from "../types/SynthParams";
+import { SynthWithPanner } from "../types/SynthWithPanner";
 
 import PlayPauseSequencerButton from "../components/PlayPauseSequencerButton";
 import RandomizeFrequencyButton from "../components/RandomizeFrequencyButton";
@@ -63,7 +64,7 @@ function Oscillators({
   const [playKeys] = useState<string[]>(["q", "w", "a", "s", "z", "x"]);
   const [muteKeys] = useState<string[]>(["e", "r", "d", "f", "c", "v"]);
   const [expandOscillators, setExpandOscillators] = useState(true);
-  const [patternDensity, setPatternDensity] = useState(50);
+  const [patternDensity, setPatternDensity] = useState(30);
   const [mutedSequences, setMutedSequences] = useState<boolean[]>(
     DEFAULT_OSCILLATORS_STATE.mutedSequences ??
       Array(OSCILLATOR_COUNT).fill(false)
@@ -90,6 +91,11 @@ function Oscillators({
   // Create refs for each oscillator component
   const oscillatorRefs = useRef<(OscillatorHandle | null)[]>([]);
   const synthEnvelopeRef = useRef<SynthEnvelopeHandle | null>(null);
+
+  // Use a ref to hold synths so the callback always accesses the latest synths
+  // without needing to be recreated. This prevents race conditions during cleanup
+  // when synths array might be temporarily empty.
+  const synthsRef = useRef<SynthWithPanner[]>([]);
 
   // Expose state to parent via ref
   useImperativeHandle(ref, () => ({
@@ -137,6 +143,11 @@ function Oscillators({
 
   // Explicitly connect panners in createSynth; oscillators are wired at creation
 
+  // Update synths ref whenever synths array changes
+  useEffect(() => {
+    synthsRef.current = synths;
+  }, [synths]);
+
   const getActiveSteps = useCallback(() => {
     return sequences
       .map((sequence, i) => ({
@@ -165,24 +176,58 @@ function Oscillators({
     };
   }, []);
 
+  // Set reasonable fixed maxPolyphony for all synths
+  // With decay max 1s and release max 2s, voice accumulation is manageable
+  // Each PolySynth has its own maxPolyphony limit (not shared across synths)
+  useEffect(() => {
+    const targetPolyphony = 64; // Reasonable limit for 6 sequencers with max 2s release
+
+    synthsRef.current.forEach(({ synth }) => {
+      if (synth && synth.maxPolyphony !== targetPolyphony) {
+        try {
+          synth.maxPolyphony = targetPolyphony;
+          // Suppress "Max polyphony exceeded" warnings
+          // @ts-expect-error - Tone.js doesn't expose this in types, but it exists
+          synth._warnMaxPolyphony = false;
+        } catch (error) {
+          console.warn("Failed to update maxPolyphony:", error);
+        }
+      }
+    });
+  }, [synths]);
+
   // set current beat and redefine the loop's callback when steps change
+  // Use synthsRef instead of synths dependency to prevent race conditions
+  // during cleanup when synths array might be temporarily empty
   useEffect(() => {
     callbackRef.current = (time) => {
-      setCurrentBeat(beat.current);
+      try {
+        setCurrentBeat(beat.current);
 
-      // Sound the active notes on each synth
-      getActiveSteps().forEach(({ frequency, synthIndex }) => {
-        synths[synthIndex].synth.triggerAttackRelease(
-          frequency,
-          "16n",
-          time,
-          1.5
-        );
-      });
+        // Sound the active notes on each synth - use ref to access latest synths
+        getActiveSteps().forEach(({ frequency, synthIndex }) => {
+          const synth = synthsRef.current[synthIndex]?.synth;
+          if (synth) {
+            try {
+              synth.triggerAttackRelease(frequency, "16n", time, 1.5);
+            } catch (error) {
+              // Log but don't stop the sequencer if a single note fails
+              console.warn(
+                `Failed to trigger note on synth ${synthIndex}:`,
+                error
+              );
+            }
+          }
+        });
 
-      beat.current = (beat.current + 1) % stepCount;
+        beat.current = (beat.current + 1) % stepCount;
+      } catch (error) {
+        // Critical: if callback throws, it can stop the entire loop
+        // Log error but don't rethrow to prevent sequencer from stopping
+        console.error("Error in sequencer callback:", error);
+      }
     };
-  }, [getActiveSteps, stepCount, synths]);
+  }, [getActiveSteps, stepCount]);
 
   // update the frequency of the out of range oscillators when min or max freq changes
   useEffect(() => {
@@ -234,10 +279,13 @@ function Oscillators({
     500
   );
 
-  // Debounce Tone.js synth envelope updates to reduce excessive set() calls during slider drags
+  // Debounce Tone.js synth envelope updates to prevent excessive calls during slider drags
+  // Apply immediately - no deferral needed with limited decay/release ranges
   const updateSynthEnvelopeDebounced = useDebounceCallback(
-    updateSynthEnvelope,
-    50 // 50ms provides responsive feel while avoiding excessive Tone.js updates
+    (envelope: SynthEnvelopeParams) => {
+      updateSynthEnvelope(envelope);
+    },
+    50 // Debounce for slider drags
   );
 
   const updateFrequencyRange = (e: React.FormEvent<HTMLFormElement>): void => {

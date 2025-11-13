@@ -13,15 +13,29 @@ interface BpmControlProps {
 function BpmControl({ onParameterChange, ref }: BpmControlProps) {
   const [bpm, setBpm] = useState<number>(120);
 
-  // Initialize BPM from Tone.js transport on mount
+  // Initialize BPM from Tone.js transport on mount and listen for external changes
   useEffect(() => {
-    const currentBpm = Tone.getTransport().bpm.value;
+    const transport = Tone.getTransport();
+    const currentBpm = transport.bpm.value;
     setBpm(currentBpm);
+
+    // Listen for BPM changes from external sources (e.g., preset loading)
+    const updateBpmFromTransport = () => {
+      setBpm(transport.bpm.value);
+    };
+
+    transport.on("bpm", updateBpmFromTransport);
+
+    return () => {
+      transport.off("bpm", updateBpmFromTransport);
+    };
   }, []);
 
   const updateBpm = (bpm: number): void => {
-    Tone.getTransport().bpm.value = bpm;
-    setBpm(bpm);
+    // Cap BPM at 300 to prevent audio glitches with high BPM + long release times
+    const cappedBpm = Math.min(bpm, 300);
+    Tone.getTransport().bpm.value = cappedBpm;
+    setBpm(cappedBpm);
     onParameterChange?.();
   };
 
@@ -37,7 +51,7 @@ function BpmControl({ onParameterChange, ref }: BpmControlProps) {
     <Slider
       inputName="bpm"
       min={0}
-      max={999}
+      max={300}
       value={bpm}
       labelText="bpm"
       step={0.01}
