@@ -3,7 +3,6 @@ import { BitCrusherParams } from "./BitCrusherParams";
 import { ChebyshevParams } from "./ChebyshevParams";
 import { DelayParams } from "./DelayParams";
 import { FilterParams } from "./FilterParams";
-import { ReverbParams } from "./ReverbParams";
 import { Sequence } from "./Sequence";
 import { PolySynthsState } from "./PolySynthParams";
 import { OscillatorParams } from "./OscillatorParams";
@@ -40,9 +39,7 @@ export interface PresetState {
     microlooper: DelayParams;
     afterFilter: FilterParams;
     delay: DelayParams;
-    reverb: ReverbParams; // Backward compatibility: old presets have single reverb
-    reverb1?: ReverbParams; // New presets: reverb early in chain (can be distorted)
-    reverb2?: ReverbParams; // New presets: reverb at end of chain (clean ambience)
+    // Note: reverb/reverb1/reverb2 fields may exist in old presets but are ignored
   };
 
   // Effects bus send level

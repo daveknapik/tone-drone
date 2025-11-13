@@ -2,7 +2,6 @@ import type { Preset } from "../types/Preset";
 import {
   DEFAULT_POLYSYNTHS_STATE,
   DEFAULT_BPM,
-  DEFAULT_REVERB_PARAMS,
 } from "./presetDefaults";
 
 /**
@@ -140,7 +139,8 @@ function migrateV4ToV5(preset: Preset): Preset {
 
 /**
  * Migration from version 5 to version 6
- * Adds reverb effect to presets
+ * Note: Reverb was removed from the app, but old presets may have reverb data
+ * which will be ignored when loading
  */
 function migrateV5ToV6(preset: Preset): Preset {
   return {
@@ -148,11 +148,7 @@ function migrateV5ToV6(preset: Preset): Preset {
     version: 6,
     state: {
       ...preset.state,
-      effects: {
-        ...preset.state.effects,
-        // Add reverb with default values if missing
-        reverb: DEFAULT_REVERB_PARAMS,
-      },
+      // Reverb fields in old presets are ignored (reverb removed from app)
     },
   };
 }

@@ -9,7 +9,7 @@ import { useDebounceCallback } from "usehooks-ts";
  *
  * @param param - The Tone.js Param to update (e.g., delay.delayTime, filter.frequency)
  * @param onParameterChange - Callback to mark preset as modified (called after debounce)
- * @param rampTime - Ramp duration in seconds (default: 0.08s, barely perceptible)
+ * @param rampTime - Ramp duration in seconds (default: 0.08s, barely perceptible; use longer for effects like reverb)
  * @param debounceTime - Debounce delay for state persistence in ms (default: 500ms)
  *
  * @returns Object with:
@@ -18,9 +18,17 @@ import { useDebounceCallback } from "usehooks-ts";
  *
  * @example
  * ```typescript
+ * // Standard usage (0.08s ramp)
  * const { rampTo, markModified } = useRampedParameter(
  *   delay.current.delayTime,
  *   onParameterChange
+ * );
+ *
+ * // Longer ramp for sensitive parameters (e.g., reverb wet)
+ * const wetRamped = useRampedParameter(
+ *   reverb.current.wet,
+ *   onParameterChange,
+ *   0.3 // 300ms ramp time for smoother transitions
  * );
  *
  * // In handleChange:

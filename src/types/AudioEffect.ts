@@ -17,7 +17,6 @@ export type AudioEffect =
   | Tone.Phaser
   | Tone.PingPongDelay
   | Tone.PitchShift
-  | Tone.Reverb
   | Tone.StereoWidener
   | Tone.Tremolo
   | Tone.Vibrato;

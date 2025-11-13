@@ -58,8 +58,6 @@ export type ModulationDestination =
   | "micro-feedback"
   | "bitcrusher-bits"
   | "chebyshev-order"
-  | "reverb1-wet"
-  | "reverb2-wet"
   | "none";
 
 /**
