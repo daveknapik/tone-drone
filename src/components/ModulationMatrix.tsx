@@ -25,7 +25,6 @@ import { FilterHandle } from "../types/FilterParams";
 import { DelayHandle } from "../types/DelayParams";
 import { BitCrusherHandle } from "../types/BitCrusherParams";
 import { ChebyshevHandle } from "../types/ChebyshevParams";
-import { ReverbHandle } from "../types/ReverbParams";
 import { coerceParamToNumber } from "../utils/modulationRange";
 
 const DEFAULT_LFOS: LFOParams[] = [
@@ -47,8 +46,6 @@ interface ModulationMatrixProps {
     micro?: React.RefObject<Tone.FeedbackDelay>;
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
-    reverb1?: React.RefObject<Tone.Reverb>;
-    reverb2?: React.RefObject<Tone.Reverb>;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;
@@ -56,8 +53,6 @@ interface ModulationMatrixProps {
     microRef?: React.RefObject<DelayHandle | null>;
     bitCrusherRef?: React.RefObject<BitCrusherHandle | null>;
     chebyshevRef?: React.RefObject<ChebyshevHandle | null>;
-    reverb1Ref?: React.RefObject<ReverbHandle | null>;
-    reverb2Ref?: React.RefObject<ReverbHandle | null>;
   };
 }
 
@@ -420,46 +415,6 @@ function ModulationMatrix({
                   : {
                       min: clamp(current - 0.1),
                       max: clamp(current + 0.1),
-                    };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
-                i === routeIndex ? { ...rt, ...updated } : rt
-              );
-              setRoutes(newRoutes);
-              return;
-            }
-            if (dest === "reverb1-wet") {
-              const params = effectRefs?.reverb1Ref?.current?.getParams();
-              const current =
-                params?.wet ?? effects?.reverb1?.current?.wet.value ?? 0;
-              const clamp = (v: number) => Math.max(0, Math.min(1, v));
-              const updated: Partial<ModulationRoute> =
-                (route.rangeMode ?? "center") === "center"
-                  ? { center: clamp(current) }
-                  : {
-                      min: clamp(current * 0.8),
-                      max:
-                        clamp(current * 1.0 + 0.2) > 1
-                          ? 1
-                          : clamp(current * 1.2),
-                    };
-              const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
-                i === routeIndex ? { ...rt, ...updated } : rt
-              );
-              setRoutes(newRoutes);
-              return;
-            }
-            if (dest === "reverb2-wet") {
-              const current = effects?.reverb2?.current?.wet.value ?? 0;
-              const clamp = (v: number) => Math.max(0, Math.min(1, v));
-              const updated: Partial<ModulationRoute> =
-                (route.rangeMode ?? "center") === "center"
-                  ? { center: clamp(current) }
-                  : {
-                      min: clamp(current * 0.8),
-                      max:
-                        clamp(current * 1.0 + 0.2) > 1
-                          ? 1
-                          : clamp(current * 1.2),
                     };
               const newRoutes: ModulationRoute[] = routes.map((rt, i) =>
                 i === routeIndex ? { ...rt, ...updated } : rt

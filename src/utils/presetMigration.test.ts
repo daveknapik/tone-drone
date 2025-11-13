@@ -6,7 +6,7 @@ import {
   CURRENT_PRESET_VERSION,
 } from "./presetMigration";
 import type { Preset, PresetState } from "../types/Preset";
-import { DEFAULT_BPM, DEFAULT_REVERB_PARAMS } from "./presetDefaults";
+import { DEFAULT_BPM } from "./presetDefaults";
 
 describe("presetMigration", () => {
   const createV1Preset = (): Preset => ({
@@ -193,11 +193,8 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        // Effects should be preserved, but reverb is added by v5→v6 migration
-        expect(migrated.state.effects).toEqual({
-          ...v1Preset.state.effects,
-          reverb: DEFAULT_REVERB_PARAMS,
-        });
+        // Effects should be preserved (reverb was removed from app, so not added)
+        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
         expect(migrated.state.effectsBusSend).toBe(
           v1Preset.state.effectsBusSend
         );
@@ -326,11 +323,8 @@ describe("presetMigration", () => {
         });
         // Second polysynth should be added during v3→v4 migration
         expect(migrated.state.polysynths.polysynths).toHaveLength(2);
-        // Effects should be preserved, but reverb is added by v5→v6 migration
-        expect(migrated.state.effects).toEqual({
-          ...v2Preset.state.effects,
-          reverb: DEFAULT_REVERB_PARAMS,
-        });
+        // Effects should be preserved (reverb was removed from app, so not added)
+        expect(migrated.state.effects).toEqual(v2Preset.state.effects);
         expect(migrated.state.effectsBusSend).toBe(
           v2Preset.state.effectsBusSend
         );
@@ -354,11 +348,8 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        // Effects should be preserved, but reverb is added by v5→v6 migration
-        expect(migrated.state.effects).toEqual({
-          ...v1Preset.state.effects,
-          reverb: DEFAULT_REVERB_PARAMS,
-        });
+        // Effects should be preserved (reverb was removed from app, so not added)
+        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
       });
     });
 

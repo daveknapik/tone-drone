@@ -4,7 +4,6 @@ import { ModulationRoute, LFOParams } from "../types/ModulationMatrixParams";
 import { OscillatorWithChannel } from "../types/OscillatorWithChannel";
 import { FilterHandle } from "../types/FilterParams";
 import { DelayHandle } from "../types/DelayParams";
-import { ReverbHandle } from "../types/ReverbParams";
 import { ModulationConnectionManager } from "../utils/modulationConnectionManager";
 import { computeRouteRange, defaultsForDestination } from "../utils/modulationRange";
 import { DEBUG_AUDIO } from "../utils/debug";
@@ -15,12 +14,10 @@ interface ControlRateRoute {
     | "filter-frequency"
     | "filter-q"
     | "bitcrusher-bits"
-    | "chebyshev-order"
-    | "reverb1-wet"
-    | "reverb2-wet";
+    | "chebyshev-order";
   amount: number;
   route: ModulationRoute;
-  node: Tone.Filter | Tone.BitCrusher | Tone.Chebyshev | Tone.Reverb;
+  node: Tone.Filter | Tone.BitCrusher | Tone.Chebyshev;
 }
 
 interface UseModulationRoutingProps {
@@ -36,15 +33,11 @@ interface UseModulationRoutingProps {
     micro?: React.RefObject<Tone.FeedbackDelay>;
     bitCrusher?: React.RefObject<Tone.BitCrusher>;
     chebyshev?: React.RefObject<Tone.Chebyshev>;
-    reverb1?: React.RefObject<Tone.Reverb>;
-    reverb2?: React.RefObject<Tone.Reverb>;
   };
   effectRefs?: {
     filterRef?: React.RefObject<FilterHandle | null>;
     delayRef?: React.RefObject<DelayHandle | null>;
     microRef?: React.RefObject<DelayHandle | null>;
-    reverb1Ref?: React.RefObject<ReverbHandle | null>;
-    reverb2Ref?: React.RefObject<ReverbHandle | null>;
   };
   sampleLfo: (lfoIdx: number, type: string) => number;
 }
@@ -211,31 +204,6 @@ export function useModulationRouting({
             effects.micro.current.feedback.value = p.feedback;
             effects.micro.current.feedback.cancelScheduledValues(0);
             effects.micro.current.delayTime.cancelScheduledValues(0);
-          } else if (dest === "reverb1-wet") {
-            if (effects?.reverb1?.current && effectRefs?.reverb1Ref?.current) {
-              const p = effectRefs.reverb1Ref.current.getParams();
-              effects.reverb1.current.set({
-                decay: p.decay,
-                preDelay: p.preDelay,
-                wet: p.wet,
-              });
-              effects.reverb1.current.wet.cancelScheduledValues(0);
-            } else if (effects?.reverb1?.current) {
-              // Fallback: cancel schedules only
-              effects.reverb1.current.wet.cancelScheduledValues(0);
-            }
-          } else if (dest === "reverb2-wet") {
-            if (effects?.reverb2?.current && effectRefs?.reverb2Ref?.current) {
-              const p = effectRefs.reverb2Ref.current.getParams();
-              effects.reverb2.current.set({
-                decay: p.decay,
-                preDelay: p.preDelay,
-                wet: p.wet,
-              });
-              effects.reverb2.current.wet.cancelScheduledValues(0);
-            } else if (effects?.reverb2?.current) {
-              effects.reverb2.current.wet.cancelScheduledValues(0);
-            }
           }
         } catch {
           // noop: defensive only
@@ -429,34 +397,6 @@ export function useModulationRouting({
           );
           return;
         }
-        // Reverb 1 wet handled at control-rate
-        if (route.destination === "reverb1-wet") {
-          const node = effects?.reverb1?.current;
-          if (node) {
-            controlRoutesRef.current.push({
-              lfoIndex: route.sourceIndex,
-              dest: "reverb1-wet",
-              amount: route.amount,
-              route,
-              node,
-            });
-            return;
-          }
-        }
-        // Reverb 2 wet handled at control-rate
-        if (route.destination === "reverb2-wet") {
-          const node = effects?.reverb2?.current;
-          if (node) {
-            controlRoutesRef.current.push({
-              lfoIndex: route.sourceIndex,
-              dest: "reverb2-wet",
-              amount: route.amount,
-              route,
-              node,
-            });
-            return;
-          }
-        }
 
         console.warn(`Unsupported destination: ${route.destination}`);
       } catch (error) {
@@ -537,25 +477,6 @@ export function useModulationRouting({
                 console.log(
                   `[ModMatrix] LFO ${cr.lfoIndex + 1} → Chebyshev order:`,
                   rounded
-                );
-                lastLogMs = now;
-              }
-            }
-          } else if (cr.dest === "reverb1-wet" || cr.dest === "reverb2-wet") {
-            const v =
-              mode === "center"
-                ? Math.max(def.min, Math.min(def.max, center + sample * amountAroundCenter))
-                : Math.max(def.min, Math.min(def.max, min + unipolar * span));
-            (cr.node as Tone.Reverb).wet.value = v;
-            if (DEBUG_AUDIO) {
-              const now =
-                typeof performance !== "undefined"
-                  ? performance.now()
-                  : Date.now();
-              if (now - lastLogMs > 100) {
-                console.log(
-                  `[ModMatrix] LFO ${cr.lfoIndex + 1} → Reverb wet:`,
-                  v.toFixed(3)
                 );
                 lastLogMs = now;
               }

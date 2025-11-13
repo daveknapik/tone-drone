@@ -361,46 +361,6 @@ export class ModulationConnectionManager {
     });
   }
 
-  /** Connect to Reverb Wet (0..1) using audio-rate modulation */
-  connectReverbWet(
-    connectionId: string,
-    lfoSignal: Tone.Signal,
-    depthMultiplier: Tone.Multiply,
-    destination: ModulationDestination,
-    reverb: Tone.Reverb
-  ): void {
-    const scale = new Tone.Scale({ min: 0, max: 1 });
-    lfoSignal.connect(depthMultiplier);
-    depthMultiplier.connect(scale);
-    scale.connect(reverb.wet as unknown as Tone.ToneAudioNode);
-    this.scaleNodes.set(connectionId, scale);
-
-    const cleanup = () => {
-      try {
-        // Disconnect only this path; do not sever other LFO routes
-        (
-          lfoSignal as unknown as {
-            disconnect: (dest?: Tone.ToneAudioNode) => void;
-          }
-        ).disconnect(depthMultiplier as unknown as Tone.ToneAudioNode);
-      } catch {
-        /* noop */
-      }
-      depthMultiplier.disconnect();
-      scale.disconnect();
-      scale.dispose();
-      this.scaleNodes.delete(connectionId);
-    };
-
-    this.connections.set(connectionId, {
-      type: "volume",
-      source: lfoSignal as unknown as Tone.ToneAudioNode,
-      depthMultiplier,
-      destination,
-      nodes: [scale],
-      cleanup,
-    });
-  }
 
   /** Connect to BitCrusher bits (2..8) */
   connectBitCrusherBits(

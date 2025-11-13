@@ -147,9 +147,6 @@ export function defaultsForDestination(destination: ModulationDestination): Rang
       return { min: 1, max: 16 };
     case "chebyshev-order":
       return { min: 1, max: 100 };
-    case "reverb1-wet":
-    case "reverb2-wet":
-      return { min: 0, max: 1 };
     default:
       return null;
   }

@@ -34,8 +34,6 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
     microlooper: droneSynthRef.current?.microlooperRef ?? { current: null },
     afterFilter: droneSynthRef.current?.afterFilterRef ?? { current: null },
     delay: droneSynthRef.current?.delayRef ?? { current: null },
-    reverb1: droneSynthRef.current?.reverb1Ref ?? { current: null },
-    reverb2: droneSynthRef.current?.reverb2Ref ?? { current: null },
     effectsBusSendRef: droneSynthRef.current?.effectsBusSendRef ?? {
       current: null,
     },
