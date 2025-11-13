@@ -4,6 +4,7 @@ import Slider from "./Slider";
 
 import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { DelayHandle, DelayParams } from "../types/DelayParams";
+import { useRampedParameter } from "../hooks/useRampedParameter";
 
 interface DelayProps {
   delay: React.RefObject<Tone.FeedbackDelay>;
@@ -42,21 +43,38 @@ function Delay({
     };
   }, [time, feedback, wet]);
 
+  // Smooth ramped parameter updates (prevents clicking)
+  const timeRamped = useRampedParameter(
+    delay.current?.delayTime,
+    onParameterChange
+  );
+  const feedbackRamped = useRampedParameter(
+    delay.current?.feedback,
+    onParameterChange
+  );
+  const wetRamped = useRampedParameter(delay.current?.wet, onParameterChange);
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     getParams: (): DelayParams => paramsRef.current,
     setParams: (params: DelayParams) => {
+      // Apply audio parameters with smooth ramping (prevents clicks on preset load)
+      timeRamped.rampTo(params.time);
+      feedbackRamped.rampTo(params.feedback);
+      wetRamped.rampTo(params.wet);
+      // Update React state for UI
       setTime(params.time);
       setFeedback(params.feedback);
       setWet(params.wet);
     },
   }));
 
-  delay.current.set({
-    delayTime: time,
-    feedback: feedback,
-    wet: wet,
-  });
+  // Apply initial parameter values on mount
+  useEffect(() => {
+    timeRamped.rampTo(time);
+    feedbackRamped.rampTo(feedback);
+    wetRamped.rampTo(wet);
+  }, []); // Empty deps - only run on mount
 
   return (
     <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
@@ -69,8 +87,10 @@ function Delay({
         labelText="Time"
         step={0.01}
         handleChange={(e) => {
-          setTime(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newTime = parseFloat(e.target.value);
+          timeRamped.rampTo(newTime); // Smooth audio update
+          setTime(newTime); // UI state update
+          timeRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
@@ -81,8 +101,10 @@ function Delay({
         labelText="Feedback"
         step={0.01}
         handleChange={(e) => {
-          setFeedback(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newFeedback = parseFloat(e.target.value);
+          feedbackRamped.rampTo(newFeedback); // Smooth audio update
+          setFeedback(newFeedback); // UI state update
+          feedbackRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
@@ -93,8 +115,10 @@ function Delay({
         step={0.01}
         labelText="Dry / Wet"
         handleChange={(e) => {
-          setWet(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newWet = parseFloat(e.target.value);
+          wetRamped.rampTo(newWet); // Smooth audio update
+          setWet(newWet); // UI state update
+          wetRamped.markModified(); // Debounced preset marking
         }}
       />
     </div>

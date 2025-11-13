@@ -58,6 +58,7 @@ describe("SynthEnvelopeControl", () => {
   });
 
   it("calls onChange callback when slider values change", () => {
+    vi.useFakeTimers();
     const handleChange = vi.fn();
 
     render(<SynthEnvelopeControl onChange={handleChange} />);
@@ -67,15 +68,21 @@ describe("SynthEnvelopeControl", () => {
     // Use fireEvent for range input change
     fireEvent.change(attackSlider, { target: { value: "0.8" } });
 
+    // Wait for debounced callback (50ms)
+    vi.advanceTimersByTime(50);
+
     expect(handleChange).toHaveBeenCalled();
     expect(handleChange).toHaveBeenCalledWith(
       expect.objectContaining({
         attack: 0.8,
       })
     );
+
+    vi.useRealTimers();
   });
 
   it("calls onParameterChange callback when slider values change", () => {
+    vi.useFakeTimers();
     const handleParameterChange = vi.fn();
 
     render(<SynthEnvelopeControl onParameterChange={handleParameterChange} />);
@@ -85,7 +92,12 @@ describe("SynthEnvelopeControl", () => {
     // Use fireEvent for range input change
     fireEvent.change(releaseSlider, { target: { value: "3" } });
 
+    // Wait for debounced callback (500ms)
+    vi.advanceTimersByTime(500);
+
     expect(handleParameterChange).toHaveBeenCalled();
+
+    vi.useRealTimers();
   });
 
   it("exposes getParams method via ref", () => {

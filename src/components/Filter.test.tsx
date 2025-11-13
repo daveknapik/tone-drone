@@ -8,13 +8,14 @@ import { FilterHandle, FilterParams } from "../types/FilterParams";
 // Mock Tone.js
 vi.mock("tone", () => {
   const mockSet = vi.fn();
+  const mockRampTo = vi.fn();
 
   return {
     Filter: vi.fn().mockImplementation(() => ({
       set: mockSet,
       rolloff: -12,
-      frequency: { value: 300 },
-      Q: { value: 1 },
+      frequency: { value: 300, rampTo: mockRampTo },
+      Q: { value: 1, rampTo: mockRampTo },
       type: "highpass",
       dispose: vi.fn(),
     })),

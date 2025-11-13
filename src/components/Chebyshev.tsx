@@ -4,6 +4,7 @@ import Slider from "./Slider";
 
 import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { ChebyshevHandle, ChebyshevParams } from "../types/ChebyshevParams";
+import { useRampedParameter } from "../hooks/useRampedParameter";
 
 interface ChebyshevProps {
   chebyshev: React.RefObject<Tone.Chebyshev>;
@@ -29,27 +30,45 @@ function Chebyshev({ chebyshev, ref, onParameterChange }: ChebyshevProps) {
     };
   }, [order, wet]);
 
+  // Smooth ramped parameter updates (prevents clicking)
+  // Note: order is not an AudioParam, so it's set directly via useEffect
+  const wetRamped = useRampedParameter(
+    chebyshev.current?.wet,
+    onParameterChange
+  );
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     getParams: (): ChebyshevParams => paramsRef.current,
     setParams: (params: ChebyshevParams) => {
+      // Apply wet with smooth ramping (prevents clicks on preset load)
+      wetRamped.rampTo(params.wet);
+      // Update React state for UI
       setOrder(params.order);
       setWet(params.wet);
     },
   }));
 
-  chebyshev.current.set({
-    order,
-    wet,
-  });
+  // Apply initial wet value on mount
+  useEffect(() => {
+    wetRamped.rampTo(wet);
+  }, []); // Empty deps - only run on mount
+
+  // Update order directly (not an AudioParam, can't be ramped)
+  useEffect(() => {
+    if (chebyshev.current) {
+      chebyshev.current.order = order;
+    }
+  }, [chebyshev, order]);
 
   return (
     <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
       <div className="col-span-full mb-1 text-center">Chebyshev</div>
       <Slider
         handleChange={(e) => {
-          setOrder(parseInt(e.target.value));
-          onParameterChange?.();
+          const newOrder = parseInt(e.target.value);
+          setOrder(newOrder); // UI state update (useEffect handles Tone.js)
+          onParameterChange?.(); // Mark preset modified
         }}
         inputName="order"
         labelText="Order"
@@ -59,8 +78,10 @@ function Chebyshev({ chebyshev, ref, onParameterChange }: ChebyshevProps) {
       />
       <Slider
         handleChange={(e) => {
-          setWet(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newWet = parseFloat(e.target.value);
+          wetRamped.rampTo(newWet); // Smooth audio update
+          setWet(newWet); // UI state update
+          wetRamped.markModified(); // Debounced preset marking
         }}
         inputName="wet"
         labelText="Dry / Wet"
