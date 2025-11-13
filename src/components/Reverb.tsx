@@ -4,6 +4,7 @@ import Slider from "./Slider";
 
 import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { ReverbHandle, ReverbParams } from "../types/ReverbParams";
+import { useRampedParameter } from "../hooks/useRampedParameter";
 
 interface ReverbProps {
   reverb: React.RefObject<Tone.Reverb>;
@@ -41,16 +42,21 @@ function Reverb({
     };
   }, [decay, preDelay, wet]);
 
+  // Smooth ramped parameter updates (prevents clicking)
+  const wetRamped = useRampedParameter(reverb.current?.wet, onParameterChange);
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     getParams: (): ReverbParams => paramsRef.current,
     setParams: (params: ReverbParams) => {
       if (!params) return; // Guard against undefined params
+      // Apply wet with smooth ramping (prevents clicks on preset load)
+      wetRamped.rampTo(params.wet);
+      // Update React state for UI
       setDecay(params.decay);
       setPreDelay(params.preDelay);
       setWet(params.wet);
       // Apply params to reverb instance
-      reverb.current.set({ wet: params.wet });
       reverb.current.decay = params.decay;
       reverb.current.preDelay = params.preDelay;
     },
@@ -79,13 +85,13 @@ function Reverb({
   // Apply current UI params when the reverb instance becomes ready
   useEffect(() => {
     if (isReady && reverb.current) {
-      // Set wet via .set() to avoid conflicts with modulation
-      reverb.current.set({ wet });
       // Apply decay/preDelay which may regenerate IR
       reverb.current.decay = decay;
       reverb.current.preDelay = preDelay;
+      // Apply wet with ramping
+      wetRamped.rampTo(wet);
     }
-  }, [isReady, reverb, decay, preDelay, wet]);
+  }, [isReady, reverb, decay, preDelay, wet, wetRamped]);
 
   return (
     <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
@@ -129,9 +135,9 @@ function Reverb({
         labelText="Dry / Wet"
         handleChange={(e) => {
           const newWet = parseFloat(e.target.value);
-          setWet(newWet);
-          reverb.current.set({ wet: newWet });
-          onParameterChange?.();
+          wetRamped.rampTo(newWet); // Smooth audio update
+          setWet(newWet); // UI state update
+          wetRamped.markModified(); // Debounced preset marking
         }}
       />
     </div>

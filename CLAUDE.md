@@ -22,6 +22,18 @@ npm run lint
 npm run preview
 ```
 
+## Development Workflow
+
+When making changes, always follow this checklist before declaring work complete:
+
+1. **Run the linter**: `npm run lint` - Ensure no TypeScript or ESLint errors
+2. **Run unit tests**: `npm run test:run` - Verify all tests pass
+3. **Check browser console**: Use Chrome DevTools MCP to check for runtime errors
+   - Even if code compiles, runtime errors may occur
+   - Look for uncaught errors, warnings, and network issues
+4. **Test in the browser**: Manually verify the feature works as expected
+5. **Run E2E tests** (if applicable): Ensure user workflows aren't broken
+
 ## Testing
 
 The project has two types of tests:

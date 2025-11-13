@@ -5,6 +5,7 @@ import Slider from "./Slider";
 import { useEffect, useState, useImperativeHandle, useRef } from "react";
 import OptionsSelector from "./OptionsSelector";
 import { AutoFilterHandle, AutoFilterParams } from "../types/AutoFilterParams";
+import { useRampedParameter } from "../hooks/useRampedParameter";
 
 interface AutoFilterProps {
   filter: React.RefObject<Tone.AutoFilter>;
@@ -48,10 +49,31 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
     };
   }, [baseFrequency, depth, frequency, rolloff, Q, wet, type, oscillatorType]);
 
+  // Smooth ramped parameter updates (prevents clicking)
+  // Type assertions needed for AutoFilter's Frequency types
+  const baseFrequencyRamped = useRampedParameter(
+    filter.current?.baseFrequency as unknown as { rampTo: (value: number, rampTime: number) => void } | undefined,
+    onParameterChange
+  );
+  const depthRamped = useRampedParameter(filter.current?.depth, onParameterChange);
+  const frequencyRamped = useRampedParameter(
+    filter.current?.frequency as unknown as { rampTo: (value: number, rampTime: number) => void } | undefined,
+    onParameterChange
+  );
+  const qRamped = useRampedParameter(filter.current?.filter.Q, onParameterChange);
+  const wetRamped = useRampedParameter(filter.current?.wet, onParameterChange);
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     getParams: (): AutoFilterParams => paramsRef.current,
     setParams: (params: AutoFilterParams) => {
+      // Apply audio parameters with smooth ramping (prevents clicks on preset load)
+      baseFrequencyRamped.rampTo(params.baseFrequency);
+      depthRamped.rampTo(params.depth);
+      frequencyRamped.rampTo(params.frequency);
+      qRamped.rampTo(params.Q);
+      wetRamped.rampTo(params.wet);
+      // Update React state for UI
       setBaseFrequency(params.baseFrequency);
       setDepth(params.depth);
       setFrequency(params.frequency);
@@ -63,19 +85,23 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
     },
   }));
 
-  filter.current.set({
-    baseFrequency,
-    depth,
-    frequency,
-    wet,
-    filter: { type, Q },
-    type: oscillatorType,
-  });
-
-  // rolloff can't go via the set method or it makes the filter stutter and glitch, but this works
+  // Apply initial parameter values on mount
   useEffect(() => {
-    filter.current.filter.rolloff = rolloff;
-  }, [filter, rolloff]);
+    baseFrequencyRamped.rampTo(baseFrequency);
+    depthRamped.rampTo(depth);
+    frequencyRamped.rampTo(frequency);
+    qRamped.rampTo(Q);
+    wetRamped.rampTo(wet);
+  }, []); // Empty deps - only run on mount
+
+  // Update properties that can't be ramped (non-AudioParams)
+  useEffect(() => {
+    if (filter.current) {
+      filter.current.filter.type = type;
+      filter.current.type = oscillatorType;
+      filter.current.filter.rolloff = rolloff;
+    }
+  }, [filter, type, oscillatorType, rolloff]);
 
   return (
     <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
@@ -88,8 +114,10 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
         labelText="Base Freq"
         step={1}
         handleChange={(e) => {
-          setBaseFrequency(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newBaseFrequency = parseFloat(e.target.value);
+          baseFrequencyRamped.rampTo(newBaseFrequency); // Smooth audio update
+          setBaseFrequency(newBaseFrequency); // UI state update
+          baseFrequencyRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
@@ -100,8 +128,10 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
         labelText="Speed"
         step={0.01}
         handleChange={(e) => {
-          setFrequency(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newFrequency = parseFloat(e.target.value);
+          frequencyRamped.rampTo(newFrequency); // Smooth audio update
+          setFrequency(newFrequency); // UI state update
+          frequencyRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
@@ -112,8 +142,10 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
         labelText="Q"
         step={0.01}
         handleChange={(e) => {
-          setQ(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newQ = parseFloat(e.target.value);
+          qRamped.rampTo(newQ); // Smooth audio update
+          setQ(newQ); // UI state update
+          qRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
@@ -124,8 +156,10 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
         labelText="Depth"
         step={0.01}
         handleChange={(e) => {
-          setDepth(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newDepth = parseFloat(e.target.value);
+          depthRamped.rampTo(newDepth); // Smooth audio update
+          setDepth(newDepth); // UI state update
+          depthRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
@@ -136,8 +170,10 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
         labelText="Dry / Wet"
         step={0.01}
         handleChange={(e) => {
-          setWet(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newWet = parseFloat(e.target.value);
+          wetRamped.rampTo(newWet); // Smooth audio update
+          setWet(newWet); // UI state update
+          wetRamped.markModified(); // Debounced preset marking
         }}
       />
       <div className="mt-3 space-y-2">

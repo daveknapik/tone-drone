@@ -173,7 +173,9 @@ function Oscillator({
     if (hasCancelScheduledValues(freqParam)) {
       freqParam.cancelScheduledValues(now);
     }
-    oscillator.frequency.setValueAtTime(frequency, now);
+    // Use exponentialRampTo for smooth, click-free frequency transitions
+    // 0.05s ramp time is fast enough to feel responsive, slow enough to prevent clicks
+    oscillator.frequency.exponentialRampTo(frequency, 0.05, now);
     oscillator.type = waveform as Tone.ToneOscillatorType;
 
     if (oscillator instanceof Tone.FatOscillator) {

@@ -9,6 +9,8 @@ import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { useAudioContext } from "../hooks/useAudioContext";
 import { useKeyDown } from "../hooks/useKeyDown";
 import { PolySynthHandle, PolySynthParams } from "../types/PolySynthParams";
+import { useRampedParameter } from "../hooks/useRampedParameter";
+import { useDebounceCallback } from "usehooks-ts";
 
 interface PolysynthProps {
   polySynth: Tone.PolySynth;
@@ -66,12 +68,20 @@ function PolySynth({
     };
   }, [frequency, waveform, volume, pan, attack, decay, sustain, release]);
 
+  // Smooth ramped parameter updates (prevents clicking)
+  const volumeRamped = useRampedParameter(polySynth?.volume, onParameterChange);
+  const panRamped = useRampedParameter(panner?.pan, onParameterChange);
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     getParams: (): PolySynthParams => paramsRef.current,
     setParams: (params: PolySynthParams) => {
       setFrequency(params.frequency);
       setWaveform(params.waveform);
+      // Apply audio parameters with smooth ramping (prevents clicks on preset load)
+      volumeRamped.rampTo(params.volume);
+      panRamped.rampTo(params.pan);
+      // Update React state for UI
       setVolume(params.volume);
       setPan(params.pan);
       setAttack(params.attack);
@@ -81,8 +91,11 @@ function PolySynth({
     },
   }));
 
-  polySynth.volume.setTargetAtTime(volume, 0, 0.01);
-  panner.pan.setTargetAtTime(pan, 0, 0.01);
+  // Apply initial volume and pan values on mount
+  useEffect(() => {
+    volumeRamped.rampTo(volume);
+    panRamped.rampTo(pan);
+  }, []); // Empty deps - only run on mount
 
   const playNote = (): void => {
     void handleBrowserAudioStart();
@@ -94,18 +107,27 @@ function PolySynth({
     playNote();
   }, keyboardShortcuts);
 
-  polySynth.set({
-    oscillator: { type: waveform },
-    envelope: {
-      attack,
-      attackCurve: "linear",
-      decay,
-      decayCurve: "linear",
-      release,
-      releaseCurve: "linear",
-      sustain,
-    },
-  });
+  // Update envelope and oscillator type (debounced to reduce update frequency)
+  // Envelope params can't be ramped (not AudioParams), so we debounce instead
+  const debouncedUpdateSynth = useDebounceCallback(() => {
+    polySynth.set({
+      oscillator: { type: waveform },
+      envelope: {
+        attack,
+        attackCurve: "linear",
+        decay,
+        decayCurve: "linear",
+        release,
+        releaseCurve: "linear",
+        sustain,
+      },
+    });
+  }, 50);
+
+  // Trigger synth updates when parameters change
+  useEffect(() => {
+    debouncedUpdateSynth();
+  }, [waveform, attack, decay, sustain, release, debouncedUpdateSynth]);
 
   return (
     <div>
@@ -118,8 +140,10 @@ function PolySynth({
         logarithmic={true}
         value={volume}
         handleChange={(e) => {
-          setVolume(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newVolume = parseFloat(e.target.value);
+          volumeRamped.rampTo(newVolume); // Smooth audio update
+          setVolume(newVolume); // UI state update
+          volumeRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
@@ -130,8 +154,10 @@ function PolySynth({
         step={0.01}
         value={pan}
         handleChange={(e) => {
-          setPan(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newPan = parseFloat(e.target.value);
+          panRamped.rampTo(newPan); // Smooth audio update
+          setPan(newPan); // UI state update
+          panRamped.markModified(); // Debounced preset marking
         }}
       />
       <Slider
