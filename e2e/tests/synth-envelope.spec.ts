@@ -33,13 +33,13 @@ test.describe("Synth Envelope Controls", () => {
   });
 
   test("should update release value", async () => {
-    await envelopePage.setRelease(2.5);
-    await envelopePage.expectRelease(2.5);
+    await envelopePage.setRelease(1.5);
+    await envelopePage.expectRelease(1.5);
   });
 
   test("should update all envelope parameters together", async () => {
-    await envelopePage.setEnvelope(1.0, 0.8, 0.6, 3.0);
-    await envelopePage.expectEnvelope(1.0, 0.8, 0.6, 3.0);
+    await envelopePage.setEnvelope(1.0, 0.8, 0.6, 2.0);
+    await envelopePage.expectEnvelope(1.0, 0.8, 0.6, 2.0);
   });
 
   test("should handle minimum attack value", async () => {
@@ -62,9 +62,9 @@ test.describe("Synth Envelope Controls", () => {
     await envelopePage.expectSustain(1);
   });
 
-  test("should handle maximum release value", async () => {
-    await envelopePage.setRelease(5);
-    await envelopePage.expectRelease(5);
+  test("should handle maximum release value (2s)", async () => {
+    await envelopePage.setRelease(2);
+    await envelopePage.expectRelease(2);
   });
 
   test("should maintain envelope values independently", async () => {
@@ -116,7 +116,7 @@ test.describe("Synth Envelope Preset Integration", () => {
       attack: 1.2,
       decay: 0.6,
       sustain: 0.4,
-      release: 3.5,
+      release: 2.0,
     };
 
     await envelopePage.setEnvelope(
@@ -247,8 +247,8 @@ test.describe("Synth Envelope Edge Cases", () => {
   });
 
   test("should handle all parameters at maximum", async () => {
-    await envelopePage.setEnvelope(2, 2, 1, 5);
-    await envelopePage.expectEnvelope(2, 2, 1, 5);
+    await envelopePage.setEnvelope(2, 1, 1, 2);
+    await envelopePage.expectEnvelope(2, 1, 1, 2);
   });
 
   test("should handle decimal precision", async () => {
@@ -258,7 +258,7 @@ test.describe("Synth Envelope Edge Cases", () => {
 
   test.skip("should maintain envelope during page refresh", async ({ page }) => {
     // Set custom envelope
-    await envelopePage.setEnvelope(0.4, 0.6, 0.8, 2.2);
+    await envelopePage.setEnvelope(0.4, 0.6, 0.8, 2.0);
 
     // Save preset
     const presetPage = new PresetPage(page);
@@ -269,7 +269,7 @@ test.describe("Synth Envelope Edge Cases", () => {
     await page.waitForLoadState("networkidle");
 
     // Envelope should be restored from last loaded preset
-    await envelopePage.expectEnvelope(0.4, 0.6, 0.8, 2.2);
+    await envelopePage.expectEnvelope(0.4, 0.6, 0.8, 2.0);
 
     // Cleanup
     await presetPage.deleteUserPreset("Refresh Test");

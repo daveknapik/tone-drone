@@ -15,13 +15,16 @@ function BpmControl({ onParameterChange, ref }: BpmControlProps) {
 
   // Initialize BPM from Tone.js transport on mount
   useEffect(() => {
-    const currentBpm = Tone.getTransport().bpm.value;
+    const transport = Tone.getTransport();
+    const currentBpm = transport.bpm.value;
     setBpm(currentBpm);
   }, []);
 
   const updateBpm = (bpm: number): void => {
-    Tone.getTransport().bpm.value = bpm;
-    setBpm(bpm);
+    // Cap BPM at 300 to prevent audio glitches with high BPM + long release times
+    const cappedBpm = Math.min(bpm, 300);
+    Tone.getTransport().bpm.value = cappedBpm;
+    setBpm(cappedBpm);
     onParameterChange?.();
   };
 
@@ -34,16 +37,18 @@ function BpmControl({ onParameterChange, ref }: BpmControlProps) {
   }));
 
   return (
-    <Slider
-      inputName="bpm"
-      min={0}
-      max={999}
-      value={bpm}
-      labelText="bpm"
-      step={0.01}
-      handleChange={(e) => updateBpm(parseFloat(e.target.value))}
-      testId="bpm-slider"
-    />
+    <div title="Beats per minute (0-300 BPM). Capped at 300 to prevent audio glitches with high BPM and long release times.">
+      <Slider
+        inputName="bpm"
+        min={0}
+        max={300}
+        value={bpm}
+        labelText="bpm"
+        step={0.01}
+        handleChange={(e) => updateBpm(parseFloat(e.target.value))}
+        testId="bpm-slider"
+      />
+    </div>
   );
 }
 

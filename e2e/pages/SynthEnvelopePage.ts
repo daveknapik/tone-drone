@@ -104,8 +104,8 @@ export class SynthEnvelopePage extends BasePage {
     // Default values from DEFAULT_SYNTH_ENVELOPE_PARAMS
     await this.expectAttack(0.01);
     await this.expectDecay(0.1);
-    await this.expectSustain(0.5);
-    await this.expectRelease(1.0);
+    await this.expectSustain(0.25);
+    await this.expectRelease(0.5);
   }
 
   // Helpers

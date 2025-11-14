@@ -274,7 +274,7 @@ test("should do something", async ({ page }) => {
 - **Oscillator Types**: Supports both Tone.Oscillator (basic, single voice) and Tone.FatOscillator (fat mode with multiple detuned voices). Type switching properly disposes and recreates oscillator instances while preserving playing state
 - **Fat Oscillator Parameters**: Auto-switches between basic (voices=1) and fat (voices>1) modes. When switching to fat mode, detune is automatically set to minimum of 1 cent to prevent silence. Voices slider is always visible (1-10 range). Detune slider is always visible but disabled when voices=1
 - **Step Sequencer**: 16-step sequencer with visual beat indication and real-time step editing. Supports per-oscillator pattern manipulation with mute, clear, and randomize controls
-- **Synth Envelope Controls**: Global ADSR envelope controls for all step sequencer synths. Controls attack (0-2s), decay (0-2s), sustain (0-1), and release (0-5s) parameters. Default values (A=0.01s, D=0.1s, S=0.5, R=1.0s) provide quick attack with natural decay, adjustable for pad-like sustained sounds
+- **Synth Envelope Controls**: Global ADSR envelope controls for all step sequencer synths. Controls attack (0-2s), decay (0-1s), sustain (0-1), and release (0-2s) parameters. Default values (A=0.01s, D=0.1s, S=0.25, R=0.5s) provide quick attack with natural decay, optimized to prevent voice accumulation issues
 - **Effects Chain**: Linear effects chain with send control for the main effects bus
 - **Recording**: Built-in recording functionality via `useRecorder` hook
 - **Theme Support**: Dark/light theme toggle using `useDarkMode` hook
@@ -390,7 +390,7 @@ Located in `src/utils/patternUtils.ts`, the pattern randomization system provide
 
 **Global Controls** (in Oscillators top bar):
 
-- **Pattern Density Slider** (0-100%): Controls the probability that any given step is active during randomization. 50% density means approximately half the steps will be active. This is UI state only (not saved in presets, defaults to 50%)
+- **Pattern Density Slider** (0-100%): Controls the probability that any given step is active during randomization. 30% density means approximately 30% of the steps will be active. This is UI state only (not saved in presets, defaults to 30%)
 - **"Randomize All Patterns" Button**: Randomizes all 6 oscillator patterns simultaneously using the current density setting
 
 **Per-Oscillator Controls** (below each sequencer):

@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+import { useEffect } from "react";
 import Step from "./Step";
 import { Sequence } from "../types/Sequence";
 
@@ -25,10 +26,20 @@ function Sequencer({
   volume,
   waveform,
 }: SequencerProps) {
-  synth.volume.setTargetAtTime(volume, 0, 0.01);
-  panner?.pan.setTargetAtTime(pan, 0, 0.01);
+  // Update synth oscillator type only when waveform changes
+  // Moving synth.set() out of render prevents clicks/glitches during playback
+  useEffect(() => {
+    synth.set({ oscillator: { type: waveform as OscillatorType } });
+  }, [synth, waveform]);
 
-  synth.set({ oscillator: { type: waveform as OscillatorType } });
+  // Update volume and pan smoothly (setTargetAtTime is safe to call frequently)
+  useEffect(() => {
+    synth.volume.setTargetAtTime(volume, 0, 0.01);
+  }, [synth, volume]);
+
+  useEffect(() => {
+    panner?.pan.setTargetAtTime(pan, 0, 0.01);
+  }, [panner, pan]);
 
   return (
     <div className="grid grid-cols-8 gap-2">
