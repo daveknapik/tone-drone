@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 Major Release - Modulation Matrix
 
-This release introduces the **Modulation Matrix**, the most complex and powerful feature in Tone Drone. After extensive development and debugging to achieve click-free operation, the synthesizer now offers professional-grade LFO-based parameter modulation with a hybrid audio/control-rate architecture.
+This release introduces the **Modulation Matrix**. The synthesizer now offers LFO-based parameter modulation with a hybrid audio/control-rate architecture.
 
 ### Added
 
