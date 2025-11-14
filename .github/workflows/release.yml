@@ -22,6 +22,13 @@ jobs:
         id: version
         run: |
           VERSION=${GITHUB_REF#refs/tags/}
+
+          # Validate tag format (must be vX.Y.Z)
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "::error::Tag must match format vX.Y.Z (e.g., v1.0.0), got: $VERSION"
+            exit 1
+          fi
+
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           # Remove 'v' prefix for changelog lookup (v1.0.0 -> 1.0.0)
           echo "VERSION_NUMBER=${VERSION#v}" >> $GITHUB_OUTPUT
@@ -34,11 +41,13 @@ jobs:
           # Extract the section for this version from CHANGELOG.md
           # Format expected: ## [1.0.0] - 2025-11-11
           # Captures everything until the next ## [ or --- separator
+          # Uses precise regex to match exact version at start of line
 
           CHANGELOG=$(awk -v ver="$VERSION_NUMBER" '
             /^## \[/ {
               if (found) exit
-              if ($0 ~ "\\[" ver "\\]") {
+              # Match exact version: ## [1.0.0] - date (prevents partial matches like 10.0.0 matching 1.0.0)
+              if ($0 ~ "^## \\[" ver "\\]") {
                 found = 1
                 next
               }
@@ -50,7 +59,9 @@ jobs:
           ' CHANGELOG.md)
 
           if [ -z "$CHANGELOG" ]; then
-            echo "⚠️ No changelog entry found for version $VERSION_NUMBER"
+            echo "::error::No changelog entry found for version $VERSION_NUMBER"
+            echo "⚠️ Falling back to default release notes"
+            echo "::warning::Make sure CHANGELOG.md has a section: ## [$VERSION_NUMBER] - YYYY-MM-DD"
             CHANGELOG="Release $VERSION_NUMBER"
           fi
 

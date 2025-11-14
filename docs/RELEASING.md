@@ -149,16 +149,37 @@ See the **Release Management** section in `CLAUDE.md` for complete formatting gu
 
 ### Release workflow didn't trigger
 
-- Check that you pushed the tag: `git push --tags`
-- Verify tag format: Must start with `v` (e.g., `v1.0.0`)
-- Check [Actions tab](https://github.com/daveknapik/tone-drone/actions) for workflow runs
+- **Check tag format**: Must be `vX.Y.Z` (e.g., `v1.0.0`, not `1.0.0` or `v1.0`)
+- **Verify tag was pushed**: `git push --tags` (not just `git push`)
+- **Check Actions tab**: Look for failed workflow runs at [Actions](https://github.com/daveknapik/tone-drone/actions)
+- **Verify permissions**: The workflow needs `contents: write` permission (should be automatic)
 
 ### Release has no notes / wrong notes
 
-- Verify CHANGELOG.md format matches the required format exactly
-- Check that the version in CHANGELOG.md matches the tag (without the `v` prefix)
-  - Tag: `v1.0.0` → CHANGELOG: `## [1.0.0] - ...`
-- Check the workflow logs in GitHub Actions for extraction errors
+- **Check version header**: Must be exactly `## [X.Y.Z] - YYYY-MM-DD` (two `##`, brackets, dash, date)
+- **Verify separator**: Section must end with `---` on its own line
+- **Check version match**: Version in CHANGELOG.md must match the tag (without the `v` prefix)
+  - Tag: `v1.0.0` → CHANGELOG: `## [1.0.0] - 2025-11-11`
+- **Test locally**: Use the npm script to test changelog extraction:
+  ```bash
+  npm run release:test 1.0.0
+  ```
+  Or run the extraction manually:
+  ```bash
+  VERSION_NUMBER="1.0.0"
+  awk -v ver="$VERSION_NUMBER" '/^## \[/ {if (found) exit; if ($0 ~ "^## \\[" ver "\\]") {found=1; next}} found {if (/^## \[/ || /^---$/) exit; print}' CHANGELOG.md
+  ```
+- **Check workflow logs**: Look for extraction errors in GitHub Actions logs
+
+### Changelog extraction failed
+
+- **Verify format**: The version header must match exactly: `## [X.Y.Z] - YYYY-MM-DD`
+- **Check for typos**: Common mistakes:
+  - `### [1.0.0]` (three `#` instead of two)
+  - `## [v1.0.0]` (includes `v` prefix - should be removed)
+  - `## [1.0.0]-2025-11-11` (missing spaces around dash)
+  - Missing `---` separator at end of section
+- **Test extraction**: Use the command above to test locally before tagging
 
 ### Want to delete/update a release
 
