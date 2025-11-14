@@ -87,6 +87,42 @@ export function useSynths(
     busRef.current = bus;
   }, [bus]);
 
+  // Development-mode voice count monitoring
+  // Logs warnings when voice count exceeds 75% of maxPolyphony
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+
+    const monitorInterval = setInterval(() => {
+      synthsRef.current.forEach(({ synth }, index) => {
+        // PolySynth doesn't directly expose activeVoices, but we can check the
+        // number of currently playing voices via the voices array
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        const voices = (synth as any).voices;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        const startedVoices = voices?.filter((v: any) => v.state === "started");
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+        const activeVoices = startedVoices?.length ?? 0;
+        const maxPolyphony = synth.maxPolyphony;
+        const threshold = maxPolyphony * 0.75;
+
+        if (activeVoices > threshold) {
+          console.warn(
+            `[Voice Monitor] Synth ${index + 1}: High voice count ${activeVoices}/${maxPolyphony} (${Math.round((activeVoices / maxPolyphony) * 100)}%)`
+          );
+        }
+
+        // Log critical threshold at 90%
+        if (activeVoices > maxPolyphony * 0.9) {
+          console.error(
+            `[Voice Monitor] Synth ${index + 1}: CRITICAL voice count ${activeVoices}/${maxPolyphony} (${Math.round((activeVoices / maxPolyphony) * 100)}%)`
+          );
+        }
+      });
+    }, 1000); // Check every second
+
+    return () => clearInterval(monitorInterval);
+  }, []); // Only depends on synthsRef which is stable
+
   // Function to update envelope on all synths without recreating them
   // Use synthsRef to always access latest synths, preventing race conditions
   // with debounced updates that might access stale/empty synths array

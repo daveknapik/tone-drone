@@ -46,71 +46,80 @@ function SynthEnvelopeControl({
   useImperativeHandle(ref, () => ({
     getParams: (): SynthEnvelopeParams => paramsRef.current,
     setParams: (params: SynthEnvelopeParams) => {
-      setAttack(params.attack);
-      setDecay(params.decay);
-      setSustain(params.sustain);
-      setRelease(params.release);
+      // Clamp values to slider ranges to match UI constraints
+      setAttack(Math.min(Math.max(params.attack, 0), 2));
+      setDecay(Math.min(Math.max(params.decay, 0), 1));
+      setSustain(Math.min(Math.max(params.sustain, 0), 1));
+      setRelease(Math.min(Math.max(params.release, 0), 2));
     },
   }));
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-      <Slider
-        inputName="synth-attack"
-        labelText="Attack"
-        min={0}
-        max={2}
-        step={0.01}
-        value={attack}
-        handleChange={(e) => {
-          const newAttack = parseFloat(e.target.value);
-          setAttack(newAttack);
-          onChange?.({ attack: newAttack, decay, sustain, release });
-          onParameterChange?.();
-        }}
-      />
-      <Slider
-        inputName="synth-decay"
-        labelText="Decay"
-        min={0}
-        max={1}
-        step={0.01}
-        value={decay}
-        handleChange={(e) => {
-          const newDecay = parseFloat(e.target.value);
-          setDecay(newDecay);
-          onChange?.({ attack, decay: newDecay, sustain, release });
-          onParameterChange?.();
-        }}
-      />
-      <Slider
-        inputName="synth-sustain"
-        labelText="Sustain"
-        min={0}
-        max={1}
-        step={0.01}
-        value={sustain}
-        handleChange={(e) => {
-          const newSustain = parseFloat(e.target.value);
-          setSustain(newSustain);
-          onChange?.({ attack, decay, sustain: newSustain, release });
-          onParameterChange?.();
-        }}
-      />
-      <Slider
-        inputName="synth-release"
-        labelText="Release"
-        min={0}
-        max={2}
-        step={0.01}
-        value={release}
-        handleChange={(e) => {
-          const newRelease = parseFloat(e.target.value);
-          setRelease(newRelease);
-          onChange?.({ attack, decay, sustain, release: newRelease });
-          onParameterChange?.();
-        }}
-      />
+      <div title="Time for sound to reach full volume (0-2s).">
+        <Slider
+          inputName="synth-attack"
+          labelText="Attack"
+          min={0}
+          max={2}
+          step={0.01}
+          value={attack}
+          handleChange={(e) => {
+            const newAttack = parseFloat(e.target.value);
+            setAttack(newAttack);
+            onChange?.({ attack: newAttack, decay, sustain, release });
+            onParameterChange?.();
+          }}
+        />
+      </div>
+      <div title="Time to decay from peak to sustain level (0-1s, limited to prevent voice accumulation).">
+        <Slider
+          inputName="synth-decay"
+          labelText="Decay"
+          min={0}
+          max={1}
+          step={0.01}
+          value={decay}
+          handleChange={(e) => {
+            const newDecay = parseFloat(e.target.value);
+            setDecay(newDecay);
+            onChange?.({ attack, decay: newDecay, sustain, release });
+            onParameterChange?.();
+          }}
+        />
+      </div>
+      <div title="Sustained volume level (0-1, where 1 is full volume).">
+        <Slider
+          inputName="synth-sustain"
+          labelText="Sustain"
+          min={0}
+          max={1}
+          step={0.01}
+          value={sustain}
+          handleChange={(e) => {
+            const newSustain = parseFloat(e.target.value);
+            setSustain(newSustain);
+            onChange?.({ attack, decay, sustain: newSustain, release });
+            onParameterChange?.();
+          }}
+        />
+      </div>
+      <div title="Time for sound to fade out after note ends (0-2s, limited to prevent voice accumulation with high BPM).">
+        <Slider
+          inputName="synth-release"
+          labelText="Release"
+          min={0}
+          max={2}
+          step={0.01}
+          value={release}
+          handleChange={(e) => {
+            const newRelease = parseFloat(e.target.value);
+            setRelease(newRelease);
+            onChange?.({ attack, decay, sustain, release: newRelease });
+            onParameterChange?.();
+          }}
+        />
+      </div>
     </div>
   );
 }
