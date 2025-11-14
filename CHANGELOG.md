@@ -5,6 +5,36 @@ All notable changes to Tone Drone will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2025-11-14
+
+### Fixed
+
+#### 🎹 Sequencer Voice Accumulation
+
+- **Simplified Sequencer Architecture**: Fixed voice accumulation that caused crackling, glitches, and audio death
+  - Removed deferred envelope updates and voice cleanup logic
+  - Fixed maxPolyphony to 64 per synth (was dynamic and causing issues)
+  - Capped BPM at 300 to prevent audio glitches at high speeds
+  - Limited envelope ranges for stability:
+    - Decay: maximum 1s (was 2s)
+    - Release: maximum 2s (was 5s)
+- **Updated Defaults for Better Performance**:
+  - Sustain: 0.25 (was 0.5)
+  - Release: 0.5s (was 1.0s)
+  - Pattern density: 30% (was 50%)
+
+### Changed
+
+#### 📊 UX Improvements
+
+- **Tooltips**: Added explanatory tooltips for BPM cap (300) and envelope limits
+- **Dev Mode Monitoring**: Added voice count monitoring in development mode
+  - Warns at 75% voice capacity
+  - Errors at 90% voice capacity
+- **Parameter Safety**: Added parameter clamping in `SynthEnvelopeControl.setParams()` to prevent out-of-range values
+
+---
+
 ## [1.0.1] - 2025-11-14
 
 ### Fixed
