@@ -5,6 +5,30 @@ All notable changes to Tone Drone will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2025-11-14
+
+### Fixed
+
+#### 🔇 Audio Click Prevention
+
+- **Smooth Parameter Ramping**: Eliminated audio clicks and pops when changing parameters
+  - Created `useRampedParameter` hook for click-free parameter updates across all effects
+  - Applied smooth ramping (0.05s) when loading presets or adjusting controls
+  - Used exponential ramping for oscillator frequency changes (prevents pitch jumps)
+- **Proper Parameter Initialization**: Fixed issue where effects sounded active on load even when UI showed them at 0
+  - All effect parameters now properly initialize to their target values on mount
+  - Added runtime checks for `rampTo` method availability for safer parameter updates
+- **Envelope Update Optimization**: Debounced synth envelope updates to reduce update frequency and prevent audio artifacts during slider interaction
+- **Affected Components**: AutoFilter, BitCrusher, Chebyshev, Delay, Filter, Polysynth, Oscillator, SynthEnvelopeControl
+
+### Technical Improvements
+
+- New `useRampedParameter` hook provides centralized, type-safe parameter ramping
+- Updated test suite to handle debounced callbacks
+- Enhanced development workflow documentation in CLAUDE.md
+
+---
+
 ## [1.0.0] - 2025-11-11
 
 ### 🎉 Major Release - Modulation Matrix
