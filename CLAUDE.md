@@ -570,3 +570,125 @@ Preset state includes:
 - PolySynth settings (2 polysynths with independent parameters)
 - Min/max frequency range
 - Modulation matrix state (LFO parameters and routing configuration)
+
+## Release Management
+
+### Changelog Formatting Guidelines
+
+The project uses automated GitHub Releases that extract release notes from CHANGELOG.md. **When updating CHANGELOG.md, follow this exact format** to ensure the extraction script works correctly:
+
+#### Required Format
+
+```markdown
+## [VERSION] - YYYY-MM-DD
+
+### Section Header (optional)
+
+- Bullet point content
+- More content
+- Can include **markdown formatting**
+
+### Another Section
+
+- More bullets
+- Sub-bullets are fine
+  - Like this
+
+---
+```
+
+#### Critical Rules
+
+1. **Version Header**: Must be exactly `## [X.Y.Z] - YYYY-MM-DD`
+   - Two `##` marks, space, version in brackets, space, dash, space, date
+   - ✅ CORRECT: `## [1.0.0] - 2025-11-11`
+   - ❌ WRONG: `## v1.0.0 - 2025-11-11` (no brackets)
+   - ❌ WRONG: `## [1.0.0]` (missing date)
+   - ❌ WRONG: `### [1.0.0] - 2025-11-11` (three `###`)
+
+2. **Separator**: End each version section with `---` on its own line
+   - This marks the boundary between versions
+   - The extraction script stops at `---` or the next `## [`
+
+3. **Content**: Everything between the version header and `---` will be extracted
+   - Use any markdown formatting (bold, italic, code, links, etc.)
+   - Use `###` for subsections (like "Added", "Changed", "Fixed")
+   - Use bullet points, numbered lists, code blocks as needed
+   - Avoid starting lines with `## [` except for version headers
+
+4. **Consistency**: Follow [Keep a Changelog](https://keepachangelog.com/) format
+   - Use sections: Added, Changed, Deprecated, Removed, Fixed, Security
+   - Write from user perspective (what changed, not how)
+   - Include emoji headers if they fit the project style (e.g., `### 🎉 Major Release`)
+
+#### Extraction Logic
+
+The `.github/workflows/release.yml` workflow uses this awk script:
+
+```bash
+awk -v ver="VERSION" '
+  /^## \[/ {
+    if (found) exit
+    if ($0 ~ "\\[" ver "\\]") {
+      found = 1
+      next
+    }
+  }
+  found {
+    if (/^## \[/ || /^---$/) exit
+    print
+  }
+' CHANGELOG.md
+```
+
+This script:
+- Finds the line matching `## [VERSION]`
+- Captures all following lines
+- Stops when it hits the next `## [` or `---`
+
+#### Example Changelog Entry
+
+```markdown
+## [1.2.0] - 2025-12-15
+
+### Added
+
+- New feature X with Y capability
+- Another feature Z
+
+### Fixed
+
+- Bug in component A that caused B
+- Issue with C when D happens
+
+---
+
+## [1.1.0] - 2025-11-20
+```
+
+When you push tag `v1.2.0`, the GitHub Release will contain:
+
+```markdown
+### Added
+
+- New feature X with Y capability
+- Another feature Z
+
+### Fixed
+
+- Bug in component A that caused B
+- Issue with C when D happens
+```
+
+#### Workflow
+
+When working on releases:
+
+1. **Update CHANGELOG.md** using the format above
+2. **Bump version** in package.json: `npm version X.Y.Z --no-git-tag-version`
+3. **Commit**: `git commit -am "chore: release vX.Y.Z"`
+4. **Tag**: `git tag vX.Y.Z`
+5. **Push**: `git push && git push --tags`
+6. **Automated**: GitHub Actions creates the release with extracted notes
+
+See `RELEASING.md` for the complete release process documentation.

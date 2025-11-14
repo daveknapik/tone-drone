@@ -1,0 +1,73 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          # Remove 'v' prefix for changelog lookup (v1.0.0 -> 1.0.0)
+          echo "VERSION_NUMBER=${VERSION#v}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          VERSION_NUMBER="${{ steps.version.outputs.VERSION_NUMBER }}"
+
+          # Extract the section for this version from CHANGELOG.md
+          # Format expected: ## [1.0.0] - 2025-11-11
+          # Captures everything until the next ## [ or --- separator
+
+          CHANGELOG=$(awk -v ver="$VERSION_NUMBER" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") {
+                found = 1
+                next
+              }
+            }
+            found {
+              if (/^## \[/ || /^---$/) exit
+              print
+            }
+          ' CHANGELOG.md)
+
+          if [ -z "$CHANGELOG" ]; then
+            echo "⚠️ No changelog entry found for version $VERSION_NUMBER"
+            CHANGELOG="Release $VERSION_NUMBER"
+          fi
+
+          # Use EOF delimiter to handle multiline content
+          {
+            echo 'NOTES<<EOF'
+            echo "$CHANGELOG"
+            echo 'EOF'
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.VERSION }}
+          name: ${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.changelog.outputs.NOTES }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
