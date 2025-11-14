@@ -1,7 +1,7 @@
 {
   "name": "tone-drone",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -19,7 +19,11 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:chromium": "playwright test --project=chromium",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version",
+    "release:test": "bash -c 'VERSION_NUMBER=\"${1:-1.0.0}\"; awk -v ver=\"$VERSION_NUMBER\" '\"'\"'/^## \\[/ {if (found) exit; if ($0 ~ \"^## \\\\[\" ver \"\\\\]\") {found=1; next}} found {if (/^## \\[/ || /^---$/) exit; print}'\"'\"' CHANGELOG.md' --"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.14",

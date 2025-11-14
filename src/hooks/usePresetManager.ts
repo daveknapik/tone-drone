@@ -162,6 +162,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
       refs.microlooper.current?.setParams(state.effects.microlooper);
       refs.afterFilter.current?.setParams(state.effects.afterFilter);
       refs.delay.current?.setParams(state.effects.delay);
+      // Note: Reverb parameters in old presets are ignored (reverb removed from app)
 
       // Apply effects bus send
       if (refs.effectsBusSendRef.current) {

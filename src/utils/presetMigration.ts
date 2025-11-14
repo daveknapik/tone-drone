@@ -1,10 +1,13 @@
 import type { Preset } from "../types/Preset";
-import { DEFAULT_POLYSYNTHS_STATE, DEFAULT_BPM } from "./presetDefaults";
+import {
+  DEFAULT_POLYSYNTHS_STATE,
+  DEFAULT_BPM,
+} from "./presetDefaults";
 
 /**
  * Current preset version
  */
-export const CURRENT_PRESET_VERSION = 5;
+export const CURRENT_PRESET_VERSION = 6;
 
 /**
  * Migrate a preset from an older version to the current version
@@ -42,6 +45,9 @@ function runMigration(preset: Preset, fromVersion: number): Preset {
 
     case 4:
       return migrateV4ToV5(preset);
+
+    case 5:
+      return migrateV5ToV6(preset);
 
     default:
       // No migration needed for this version
@@ -127,6 +133,22 @@ function migrateV4ToV5(preset: Preset): Preset {
       polysynths: {
         polysynths: updatedPolysynths,
       },
+    },
+  };
+}
+
+/**
+ * Migration from version 5 to version 6
+ * Note: Reverb was removed from the app, but old presets may have reverb data
+ * which will be ignored when loading
+ */
+function migrateV5ToV6(preset: Preset): Preset {
+  return {
+    ...preset,
+    version: 6,
+    state: {
+      ...preset.state,
+      // Reverb fields in old presets are ignored (reverb removed from app)
     },
   };
 }

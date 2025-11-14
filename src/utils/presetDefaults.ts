@@ -138,6 +138,8 @@ export const DEFAULT_DELAY_PARAMS: DelayParams = {
   wet: 0.5,
 };
 
+// Reverb removed from app - kept for backward compatibility in old presets only
+
 export const DEFAULT_EFFECTS_BUS_SEND = -15;
 
 // ============================================================================

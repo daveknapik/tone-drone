@@ -39,6 +39,7 @@ export interface PresetState {
     microlooper: DelayParams;
     afterFilter: FilterParams;
     delay: DelayParams;
+    // Note: reverb/reverb1/reverb2 fields may exist in old presets but are ignored
   };
 
   // Effects bus send level

@@ -5,6 +5,7 @@ import Slider from "./Slider";
 import { useEffect, useState, useImperativeHandle, useRef } from "react";
 import OptionsSelector from "./OptionsSelector";
 import { FilterHandle, FilterParams } from "../types/FilterParams";
+import { useRampedParameter } from "../hooks/useRampedParameter";
 
 interface FilterProps {
   filter: React.RefObject<Tone.Filter>;
@@ -36,10 +37,21 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
     };
   }, [frequency, rolloff, Q, type]);
 
+  // Smooth ramped parameter updates (prevents clicking)
+  const frequencyRamped = useRampedParameter(
+    filter.current?.frequency,
+    onParameterChange
+  );
+  const qRamped = useRampedParameter(filter.current?.Q, onParameterChange);
+
   // Expose methods to parent via ref
   useImperativeHandle(ref, () => ({
     getParams: (): FilterParams => paramsRef.current,
     setParams: (params: FilterParams) => {
+      // Apply audio parameters with smooth ramping (prevents clicks on preset load)
+      frequencyRamped.rampTo(params.frequency);
+      qRamped.rampTo(params.Q);
+      // Update React state for UI
       setFrequency(params.frequency);
       setRolloff(params.rolloff);
       setQ(params.Q);
@@ -47,25 +59,19 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
     },
   }));
 
-  // Update Params - direct .value assignment works for Tone.Signal params
-  // This ensures Anchor To Current can read the correct values
+  // Apply initial parameter values on mount
   useEffect(() => {
-    const node = filter.current;
-    if (!node) return;
+    frequencyRamped.rampTo(frequency);
+    qRamped.rampTo(Q);
+  }, []); // Empty deps - only run on mount
 
-    // Using augmented Tone.js types from src/types/tone.d.ts
-    node.frequency.value = frequency;
-    node.Q.value = Q;
-    node.type = type;
-  }, [filter, frequency, Q, type]);
-
-  // rolloff can't go via the set method or it makes the filter stutter and glitch, but this works
+  // Update properties that can't be ramped (non-AudioParams)
   useEffect(() => {
-    const node = filter.current;
-    if (!node) return;
-
-    node.rolloff = rolloff;
-  }, [filter, rolloff]);
+    if (filter.current) {
+      filter.current.type = type;
+      filter.current.rolloff = rolloff;
+    }
+  }, [filter, type, rolloff]);
 
   return (
     <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
@@ -78,8 +84,10 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
         labelText="Frequency"
         step={1}
         handleChange={(e) => {
-          setFrequency(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newFrequency = parseFloat(e.target.value);
+          frequencyRamped.rampTo(newFrequency); // Smooth audio update
+          setFrequency(newFrequency); // UI state update
+          frequencyRamped.markModified(); // Debounced preset marking
         }}
       />
 
@@ -91,8 +99,10 @@ function Filter({ filter, ref, onParameterChange }: FilterProps) {
         labelText="Q"
         step={0.01}
         handleChange={(e) => {
-          setQ(parseFloat(e.target.value));
-          onParameterChange?.();
+          const newQ = parseFloat(e.target.value);
+          qRamped.rampTo(newQ); // Smooth audio update
+          setQ(newQ); // UI state update
+          qRamped.markModified(); // Debounced preset marking
         }}
       />
 

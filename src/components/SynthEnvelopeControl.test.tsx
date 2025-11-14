@@ -46,6 +46,7 @@ describe("SynthEnvelopeControl", () => {
   });
 
   it("calls onChange callback when slider values change", () => {
+    vi.useFakeTimers();
     const handleChange = vi.fn();
 
     render(<SynthEnvelopeControl onChange={handleChange} />);
@@ -56,17 +57,21 @@ describe("SynthEnvelopeControl", () => {
     // which is exp(0.8) - 1 ≈ 1.23, not 0.8
     fireEvent.change(attackSlider, { target: { value: "0.8" } });
 
+    // Wait for debounced callback (50ms)
+    vi.advanceTimersByTime(50);
+
     expect(handleChange).toHaveBeenCalled();
-    // Just verify attack value changed from default (0.01) to something higher
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const callArgs = handleChange.mock.calls[0][0];
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(callArgs.attack).toBeGreaterThan(0.01);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    expect(callArgs.attack).toBeLessThanOrEqual(2.0);
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attack: 0.8,
+      })
+    );
+
+    vi.useRealTimers();
   });
 
   it("calls onParameterChange callback when slider values change", () => {
+    vi.useFakeTimers();
     const handleParameterChange = vi.fn();
 
     render(<SynthEnvelopeControl onParameterChange={handleParameterChange} />);
@@ -76,7 +81,12 @@ describe("SynthEnvelopeControl", () => {
     // Use fireEvent for range input change
     fireEvent.change(releaseSlider, { target: { value: "3" } });
 
+    // Wait for debounced callback (500ms)
+    vi.advanceTimersByTime(500);
+
     expect(handleParameterChange).toHaveBeenCalled();
+
+    vi.useRealTimers();
   });
 
   it("exposes getParams method via ref", () => {
@@ -162,7 +172,7 @@ describe("SynthEnvelopeControl", () => {
     expect(attackSlider.max).toBe("2");
     expect(attackSlider.step).toBe("0.01");
 
-    // Decay: 0-1s
+    // Decay: 0-1s (limited to prevent voice accumulation)
     expect(decaySlider.min).toBe("0");
     expect(decaySlider.max).toBe("1");
     expect(decaySlider.step).toBe("0.01");
@@ -172,7 +182,7 @@ describe("SynthEnvelopeControl", () => {
     expect(sustainSlider.max).toBe("1");
     expect(sustainSlider.step).toBe("0.01");
 
-    // Release: 0-2s
+    // Release: 0-2s (limited to prevent voice accumulation)
     expect(releaseSlider.min).toBe("0");
     expect(releaseSlider.max).toBe("2");
     expect(releaseSlider.step).toBe("0.01");

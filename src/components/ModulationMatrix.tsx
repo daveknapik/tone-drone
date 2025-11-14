@@ -25,9 +25,7 @@ import { FilterHandle } from "../types/FilterParams";
 import { DelayHandle } from "../types/DelayParams";
 import { BitCrusherHandle } from "../types/BitCrusherParams";
 import { ChebyshevHandle } from "../types/ChebyshevParams";
-import {
-  coerceParamToNumber,
-} from "../utils/modulationRange";
+import { coerceParamToNumber } from "../utils/modulationRange";
 
 const DEFAULT_LFOS: LFOParams[] = [
   { frequency: 0.5, type: "sine", amplitude: 1, polarityMode: "bipolar" },
@@ -105,21 +103,18 @@ function ModulationMatrix({
   });
 
   // Modulation routing hook (handles all audio graph connections)
-  const {
-    depthMultipliersRef,
-    hasConnectedRef,
-    buildControlRateUpdaters,
-  } = useModulationRouting({
-    routes,
-    routeStructure,
-    signals,
-    lfos,
-    lfoParams,
-    oscillators,
-    effects,
-    effectRefs,
-    sampleLfo,
-  });
+  const { depthMultipliersRef, hasConnectedRef, buildControlRateUpdaters } =
+    useModulationRouting({
+      routes,
+      routeStructure,
+      signals,
+      lfos,
+      lfoParams,
+      oscillators,
+      effects,
+      effectRefs,
+      sampleLfo,
+    });
 
   // Modulation depth hook (handles real-time depth updates)
   const { updateDepth } = useModulationDepth({
@@ -142,7 +137,11 @@ function ModulationMatrix({
       state.lfos.forEach((params, i) => {
         if (lfos[i]) {
           lfos[i].frequency.value = params.frequency;
-          lfos[i].type = params.type as "sine" | "square" | "triangle" | "sawtooth";
+          lfos[i].type = params.type as
+            | "sine"
+            | "square"
+            | "triangle"
+            | "sawtooth";
           lfos[i].amplitude.value = params.amplitude;
           if (params.polarityMode) {
             setPolarityMode(i, params.polarityMode);
@@ -305,10 +304,7 @@ function ModulationMatrix({
             if (dest === "chebyshev-order") {
               const chebyshev = effects?.chebyshev?.current;
               if (!chebyshev) return;
-              const current = coerceParamToNumber(
-                chebyshev.order,
-                "normal"
-              );
+              const current = coerceParamToNumber(chebyshev.order, "normal");
               const updated: Partial<ModulationRoute> =
                 (route.rangeMode ?? "center") === "center"
                   ? { center: Math.max(1, Math.min(100, Math.round(current))) }
@@ -424,6 +420,7 @@ function ModulationMatrix({
                 i === routeIndex ? { ...rt, ...updated } : rt
               );
               setRoutes(newRoutes);
+              return;
             }
           }}
         />

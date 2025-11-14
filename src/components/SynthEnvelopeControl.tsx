@@ -2,6 +2,7 @@ import Slider from "./Slider";
 import { useState, useImperativeHandle, useRef, useEffect } from "react";
 import { SynthEnvelopeHandle, SynthEnvelopeParams } from "../types/SynthParams";
 import { DEFAULT_SYNTH_ENVELOPE_PARAMS } from "../utils/presetDefaults";
+import { useDebounceCallback } from "usehooks-ts";
 
 interface SynthEnvelopeControlProps {
   initialParams?: SynthEnvelopeParams;
@@ -54,6 +55,15 @@ function SynthEnvelopeControl({
     },
   }));
 
+  // Debounced callbacks to reduce update frequency (prevents excessive synth updates)
+  const debouncedOnChange = useDebounceCallback((params: SynthEnvelopeParams) => {
+    onChange?.(params);
+  }, 50); // 50ms - fast enough to feel responsive, slow enough to reduce updates
+
+  const debouncedOnParameterChange = useDebounceCallback(() => {
+    onParameterChange?.();
+  }, 500); // 500ms for preset modification marking
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
       <div title="Time for sound to reach full volume (0-2s).">
@@ -66,9 +76,9 @@ function SynthEnvelopeControl({
           value={attack}
           handleChange={(e) => {
             const newAttack = parseFloat(e.target.value);
-            setAttack(newAttack);
-            onChange?.({ attack: newAttack, decay, sustain, release });
-            onParameterChange?.();
+            setAttack(newAttack); // UI state update
+            debouncedOnChange({ attack: newAttack, decay, sustain, release }); // Debounced synth update
+            debouncedOnParameterChange(); // Debounced preset marking
           }}
         />
       </div>
@@ -82,9 +92,9 @@ function SynthEnvelopeControl({
           value={decay}
           handleChange={(e) => {
             const newDecay = parseFloat(e.target.value);
-            setDecay(newDecay);
-            onChange?.({ attack, decay: newDecay, sustain, release });
-            onParameterChange?.();
+            setDecay(newDecay); // UI state update
+            debouncedOnChange({ attack, decay: newDecay, sustain, release }); // Debounced synth update
+            debouncedOnParameterChange(); // Debounced preset marking
           }}
         />
       </div>
@@ -98,9 +108,9 @@ function SynthEnvelopeControl({
           value={sustain}
           handleChange={(e) => {
             const newSustain = parseFloat(e.target.value);
-            setSustain(newSustain);
-            onChange?.({ attack, decay, sustain: newSustain, release });
-            onParameterChange?.();
+            setSustain(newSustain); // UI state update
+            debouncedOnChange({ attack, decay, sustain: newSustain, release }); // Debounced synth update
+            debouncedOnParameterChange(); // Debounced preset marking
           }}
         />
       </div>
@@ -114,9 +124,9 @@ function SynthEnvelopeControl({
           value={release}
           handleChange={(e) => {
             const newRelease = parseFloat(e.target.value);
-            setRelease(newRelease);
-            onChange?.({ attack, decay, sustain, release: newRelease });
-            onParameterChange?.();
+            setRelease(newRelease); // UI state update
+            debouncedOnChange({ attack, decay, sustain, release: newRelease }); // Debounced synth update
+            debouncedOnParameterChange(); // Debounced preset marking
           }}
         />
       </div>

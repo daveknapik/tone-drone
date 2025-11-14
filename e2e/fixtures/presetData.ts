@@ -50,6 +50,12 @@ export const testPreset: Preset = {
           ],
         },
       ],
+      synthEnvelope: {
+        attack: 0.01,
+        decay: 0.1,
+        sustain: 0.5,
+        release: 1.0,
+      },
     },
     polysynths: {
       polysynths: [
@@ -108,6 +114,21 @@ export const testPreset: Preset = {
       delay: {
         time: 0.25,
         feedback: 0.5,
+        wet: 0,
+      },
+      reverb: {
+        decay: 2.5,
+        preDelay: 0.01,
+        wet: 0,
+      },
+      reverb1: {
+        decay: 2.5,
+        preDelay: 0.01,
+        wet: 0,
+      },
+      reverb2: {
+        decay: 2.5,
+        preDelay: 0.01,
         wet: 0,
       },
     },

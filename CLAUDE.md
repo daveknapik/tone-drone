@@ -22,6 +22,18 @@ npm run lint
 npm run preview
 ```
 
+## Development Workflow
+
+When making changes, always follow this checklist before declaring work complete:
+
+1. **Run the linter**: `npm run lint` - Ensure no TypeScript or ESLint errors
+2. **Run unit tests**: `npm run test:run` - Verify all tests pass
+3. **Check browser console**: Use Chrome DevTools MCP to check for runtime errors
+   - Even if code compiles, runtime errors may occur
+   - Look for uncaught errors, warnings, and network issues
+4. **Test in the browser**: Manually verify the feature works as expected
+5. **Run E2E tests** (if applicable): Ensure user workflows aren't broken
+
 ## Testing
 
 The project has two types of tests:
@@ -232,7 +244,11 @@ test("should do something", async ({ page }) => {
 
 - **Audio Context**: Managed via `src/context/audio.tsx` - handles browser audio initialization and Tone.js transport control
 - **Effects Bus**: Central audio routing through `useAudioEffectsBus` hook - connects all audio sources through a chain of effects
-- **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, etc.) has its own custom hook in `src/hooks/`
+- **Audio Effects**: Each effect (AutoFilter, BitCrusher, Chebyshev, Delay, Reverb, etc.) has its own custom hook in `src/hooks/`
+- **Dual Reverb Design**: Two independent reverb instances serve different creative purposes:
+  - **Reverb 1** (early in chain): Positioned after AutoFilter, before distortion effects. Creates interesting artifacts when processed by BitCrusher/Chebyshev
+  - **Reverb 2** (end of chain): Positioned before compressor. Adds clean, standard ambience without being colored by other effects
+  - Both reverbs use Tone.Reverb with configurable decay (0.1-10s), preDelay (0-0.1s), and wet (0-1) parameters
 - **Oscillators**: Created with Tone.Oscillator or Tone.FatOscillator, each paired with a Tone.Channel for individual volume/pan control. Users can toggle between basic and fat oscillator types for thicker, chorus-like sounds
 - **Synths**: Monophonic synthesizers for step sequencer note triggering, managed via `useSynths` hook. Each synth has a configurable ADSR envelope for shaping the amplitude of triggered notes
 - **PolySynths**: Two polyphonic synthesizers for melodic elements, managed via `usePolysynths` hook
@@ -565,8 +581,131 @@ Preset state includes:
 - Sequencer patterns (16 steps per oscillator)
 - Sequence mute state (boolean array indicating which sequences are muted)
 - Synth envelope parameters (attack, decay, sustain, release for step sequencer notes)
-- All audio effect parameters
+- All audio effect parameters (AutoFilter, BitCrusher, Chebyshev, Microlooper, Filter, Delay)
+- Reverb settings (two independent reverb instances: reverb1 and reverb2, with backward compatibility for old presets)
 - Effects bus send level
 - PolySynth settings (2 polysynths with independent parameters)
 - Min/max frequency range
 - Modulation matrix state (LFO parameters and routing configuration)
+
+## Release Management
+
+### Changelog Formatting Guidelines
+
+The project uses automated GitHub Releases that extract release notes from CHANGELOG.md. **When updating CHANGELOG.md, follow this exact format** to ensure the extraction script works correctly:
+
+#### Required Format
+
+```markdown
+## [VERSION] - YYYY-MM-DD
+
+### Section Header (optional)
+
+- Bullet point content
+- More content
+- Can include **markdown formatting**
+
+### Another Section
+
+- More bullets
+- Sub-bullets are fine
+  - Like this
+
+---
+```
+
+#### Critical Rules
+
+1. **Version Header**: Must be exactly `## [X.Y.Z] - YYYY-MM-DD`
+   - Two `##` marks, space, version in brackets, space, dash, space, date
+   - ✅ CORRECT: `## [1.0.0] - 2025-11-11`
+   - ❌ WRONG: `## v1.0.0 - 2025-11-11` (no brackets)
+   - ❌ WRONG: `## [1.0.0]` (missing date)
+   - ❌ WRONG: `### [1.0.0] - 2025-11-11` (three `###`)
+
+2. **Separator**: End each version section with `---` on its own line
+   - This marks the boundary between versions
+   - The extraction script stops at `---` or the next `## [`
+
+3. **Content**: Everything between the version header and `---` will be extracted
+   - Use any markdown formatting (bold, italic, code, links, etc.)
+   - Use `###` for subsections (like "Added", "Changed", "Fixed")
+   - Use bullet points, numbered lists, code blocks as needed
+   - Avoid starting lines with `## [` except for version headers
+
+4. **Consistency**: Follow [Keep a Changelog](https://keepachangelog.com/) format
+   - Use sections: Added, Changed, Deprecated, Removed, Fixed, Security
+   - Write from user perspective (what changed, not how)
+   - Include emoji headers if they fit the project style (e.g., `### 🎉 Major Release`)
+
+#### Extraction Logic
+
+The `.github/workflows/release.yml` workflow uses this awk script:
+
+```bash
+awk -v ver="VERSION" '
+  /^## \[/ {
+    if (found) exit
+    if ($0 ~ "\\[" ver "\\]") {
+      found = 1
+      next
+    }
+  }
+  found {
+    if (/^## \[/ || /^---$/) exit
+    print
+  }
+' CHANGELOG.md
+```
+
+This script:
+- Finds the line matching `## [VERSION]`
+- Captures all following lines
+- Stops when it hits the next `## [` or `---`
+
+#### Example Changelog Entry
+
+```markdown
+## [1.2.0] - 2025-12-15
+
+### Added
+
+- New feature X with Y capability
+- Another feature Z
+
+### Fixed
+
+- Bug in component A that caused B
+- Issue with C when D happens
+
+---
+
+## [1.1.0] - 2025-11-20
+```
+
+When you push tag `v1.2.0`, the GitHub Release will contain:
+
+```markdown
+### Added
+
+- New feature X with Y capability
+- Another feature Z
+
+### Fixed
+
+- Bug in component A that caused B
+- Issue with C when D happens
+```
+
+#### Workflow
+
+When working on releases:
+
+1. **Update CHANGELOG.md** using the format above
+2. **Bump version** in package.json: `npm version X.Y.Z --no-git-tag-version`
+3. **Commit**: `git commit -am "chore: release vX.Y.Z"`
+4. **Tag**: `git tag vX.Y.Z`
+5. **Push**: `git push && git push --tags`
+6. **Automated**: GitHub Actions creates the release with extracted notes
+
+See `docs/RELEASING.md` for the complete release process documentation.
