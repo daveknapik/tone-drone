@@ -691,4 +691,4 @@ When working on releases:
 5. **Push**: `git push && git push --tags`
 6. **Automated**: GitHub Actions creates the release with extracted notes
 
-See `RELEASING.md` for the complete release process documentation.
+See `docs/RELEASING.md` for the complete release process documentation.
