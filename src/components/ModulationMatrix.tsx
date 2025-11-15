@@ -279,6 +279,7 @@ function ModulationMatrix({
         {/* Modulation Routing Grid */}
         <ModulationMatrixGrid
           routes={routes}
+          lfoParams={lfoParams}
           onRoutesChange={setRoutes}
           onParameterChange={onParameterChange}
           onDepthChange={updateDepth}

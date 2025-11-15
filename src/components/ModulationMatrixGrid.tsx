@@ -1,15 +1,17 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { clsx } from "clsx";
 import { useDebounceCallback } from "usehooks-ts";
 import {
   ModulationRoute,
   ModulationDestination,
   DestinationInfo,
+  LFOParams,
 } from "../types/ModulationMatrixParams";
 import Slider from "./Slider";
 
 interface ModulationMatrixGridProps {
   routes: ModulationRoute[];
+  lfoParams: LFOParams[];
   onRoutesChange: (routes: ModulationRoute[]) => void;
   onParameterChange?: () => void;
   onDepthChange?: (routeIndex: number, amount: number) => void; // Direct Tone.js update, bypasses React
@@ -60,6 +62,7 @@ const DESTINATIONS: DestinationInfo[] = [
 
 function ModulationMatrixGrid({
   routes,
+  lfoParams,
   onRoutesChange,
   onParameterChange,
   onDepthChange,
@@ -70,6 +73,78 @@ function ModulationMatrixGrid({
   const [localAmounts, setLocalAmounts] = useState<number[]>(
     routes.map((r) => r.amount)
   );
+
+  /**
+   * Filter destinations based on the selected LFO's waveform type.
+   * Sample-and-hold LFOs can't modulate volume or pan (Tremolo/AutoPanner limitation).
+   */
+  const getAvailableDestinations = useCallback(
+    (sourceIndex: number): DestinationInfo[] => {
+      const lfo = lfoParams[sourceIndex];
+      const isSampleAndHold = lfo?.type === "sampleandhold";
+
+      if (!isSampleAndHold) {
+        return DESTINATIONS;
+      }
+
+      // Filter out volume and pan destinations for sample-and-hold
+      return DESTINATIONS.filter((dest) => {
+        const isVolume = dest.category === "Volume";
+        const isPan = dest.category === "Pan";
+        return !isVolume && !isPan;
+      });
+    },
+    [lfoParams]
+  );
+
+  // Track previous LFO types to detect changes
+  const prevLfoTypesRef = useRef<string[]>([]);
+
+  /**
+   * Auto-reset incompatible destinations when LFO type changes to sample-and-hold
+   */
+  useEffect(() => {
+    const currentTypes = lfoParams.map((lfo) => lfo.type);
+    const prevTypes = prevLfoTypesRef.current;
+
+    // Check if any LFO type changed to sample-and-hold
+    const typeChanged = currentTypes.some((type, idx) => type !== prevTypes[idx]);
+
+    if (typeChanged) {
+      const needsUpdate = routes.some((route) => {
+        const lfo = lfoParams[route.sourceIndex];
+        if (lfo?.type === "sampleandhold") {
+          const destInfo = DESTINATIONS.find((d) => d.value === route.destination);
+          const isVolume = destInfo?.category === "Volume";
+          const isPan = destInfo?.category === "Pan";
+          return isVolume || isPan;
+        }
+        return false;
+      });
+
+      if (needsUpdate) {
+        const updatedRoutes = routes.map((route) => {
+          const lfo = lfoParams[route.sourceIndex];
+          if (lfo?.type === "sampleandhold") {
+            const destInfo = DESTINATIONS.find((d) => d.value === route.destination);
+            const isVolume = destInfo?.category === "Volume";
+            const isPan = destInfo?.category === "Pan";
+
+            // If destination is volume or pan, reset to "none"
+            if (isVolume || isPan) {
+              return { ...route, destination: "none" as ModulationDestination };
+            }
+          }
+          return route;
+        });
+
+        onRoutesChange(updatedRoutes);
+      }
+
+      // Update previous types
+      prevLfoTypesRef.current = currentTypes;
+    }
+  }, [lfoParams, routes, onRoutesChange]);
 
   const updateRoute = useCallback(
     (index: number, updates: Partial<ModulationRoute>): void => {
@@ -215,7 +290,7 @@ function ModulationMatrixGrid({
                     }
                     className="w-full px-2 py-1 border-2 rounded border-pink-500 dark:border-sky-300 bg-white dark:bg-gray-800"
                   >
-                    {DESTINATIONS.map((dest) => (
+                    {getAvailableDestinations(route.sourceIndex).map((dest) => (
                       <option key={dest.value} value={dest.value}>
                         {dest.label}
                       </option>
