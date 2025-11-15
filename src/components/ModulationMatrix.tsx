@@ -137,11 +137,10 @@ function ModulationMatrix({
       state.lfos.forEach((params, i) => {
         if (lfos[i]) {
           lfos[i].frequency.value = params.frequency;
-          lfos[i].type = params.type as
-            | "sine"
-            | "square"
-            | "triangle"
-            | "sawtooth";
+          // Only set type if the LFO has a type property (Tone.LFO does, SampleAndHoldLFO doesn't)
+          if ('type' in lfos[i] && params.type !== "sampleandhold") {
+            lfos[i].type = params.type;
+          }
           lfos[i].amplitude.value = params.amplitude;
           if (params.polarityMode) {
             setPolarityMode(i, params.polarityMode);
@@ -211,6 +210,13 @@ function ModulationMatrix({
                 }}
                 onTypeChange={(type) => {
                   handleLfoParamsUpdate(i, { type });
+
+                  // Skip updating Tremolo/AutoPanner for sample-and-hold
+                  // (those effects don't support custom waveforms)
+                  if (type === "sampleandhold") {
+                    return;
+                  }
+
                   routes.forEach((route) => {
                     if (route.sourceIndex !== i) return;
                     const re = /^osc(\d+)-(frequency|volume|pan)$/;

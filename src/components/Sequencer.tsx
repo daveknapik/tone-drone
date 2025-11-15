@@ -29,7 +29,9 @@ function Sequencer({
   // Update synth oscillator type only when waveform changes
   // Moving synth.set() out of render prevents clicks/glitches during playback
   useEffect(() => {
-    synth.set({ oscillator: { type: waveform as OscillatorType } });
+    // TypeScript can't properly infer synth.set oscillator type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    synth.set({ oscillator: { type: waveform as any } });
   }, [synth, waveform]);
 
   // Update volume and pan smoothly (setTargetAtTime is safe to call frequently)

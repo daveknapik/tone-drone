@@ -4,16 +4,18 @@ import { useDebounceCallback } from "usehooks-ts";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 import { LFOPolarityMode } from "../types/ModulationMatrixParams";
+import { WaveformType } from "../types/OscillatorParams";
+import { SampleAndHoldLFO } from "../audio/SampleAndHoldLFO";
 
 interface ModulationLFOProps {
-  lfo: Tone.LFO;
+  lfo: Tone.LFO | SampleAndHoldLFO;
   lfoIndex: number;
   initialFrequency?: number;
-  initialType?: OscillatorType;
+  initialType?: WaveformType;
   initialAmplitude?: number;
   initialPolarityMode?: LFOPolarityMode;
   onFrequencyChange?: (frequency: number) => void;
-  onTypeChange?: (type: OscillatorType) => void;
+  onTypeChange?: (type: WaveformType) => void;
   onAmplitudeChange?: (amplitude: number) => void;
   onPolarityModeChange?: (mode: LFOPolarityMode) => void;
   onParameterChange?: () => void;
@@ -33,7 +35,7 @@ function ModulationLFO({
   onParameterChange,
 }: ModulationLFOProps) {
   const [frequency, setFrequency] = useState(initialFrequency);
-  const [type, setType] = useState<OscillatorType>(initialType);
+  const [type, setType] = useState<WaveformType>(initialType);
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
@@ -65,9 +67,10 @@ function ModulationLFO({
   }, 500);
 
   // Update LFO type immediately (non-audio-rate parameter)
+  // Note: Only Tone.LFO has a 'type' property; SampleAndHoldLFO doesn't need it
   useEffect(() => {
-    if (lfo) {
-      lfo.type = type;
+    if (lfo && 'type' in lfo) {
+      lfo.type = type as "sine" | "triangle" | "square" | "sawtooth";
     }
   }, [lfo, type]);
 
@@ -87,8 +90,8 @@ function ModulationLFO({
           handleChange={(e) => {
             const newFreq = parseFloat(e.target.value);
             // Reset phase to avoid discontinuity when changing rate
-            // Using augmented Tone.js types from src/types/tone.d.ts
-            if (lfo) {
+            // Note: Only Tone.LFO has a 'phase' property; SampleAndHoldLFO doesn't need it
+            if (lfo && 'phase' in lfo) {
               lfo.phase = 0;
             }
             // Update Tone.js immediately (like modulation-reference.html)
@@ -117,15 +120,15 @@ function ModulationLFO({
             persistAmplitude(newAmp);
           }}
         />
-        <OptionsSelector<OscillatorType>
+        <OptionsSelector<WaveformType>
           handleChange={(e) => {
-            const newType = e.target.value as OscillatorType;
+            const newType = e.target.value as WaveformType;
             setType(newType);
             onTypeChange?.(newType);
             onParameterChange?.();
           }}
           value={type}
-          options={["sine", "triangle", "square", "sawtooth"]}
+          options={["sine", "triangle", "square", "sawtooth", "sampleandhold"]}
           useDropdownOnSmall={true}
           label="Wave"
         />

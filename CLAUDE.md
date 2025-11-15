@@ -454,9 +454,11 @@ This hybrid architecture was developed through extensive testing to solve specif
 - `src/components/ModulationLFO.tsx` - Individual LFO controls (rate, amplitude, waveform, polarity mode)
 - `src/components/ModulationMatrixGrid.tsx` - Routing grid UI component
 - `src/hooks/useModulationLFOs.ts` - LFO creation and polarity mode switching
+- `src/audio/SampleAndHoldLFO.ts` - Custom sample-and-hold LFO implementation
 - `src/utils/modulationConnectionManager.ts` - Audio graph connection management
 - `src/utils/modulationRange.ts` - Parameter coercion and range computation helpers
 - `src/types/tone.d.ts` - TypeScript declaration merging for Tone.js types
+- `src/types/OscillatorParams.ts` - WaveformType definition (sine, triangle, square, sawtooth, sampleandhold)
 
 ### Modulation Destinations
 
@@ -477,14 +479,40 @@ This hybrid architecture was developed through extensive testing to solve specif
 Each of the 4 LFOs has:
 - **Rate:** 0.01-20 Hz
 - **Amplitude:** 0-1 (modulation depth at LFO level)
-- **Waveform:** Sine, Triangle, Square, Sawtooth
+- **Waveform:** Sine, Triangle, Square, Sawtooth, Sample-and-Hold
 - **Polarity Mode:** Bipolar (-1 to +1) or Unipolar (0 to +1)
+
+**Waveform Types:**
+- **Sine, Triangle, Square, Sawtooth:** Standard periodic waveforms (via Tone.LFO)
+- **Sample-and-Hold (S&H):** Random stepped values updated at the LFO rate (custom implementation)
 
 **Polarity Modes:**
 - **Bipolar** (-1 to +1): Best for frequency (vibrato), pan. Oscillates equally above/below center value.
 - **Unipolar** (0 to +1): Best for volume (tremolo), filter cutoff. Starts from zero, prevents negative values.
 
 Polarity switching uses smooth fade transitions to prevent audio clicks.
+
+#### Sample-and-Hold Waveform
+
+The modulation matrix includes a custom sample-and-hold (S&H) waveform type for creating random stepped modulation:
+
+**Implementation:**
+- Custom `SampleAndHoldLFO` class in `src/audio/SampleAndHoldLFO.ts`
+- Uses `Tone.Loop` to schedule random value updates at LFO frequency
+- Generates bipolar random values [-1, 1] with instant stepped changes (no ramping)
+- Integrates with polarity mode system (unipolar converts to [0, 1])
+- Compatible with all modulation routing architecture (audio-rate, pre-inserted effects, control-rate)
+
+**Limitations:**
+- Volume/pan modulation uses Tremolo/AutoPanner effects which don't support S&H
+- When S&H is selected, volume/pan modulation continues using the previous waveform
+- Uses Math.random() (not seedable/reproducible between sessions)
+
+**Usage:**
+- Select "sampleandhold" from waveform dropdown in ModulationLFO component
+- Works best with: frequency (random pitch variation), filter cutoff (random brightness), delay time (rhythmic variation)
+- Use unipolar mode for parameters that shouldn't go negative (cutoff, bits, order)
+- Use bipolar mode for parameters that can be positive/negative (frequency, pan, feedback)
 
 ### Per-Route Range Controls
 

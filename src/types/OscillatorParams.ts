@@ -4,6 +4,16 @@
 export type OscillatorType = "basic" | "fat";
 
 /**
+ * Standard waveform shapes supported by Tone.js oscillators
+ */
+export type StandardWaveformType = "sine" | "triangle" | "square" | "sawtooth";
+
+/**
+ * All waveform shapes including custom implementations (sample-and-hold)
+ */
+export type WaveformType = StandardWaveformType | "sampleandhold";
+
+/**
  * Parameters for a single Oscillator component that should be persisted in presets
  */
 export interface OscillatorParams {

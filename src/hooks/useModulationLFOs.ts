@@ -1,6 +1,7 @@
 import * as Tone from "tone";
 import { useRef, useEffect, useCallback } from "react";
 import { LFOParams, LFOPolarityMode } from "../types/ModulationMatrixParams";
+import { SampleAndHoldLFO } from "../audio/SampleAndHoldLFO";
 
 const DEFAULT_LFO_PARAMS: LFOParams[] = [
   { frequency: 0.5, type: "sine", amplitude: 1, polarityMode: "bipolar" },
@@ -11,9 +12,10 @@ const DEFAULT_LFO_PARAMS: LFOParams[] = [
 
 /**
  * Internal state for each LFO with polarity processing
+ * LFO can be either a standard Tone.LFO or a custom SampleAndHoldLFO
  */
 interface LFOState {
-  lfo: Tone.LFO;
+  lfo: Tone.LFO | SampleAndHoldLFO;
   polarityMode: LFOPolarityMode;
   unipolarScaler: Tone.Scale; // Converts bipolar [-1,1] to unipolar [0,1]
   outputSignal: Tone.Signal;  // Final output after polarity processing
@@ -29,14 +31,23 @@ export function useModulationLFOs() {
   useEffect(() => {
     // Create 4 LFOs with polarity processing chains
     DEFAULT_LFO_PARAMS.forEach((params, i) => {
-      // Create base LFO (always bipolar internally)
-      const lfo = new Tone.LFO({
-        frequency: params.frequency,
-        type: params.type,
-        amplitude: params.amplitude,
-        min: -1,
-        max: 1,
-      }).start();
+      // Create base LFO (standard or sample-and-hold)
+      let lfo: Tone.LFO | SampleAndHoldLFO;
+
+      if (params.type === "sampleandhold") {
+        // Create custom sample-and-hold LFO
+        lfo = new SampleAndHoldLFO(params.frequency, params.amplitude);
+        lfo.start();
+      } else {
+        // Create standard Tone.LFO (always bipolar internally)
+        lfo = new Tone.LFO({
+          frequency: params.frequency,
+          type: params.type,
+          amplitude: params.amplitude,
+          min: -1,
+          max: 1,
+        }).start();
+      }
 
       // Create unipolar scaler: maps [-1,1] to [0,1]
       const unipolarScaler = new Tone.Scale({ min: 0, max: 1 });

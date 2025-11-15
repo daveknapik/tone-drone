@@ -101,4 +101,38 @@ declare module 'tone' {
     count: number;
     spread: number;
   }
+
+  /**
+   * Loop - Repeating event scheduler
+   */
+  interface Loop {
+    interval: number | string; // Time between iterations
+    start(time?: Tone.Unit.Time): this;
+    stop(time?: Tone.Unit.Time): this;
+    dispose(): void;
+    disposed: boolean;
+  }
+
+  /**
+   * Signal - Audio-rate signal that can be used for modulation
+   */
+  interface Signal {
+    value: number;
+    setValueAtTime(value: number, time: Tone.Unit.Time): this;
+    linearRampToValueAtTime(value: number, time: Tone.Unit.Time): this;
+    connect(destination: Tone.InputNode): this;
+    disconnect(): this;
+    dispose(): void;
+  }
+
+  /**
+   * Scale - Maps an input signal range to an output range
+   */
+  interface Scale {
+    min: number;
+    max: number;
+    connect(destination: Tone.InputNode): this;
+    disconnect(): this;
+    dispose(): void;
+  }
 }

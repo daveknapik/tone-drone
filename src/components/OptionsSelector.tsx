@@ -1,13 +1,15 @@
 import * as Tone from "tone";
 import { clsx } from "clsx";
 import { useId } from "react";
-import { OscillatorType as OscTypeEnum } from "../types/OscillatorParams";
+import { OscillatorType as OscTypeEnum, WaveformType, StandardWaveformType } from "../types/OscillatorParams";
 
 type OptionType =
   | OscillatorType
   | BiquadFilterType
   | Tone.FilterRollOff
-  | OscTypeEnum;
+  | OscTypeEnum
+  | WaveformType
+  | StandardWaveformType;
 
 interface OptionsSelectorProps<T extends OptionType> {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;

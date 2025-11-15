@@ -1,9 +1,11 @@
+import { StandardWaveformType } from "./OscillatorParams";
+
 /**
  * Parameters for a single PolySynth instance
  */
 export interface PolySynthParams {
   frequency: number;
-  waveform: OscillatorType;
+  waveform: StandardWaveformType;
   volume: number;
   pan: number;
   attack: number;

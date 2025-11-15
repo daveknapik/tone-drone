@@ -78,7 +78,7 @@ export const DEFAULT_SYNTH_ENVELOPE_PARAMS: SynthEnvelopeParams = {
 
 export const DEFAULT_POLYSYNTH_PARAMS: PolySynthParams = {
   frequency: 666,
-  waveform: "sine" as OscillatorType,
+  waveform: "sine",
   volume: -5,
   pan: 0,
   attack: 0.5,

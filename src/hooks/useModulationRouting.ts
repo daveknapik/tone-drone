@@ -7,6 +7,7 @@ import { DelayHandle } from "../types/DelayParams";
 import { ModulationConnectionManager } from "../utils/modulationConnectionManager";
 import { computeRouteRange, defaultsForDestination } from "../utils/modulationRange";
 import { DEBUG_AUDIO } from "../utils/debug";
+import { SampleAndHoldLFO } from "../audio/SampleAndHoldLFO";
 
 interface ControlRateRoute {
   lfoIndex: number;
@@ -24,7 +25,7 @@ interface UseModulationRoutingProps {
   routes: ModulationRoute[];
   routeStructure: string;
   signals: Tone.Signal[];
-  lfos: Tone.LFO[];
+  lfos: (Tone.LFO | SampleAndHoldLFO)[];
   lfoParams: LFOParams[];
   oscillators: OscillatorWithChannel[];
   effects?: {
@@ -281,6 +282,10 @@ export function useModulationRouting({
           }
           if (paramType === "volume") {
             const lfoObj = lfos[route.sourceIndex];
+            // Skip sample-and-hold for volume (Tremolo doesn't support custom waveforms)
+            if (lfoObj instanceof SampleAndHoldLFO) {
+              return;
+            }
             const initialDepth =
               (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
             connectionManager.connectVolumeEffect(
@@ -294,6 +299,10 @@ export function useModulationRouting({
           }
           if (paramType === "pan") {
             const lfoObj = lfos[route.sourceIndex];
+            // Skip sample-and-hold for pan (AutoPanner doesn't support custom waveforms)
+            if (lfoObj instanceof SampleAndHoldLFO) {
+              return;
+            }
             const initialDepth =
               (lfoParams[route.sourceIndex]?.amplitude ?? 1) * route.amount;
             connectionManager.connectPanEffect(

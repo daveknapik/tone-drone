@@ -6,6 +6,7 @@ import { useEffect, useState, useImperativeHandle, useRef } from "react";
 import OptionsSelector from "./OptionsSelector";
 import { AutoFilterHandle, AutoFilterParams } from "../types/AutoFilterParams";
 import { useRampedParameter } from "../hooks/useRampedParameter";
+import { StandardWaveformType } from "../types/OscillatorParams";
 
 interface AutoFilterProps {
   filter: React.RefObject<Tone.AutoFilter>;
@@ -21,7 +22,7 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
   const [Q, setQ] = useState(1);
   const [wet, setWet] = useState(0);
   const [type, setType] = useState<BiquadFilterType>("highpass");
-  const [oscillatorType, setOscillatorType] = useState<OscillatorType>("sine");
+  const [oscillatorType, setOscillatorType] = useState<StandardWaveformType>("sine");
 
   // Keep a ref with current state values for imperative access
   const paramsRef = useRef<AutoFilterParams>({
@@ -197,9 +198,9 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
           useDropdownOnSmall={true}
           label="Rolloff"
         />
-        <OptionsSelector<OscillatorType>
+        <OptionsSelector<StandardWaveformType>
           handleChange={(e) => {
-            setOscillatorType(e.target.value as OscillatorType);
+            setOscillatorType(e.target.value as StandardWaveformType);
             onParameterChange?.();
           }}
           value={oscillatorType}
