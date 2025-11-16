@@ -6,11 +6,11 @@ import { GristleizerMode, GristleizerWaveform } from "../types/GristleizerParams
  * Custom Gristleizer effect inspired by the legendary Throbbing Gristle VCA/VCF
  *
  * The Gristleizer has two modes:
- * - VCA: Amplitude modulation (tremolo) with distortion
+ * - VCA: Amplitude modulation (tremolo) with gain/overdrive
  * - VCF: Bandpass filter modulation (auto-wah) with dry/wet mix
  *
  * Architecture:
- * - Input → Distortion (GAIN) → Mode Router → Output
+ * - Input → Gain Node (GAIN control for overdrive) → Mode Router → Output
  *   - VCA path: Tremolo (LFO-controlled amplitude modulation)
  *   - VCF path: Bandpass Filter (LFO-controlled center frequency) → Filter Mix
  * - LFO with selectable waveform (triangle/sawtooth/square)
@@ -30,7 +30,7 @@ export interface GristleizerEffect {
 
   // Internal components
   lfo: Tone.LFO;
-  distortion: Tone.Distortion;
+  gainNode: Tone.Gain;
   tremolo: Tone.Tremolo;
   filter: Tone.Filter;
   vcaDryWet: Tone.CrossFade;
@@ -60,11 +60,9 @@ export function useGristleizer() {
       type: "triangle",
     }).start();
 
-    // Create distortion (GAIN control - applies to both modes)
-    const distortion = new Tone.Distortion({
-      distortion: 0,
-      wet: 1, // Always 100% wet since it's in series
-    });
+    // Create gain node (GAIN control - applies to both modes)
+    // Higher gain values will overdrive/distort the signal
+    const gainNode = new Tone.Gain(1); // Start at unity gain (1 = no distortion)
 
     // VCA MODE: Tremolo effect
     const tremolo = new Tone.Tremolo({
@@ -112,8 +110,9 @@ export function useGristleizer() {
     // Connect depth to tremolo
     depthSignal.connect(tremolo.depth);
 
-    // Connect gain to distortion
-    gainSignal.connect(distortion.distortion as unknown as Tone.InputNode);
+    // Connect gain signal to gain node
+    // This allows dynamic control of the gain/overdrive amount
+    gainSignal.connect(gainNode.gain);
 
     // Connect filter mix to VCF dry/wet
     filterMixSignal.connect(vcfDryWet.fade);
@@ -121,7 +120,7 @@ export function useGristleizer() {
     // Connect wet signal to overall dry/wet
     wetSignal.connect(wetDryMix.fade);
 
-    // VCA signal path: Input → Distortion → VCA DryWet (Tremolo) → Mode Selector (A)
+    // VCA signal path: Input → Gain → VCA DryWet (Tremolo) → Mode Selector (A)
     const vcaInput = new Tone.Gain(1);
     const vcaWet = new Tone.Gain(1);
 
@@ -131,7 +130,7 @@ export function useGristleizer() {
     vcaWet.connect(vcaDryWet.b); // Wet path
     vcaDryWet.connect(modeSelector.a);
 
-    // VCF signal path: Input → Distortion → VCF DryWet (Filter) → Mode Selector (B)
+    // VCF signal path: Input → Gain → VCF DryWet (Filter) → Mode Selector (B)
     const vcfInput = new Tone.Gain(1);
     const vcfWet = new Tone.Gain(1);
 
@@ -143,12 +142,12 @@ export function useGristleizer() {
 
     // Main signal routing
     const mainInput = new Tone.Gain(1);
-    const afterDistortion = new Tone.Gain(1);
+    const afterGain = new Tone.Gain(1);
 
-    mainInput.connect(distortion);
-    distortion.connect(afterDistortion);
-    afterDistortion.connect(vcaInput); // To VCA path
-    afterDistortion.connect(vcfInput); // To VCF path
+    mainInput.connect(gainNode);
+    gainNode.connect(afterGain);
+    afterGain.connect(vcaInput); // To VCA path
+    afterGain.connect(vcfInput); // To VCF path
 
     // Mode selector → Level → Wet/Dry → Output
     const beforeWetDry = new Tone.Gain(1);
@@ -175,7 +174,7 @@ export function useGristleizer() {
       wet: wetSignal,
 
       lfo,
-      distortion,
+      gainNode,
       tremolo,
       filter,
       vcaDryWet,
@@ -194,7 +193,7 @@ export function useGristleizer() {
 
       dispose: () => {
         lfo.dispose();
-        distortion.dispose();
+        gainNode.dispose();
         tremolo.dispose();
         filter.dispose();
         vcaDryWet.dispose();
@@ -213,7 +212,7 @@ export function useGristleizer() {
         vcfInput.dispose();
         vcfWet.dispose();
         mainInput.dispose();
-        afterDistortion.dispose();
+        afterGain.dispose();
         beforeWetDry.dispose();
         output.dispose();
       },
