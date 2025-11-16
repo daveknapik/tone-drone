@@ -58,7 +58,7 @@ export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
     }
 
     // Connect the final node to destination
-    currentNode.toDestination();
+    currentNode.connect(Tone.getDestination());
   }, [audioEffects]);
 
   useEffect(() => {
