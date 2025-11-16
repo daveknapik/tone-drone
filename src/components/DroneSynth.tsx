@@ -102,7 +102,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
       chebyshev.current,
       microlooper.current,
       afterFilter.current,
-      gristleizer.current!,
+      gristleizer.current,
       delay.current,
       compressorRef.current!,
     ],
