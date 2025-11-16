@@ -167,7 +167,7 @@ describe("presetMigration", () => {
 
     it("should return correct migration path from v2", () => {
       const path = getMigrationPath(2);
-      expect(path).toEqual([2, 3, 4, 5]); // v2→v3, v3→v4, v4→v5, v5→v6
+      expect(path).toEqual([2, 3, 4, 5, 6]); // v2→v3, v3→v4, v4→v5, v5→v6, v6→v7
     });
 
     it("should return empty array for current version", () => {
@@ -193,8 +193,15 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        // Effects should be preserved (reverb was removed from app, so not added)
-        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
+        // Original effects should be preserved
+        expect(migrated.state.effects.autoFilter).toEqual(v1Preset.state.effects.autoFilter);
+        expect(migrated.state.effects.bitCrusher).toEqual(v1Preset.state.effects.bitCrusher);
+        expect(migrated.state.effects.chebyshev).toEqual(v1Preset.state.effects.chebyshev);
+        expect(migrated.state.effects.microlooper).toEqual(v1Preset.state.effects.microlooper);
+        expect(migrated.state.effects.afterFilter).toEqual(v1Preset.state.effects.afterFilter);
+        expect(migrated.state.effects.delay).toEqual(v1Preset.state.effects.delay);
+        // Gristleizer should be added with default values during v6→v7 migration
+        expect(migrated.state.effects.gristleizer).toBeDefined();
         expect(migrated.state.effectsBusSend).toBe(
           v1Preset.state.effectsBusSend
         );
@@ -323,8 +330,15 @@ describe("presetMigration", () => {
         });
         // Second polysynth should be added during v3→v4 migration
         expect(migrated.state.polysynths.polysynths).toHaveLength(2);
-        // Effects should be preserved (reverb was removed from app, so not added)
-        expect(migrated.state.effects).toEqual(v2Preset.state.effects);
+        // Original effects should be preserved
+        expect(migrated.state.effects.autoFilter).toEqual(v2Preset.state.effects.autoFilter);
+        expect(migrated.state.effects.bitCrusher).toEqual(v2Preset.state.effects.bitCrusher);
+        expect(migrated.state.effects.chebyshev).toEqual(v2Preset.state.effects.chebyshev);
+        expect(migrated.state.effects.microlooper).toEqual(v2Preset.state.effects.microlooper);
+        expect(migrated.state.effects.afterFilter).toEqual(v2Preset.state.effects.afterFilter);
+        expect(migrated.state.effects.delay).toEqual(v2Preset.state.effects.delay);
+        // Gristleizer should be added during v6→v7 migration
+        expect(migrated.state.effects.gristleizer).toBeDefined();
         expect(migrated.state.effectsBusSend).toBe(
           v2Preset.state.effectsBusSend
         );
@@ -348,8 +362,15 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        // Effects should be preserved (reverb was removed from app, so not added)
-        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
+        // Original effects should be preserved
+        expect(migrated.state.effects.autoFilter).toEqual(v1Preset.state.effects.autoFilter);
+        expect(migrated.state.effects.bitCrusher).toEqual(v1Preset.state.effects.bitCrusher);
+        expect(migrated.state.effects.chebyshev).toEqual(v1Preset.state.effects.chebyshev);
+        expect(migrated.state.effects.microlooper).toEqual(v1Preset.state.effects.microlooper);
+        expect(migrated.state.effects.afterFilter).toEqual(v1Preset.state.effects.afterFilter);
+        expect(migrated.state.effects.delay).toEqual(v1Preset.state.effects.delay);
+        // Gristleizer should be added during v6→v7 migration
+        expect(migrated.state.effects.gristleizer).toBeDefined();
       });
     });
 
