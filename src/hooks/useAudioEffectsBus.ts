@@ -16,7 +16,9 @@ export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
   );
 
   const updateAudioEffects = useCallback(() => {
-    mainAudioEffectsBus.current.chain(...audioEffects, Tone.getDestination());
+    // Cast audio effects to InputNode to handle custom effects like Gristleizer
+    const effects = audioEffects.map(effect => effect as unknown as Tone.InputNode);
+    mainAudioEffectsBus.current.chain(...effects, Tone.getDestination());
   }, [audioEffects]);
 
   useEffect(() => {

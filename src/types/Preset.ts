@@ -3,6 +3,7 @@ import { BitCrusherParams } from "./BitCrusherParams";
 import { ChebyshevParams } from "./ChebyshevParams";
 import { DelayParams } from "./DelayParams";
 import { FilterParams } from "./FilterParams";
+import { GristleizerParams } from "./GristleizerParams";
 import { Sequence } from "./Sequence";
 import { PolySynthsState } from "./PolySynthParams";
 import { OscillatorParams } from "./OscillatorParams";
@@ -38,6 +39,7 @@ export interface PresetState {
     chebyshev: ChebyshevParams;
     microlooper: DelayParams;
     afterFilter: FilterParams;
+    gristleizer?: GristleizerParams; // Optional for backward compatibility
     delay: DelayParams;
     // Note: reverb/reverb1/reverb2 fields may exist in old presets but are ignored
   };

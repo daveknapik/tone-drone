@@ -3,6 +3,7 @@ import type { BitCrusherParams } from "../types/BitCrusherParams";
 import type { ChebyshevParams } from "../types/ChebyshevParams";
 import type { DelayParams } from "../types/DelayParams";
 import type { FilterParams } from "../types/FilterParams";
+import type { GristleizerParams } from "../types/GristleizerParams";
 import type {
   PolySynthParams,
   PolySynthsState,
@@ -138,6 +139,18 @@ export const DEFAULT_DELAY_PARAMS: DelayParams = {
   wet: 0.5,
 };
 
+export const DEFAULT_GRISTLEIZER_PARAMS: GristleizerParams = {
+  bias: 0.5,
+  gain: 0,
+  filterMix: 0,
+  freq: 4,
+  depth: 0,
+  level: 1,
+  mode: "vca",
+  waveform: "triangle",
+  wet: 0,
+};
+
 // Reverb removed from app - kept for backward compatibility in old presets only
 
 export const DEFAULT_EFFECTS_BUS_SEND = -15;
@@ -175,6 +188,7 @@ export const DEFAULT_PRESET_STATE: PresetState = {
     chebyshev: DEFAULT_CHEBYSHEV_PARAMS,
     microlooper: DEFAULT_MICROLOOPER_PARAMS,
     afterFilter: DEFAULT_AFTER_FILTER_PARAMS,
+    gristleizer: DEFAULT_GRISTLEIZER_PARAMS,
     delay: DEFAULT_DELAY_PARAMS,
   },
   effectsBusSend: DEFAULT_EFFECTS_BUS_SEND,

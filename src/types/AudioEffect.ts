@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+import type { GristleizerEffect } from "../hooks/useGristleizer";
 
 export type AudioEffect =
   | Tone.AutoFilter
@@ -19,4 +20,5 @@ export type AudioEffect =
   | Tone.PitchShift
   | Tone.StereoWidener
   | Tone.Tremolo
-  | Tone.Vibrato;
+  | Tone.Vibrato
+  | GristleizerEffect;

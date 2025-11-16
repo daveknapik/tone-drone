@@ -2,12 +2,13 @@ import type { Preset } from "../types/Preset";
 import {
   DEFAULT_POLYSYNTHS_STATE,
   DEFAULT_BPM,
+  DEFAULT_GRISTLEIZER_PARAMS,
 } from "./presetDefaults";
 
 /**
  * Current preset version
  */
-export const CURRENT_PRESET_VERSION = 6;
+export const CURRENT_PRESET_VERSION = 7;
 
 /**
  * Migrate a preset from an older version to the current version
@@ -48,6 +49,9 @@ function runMigration(preset: Preset, fromVersion: number): Preset {
 
     case 5:
       return migrateV5ToV6(preset);
+
+    case 6:
+      return migrateV6ToV7(preset);
 
     default:
       // No migration needed for this version
@@ -149,6 +153,25 @@ function migrateV5ToV6(preset: Preset): Preset {
     state: {
       ...preset.state,
       // Reverb fields in old presets are ignored (reverb removed from app)
+    },
+  };
+}
+
+/**
+ * Migration from version 6 to version 7
+ * Adds Gristleizer effect to presets created before this feature existed
+ */
+function migrateV6ToV7(preset: Preset): Preset {
+  return {
+    ...preset,
+    version: 7,
+    state: {
+      ...preset.state,
+      effects: {
+        ...preset.state.effects,
+        // Add Gristleizer with default values if missing
+        gristleizer: preset.state.effects.gristleizer ?? DEFAULT_GRISTLEIZER_PARAMS,
+      },
     },
   };
 }

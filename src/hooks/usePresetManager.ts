@@ -7,6 +7,7 @@ import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
+import type { GristleizerHandle } from "../types/GristleizerParams";
 import type { EffectsBusSendHandle } from "../components/EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
 import type { ModulationMatrixHandle } from "../types/ModulationMatrixParams";
@@ -22,6 +23,7 @@ import { extractPresetFromUrl } from "../utils/presetUrl";
 import {
   DEFAULT_BPM,
   DEFAULT_MODULATION_MATRIX_STATE,
+  DEFAULT_GRISTLEIZER_PARAMS,
 } from "../utils/presetDefaults";
 
 /**
@@ -35,6 +37,7 @@ export interface PresetComponentRefs {
   chebyshev: React.RefObject<ChebyshevHandle | null>;
   microlooper: React.RefObject<DelayHandle | null>;
   afterFilter: React.RefObject<FilterHandle | null>;
+  gristleizer: React.RefObject<GristleizerHandle | null>;
   delay: React.RefObject<DelayHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControl: React.RefObject<BpmControlHandle | null>;
@@ -103,6 +106,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
     const chebyshevParams = refs.chebyshev.current?.getParams();
     const microlooperParams = refs.microlooper.current?.getParams();
     const afterFilterParams = refs.afterFilter.current?.getParams();
+    const gristleizerParams = refs.gristleizer.current?.getParams();
     const delayParams = refs.delay.current?.getParams();
     const effectsBusSend = refs.effectsBusSendRef.current?.value ?? 0;
     const bpm = refs.bpmControl.current?.getValue() ?? DEFAULT_BPM;
@@ -118,6 +122,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
       !chebyshevParams ||
       !microlooperParams ||
       !afterFilterParams ||
+      !gristleizerParams ||
       !delayParams
     ) {
       throw new Error(
@@ -134,6 +139,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
         chebyshev: chebyshevParams,
         microlooper: microlooperParams,
         afterFilter: afterFilterParams,
+        gristleizer: gristleizerParams,
         delay: delayParams,
       },
       effectsBusSend,
@@ -161,6 +167,9 @@ export function usePresetManager(refs: PresetComponentRefs) {
       refs.chebyshev.current?.setParams(state.effects.chebyshev);
       refs.microlooper.current?.setParams(state.effects.microlooper);
       refs.afterFilter.current?.setParams(state.effects.afterFilter);
+      refs.gristleizer.current?.setParams(
+        state.effects.gristleizer ?? DEFAULT_GRISTLEIZER_PARAMS
+      );
       refs.delay.current?.setParams(state.effects.delay);
       // Note: Reverb parameters in old presets are ignored (reverb removed from app)
 

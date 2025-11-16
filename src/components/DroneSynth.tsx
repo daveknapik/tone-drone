@@ -7,6 +7,7 @@ import Chebyshev from "./Chebyshev";
 import Delay from "./Delay";
 import EffectsBusSendControl from "./EffectsBusSendControl.tsx";
 import Filter from "./Filter.tsx";
+import Gristleizer from "./Gristleizer";
 import Oscillators from "./Oscillators.tsx";
 import PolySynths from "./Polysynths";
 import Recorder from "./Recorder.tsx";
@@ -18,6 +19,7 @@ import { useBitCrusher } from "../hooks/useBitCrusher";
 import { useChebyshev } from "../hooks/useChebyshev";
 import { useDelay } from "../hooks/useDelay";
 import { useFilter } from "../hooks/useFilter.ts";
+import { useGristleizer } from "../hooks/useGristleizer";
 
 import { useRecorder } from "../hooks/useRecorder.ts";
 
@@ -37,6 +39,7 @@ import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
+import type { GristleizerHandle } from "../types/GristleizerParams";
 import type { PolySynthsHandle } from "./Polysynths";
 import type { EffectsBusSendHandle } from "./EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
@@ -51,6 +54,7 @@ export interface DroneSynthHandle {
   chebyshevRef: React.RefObject<ChebyshevHandle | null>;
   microlooperRef: React.RefObject<DelayHandle | null>;
   afterFilterRef: React.RefObject<FilterHandle | null>;
+  gristleizerRef: React.RefObject<GristleizerHandle | null>;
   delayRef: React.RefObject<DelayHandle | null>;
   effectsBusSendRef: React.RefObject<EffectsBusSendHandle | null>;
   bpmControlRef: React.RefObject<BpmControlHandle | null>;
@@ -70,6 +74,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const chebyshev = useChebyshev();
   const microlooper = useDelay();
   const afterFilter = useFilter();
+  const gristleizer = useGristleizer();
   const delay = useDelay();
 
   // Create compressor once; recreating per-render is expensive in dev (and StrictMode doubles this).
@@ -86,8 +91,10 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   // Effects chain order (explained):
   // 1. AutoFilter: Modulation effect
   // 2. BitCrusher, Chebyshev: Distortion effects
-  // 3. Microlooper, Filter, Delay: Time/frequency effects
-  // 4. Compressor: Always last to control output levels
+  // 3. Microlooper, Filter: Time/frequency effects
+  // 4. Gristleizer: Vintage VCA/VCF modulation and distortion
+  // 5. Delay: Time-based spatial effects
+  // 6. Compressor: Always last to control output levels
   const effects = useMemo(
     () => [
       beforeFilter.current,
@@ -95,6 +102,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
       chebyshev.current,
       microlooper.current,
       afterFilter.current,
+      gristleizer.current!,
       delay.current,
       compressorRef.current!,
     ],
@@ -104,6 +112,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
       chebyshev.current,
       microlooper.current,
       afterFilter.current,
+      gristleizer.current,
       delay.current,
       compressorRef.current,
     ]
@@ -131,6 +140,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const chebyshevRef = useRef<ChebyshevHandle>(null);
   const microlooperRef = useRef<DelayHandle>(null);
   const afterFilterRef = useRef<FilterHandle>(null);
+  const gristleizerRef = useRef<GristleizerHandle>(null);
   const delayRef = useRef<DelayHandle>(null);
   const effectsBusSendRef = useRef<EffectsBusSendHandle | null>(null);
   const bpmControlRef = useRef<BpmControlHandle | null>(null);
@@ -172,6 +182,7 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
     chebyshevRef,
     microlooperRef,
     afterFilterRef,
+    gristleizerRef,
     delayRef,
     effectsBusSendRef,
     bpmControlRef,
@@ -210,6 +221,11 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
           <Filter
             filter={afterFilter}
             ref={afterFilterRef}
+            onParameterChange={onParameterChange}
+          />
+          <Gristleizer
+            gristleizer={gristleizer}
+            ref={gristleizerRef}
             onParameterChange={onParameterChange}
           />
           <Delay
