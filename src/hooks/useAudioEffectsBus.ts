@@ -27,16 +27,23 @@ export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
   );
 
   const updateAudioEffects = useCallback(() => {
+    // Check if main bus is disposed before proceeding
+    if (mainAudioEffectsBus.current.disposed) {
+      return;
+    }
+
     // Disconnect all effects first to avoid stacking connections
     mainAudioEffectsBus.current.disconnect();
 
     for (const effect of audioEffects) {
       if (effect) {
         if (isCustomEffect(effect)) {
-          effect.input.disconnect();
-          effect.output.disconnect();
+          // Only disconnect if not disposed
+          if (!effect.input.disposed) effect.input.disconnect();
+          if (!effect.output.disposed) effect.output.disconnect();
         } else if (effect instanceof Tone.ToneAudioNode) {
-          effect.disconnect();
+          // Only disconnect if not disposed
+          if (!effect.disposed) effect.disconnect();
         }
       }
     }
@@ -46,19 +53,33 @@ export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
 
     for (const effect of audioEffects) {
       if (isCustomEffect(effect)) {
+        // Skip if either input or output is disposed
+        if (effect.input.disposed || effect.output.disposed) continue;
+        if (currentNode.disposed) continue;
+
         // Custom effect: connect current node to effect's input
         currentNode.connect(effect.input);
         // Set current node to effect's output for next connection
         currentNode = effect.output;
       } else if (effect instanceof Tone.ToneAudioNode) {
+        // Skip if effect or current node is disposed
+        if (effect.disposed || currentNode.disposed) continue;
+
         // Standard Tone.js effect: connect directly
         currentNode.connect(effect);
         currentNode = effect;
       }
     }
 
-    // Connect the final node to destination
-    currentNode.connect(Tone.getDestination());
+    // Connect the final node to destination only if not disposed
+    if (!currentNode.disposed) {
+      try {
+        currentNode.connect(Tone.getDestination());
+      } catch (error) {
+        // In StrictMode, Tone.getDestination() might be temporarily unavailable
+        console.warn("Failed to connect to destination:", error);
+      }
+    }
   }, [audioEffects]);
 
   useEffect(() => {
