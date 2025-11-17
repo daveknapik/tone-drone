@@ -77,13 +77,16 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   const gristleizer = useGristleizer();
   const delay = useDelay();
 
-  // Create compressor once; recreating per-render is expensive in dev (and StrictMode doubles this).
+  // Create compressor: recreate if disposed (handles StrictMode)
   const compressorRef = useRef<Tone.Compressor | null>(null);
-  compressorRef.current ??= new Tone.Compressor(-30, 3);
+  if (!compressorRef.current || compressorRef.current.disposed) {
+    compressorRef.current = new Tone.Compressor(-30, 3);
+  }
   useEffect(() => {
     return () => {
-      compressorRef.current?.dispose();
-      compressorRef.current = null;
+      if (compressorRef.current && !compressorRef.current.disposed) {
+        compressorRef.current.dispose();
+      }
     };
   }, []);
 

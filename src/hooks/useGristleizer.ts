@@ -236,14 +236,15 @@ function createGristleizer(): GristleizerEffect {
 export function useGristleizer() {
   const gristleizer = useRef<GristleizerEffect | null>(null);
 
-  // Lazy initialization - create on first access if not already created
-  gristleizer.current ??= createGristleizer();
+  // Lazy initialization: create on first access if not already created or if disposed
+  if (!gristleizer.current || gristleizer.current.input.disposed) {
+    gristleizer.current = createGristleizer();
+  }
 
   useEffect(() => {
     return () => {
-      if (gristleizer.current) {
+      if (gristleizer.current && !gristleizer.current.input.disposed) {
         gristleizer.current.dispose();
-        gristleizer.current = null;
       }
     };
   }, []);

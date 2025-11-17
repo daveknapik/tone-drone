@@ -24,16 +24,13 @@ function isCustomEffect(effect: AudioEffect): effect is GristleizerEffect {
 export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
   const mainAudioEffectsBus = useRef<Tone.Channel | null>(null);
 
-  // Lazy initialization: create bus only when needed (handles StrictMode remounting)
-  mainAudioEffectsBus.current ??= new Tone.Channel({ volume: -15, channelCount: 2 });
-
   const updateAudioEffects = useCallback(() => {
-    const bus = mainAudioEffectsBus.current;
-
-    // Check if main bus is disposed before proceeding
-    if (!bus || bus.disposed) {
-      return;
+    // Ensure bus exists and is not disposed (handles StrictMode re-invocation)
+    if (!mainAudioEffectsBus.current || mainAudioEffectsBus.current.disposed) {
+      mainAudioEffectsBus.current = new Tone.Channel({ volume: -15, channelCount: 2 });
     }
+
+    const bus = mainAudioEffectsBus.current;
 
     // Disconnect all effects first to avoid stacking connections
     bus.disconnect();
