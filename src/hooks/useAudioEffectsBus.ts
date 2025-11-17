@@ -22,18 +22,21 @@ function isCustomEffect(effect: AudioEffect): effect is GristleizerEffect {
 }
 
 export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
-  const mainAudioEffectsBus = useRef<Tone.Channel>(
-    new Tone.Channel({ volume: -15, channelCount: 2 })
-  );
+  const mainAudioEffectsBus = useRef<Tone.Channel | null>(null);
+
+  // Lazy initialization: create bus only when needed (handles StrictMode remounting)
+  mainAudioEffectsBus.current ??= new Tone.Channel({ volume: -15, channelCount: 2 });
 
   const updateAudioEffects = useCallback(() => {
+    const bus = mainAudioEffectsBus.current;
+
     // Check if main bus is disposed before proceeding
-    if (mainAudioEffectsBus.current.disposed) {
+    if (!bus || bus.disposed) {
       return;
     }
 
     // Disconnect all effects first to avoid stacking connections
-    mainAudioEffectsBus.current.disconnect();
+    bus.disconnect();
 
     for (const effect of audioEffects) {
       if (effect) {
@@ -49,7 +52,7 @@ export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
     }
 
     // Manually chain effects to handle custom effects with input/output properties
-    let currentNode: Tone.ToneAudioNode = mainAudioEffectsBus.current;
+    let currentNode: Tone.ToneAudioNode = bus;
 
     for (const effect of audioEffects) {
       if (isCustomEffect(effect)) {
@@ -73,18 +76,22 @@ export function useAudioEffectsBus(audioEffects: AudioEffect[]) {
 
     // Connect the final node to destination only if not disposed
     if (!currentNode.disposed) {
-      try {
-        currentNode.connect(Tone.getDestination());
-      } catch (error) {
-        // In StrictMode, Tone.getDestination() might be temporarily unavailable
-        console.warn("Failed to connect to destination:", error);
-      }
+      currentNode.connect(Tone.getDestination());
     }
   }, [audioEffects]);
 
   useEffect(() => {
     updateAudioEffects();
+
+    // Cleanup: dispose the bus on unmount
+    return () => {
+      if (mainAudioEffectsBus.current && !mainAudioEffectsBus.current.disposed) {
+        mainAudioEffectsBus.current.dispose();
+        mainAudioEffectsBus.current = null;
+      }
+    };
   }, [updateAudioEffects]);
 
-  return mainAudioEffectsBus;
+  // Type assertion is safe because we always initialize the bus before use
+  return mainAudioEffectsBus as React.MutableRefObject<Tone.Channel>;
 }
