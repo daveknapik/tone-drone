@@ -96,16 +96,17 @@ function DroneSynth({ ref, onParameterChange }: DroneSynthProps) {
   // 5. Delay: Time-based spatial effects
   // 6. Compressor: Always last to control output levels
   const effects = useMemo(
-    () => [
-      beforeFilter.current,
-      bitCrusher.current,
-      chebyshev.current,
-      microlooper.current,
-      afterFilter.current,
-      gristleizer.current,
-      delay.current,
-      compressorRef.current!,
-    ],
+    () =>
+      [
+        beforeFilter.current,
+        bitCrusher.current,
+        chebyshev.current,
+        microlooper.current,
+        afterFilter.current,
+        gristleizer.current,
+        delay.current,
+        compressorRef.current,
+      ].filter((effect): effect is NonNullable<typeof effect> => effect !== null),
     [
       beforeFilter.current,
       bitCrusher.current,
