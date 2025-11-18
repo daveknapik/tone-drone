@@ -31,6 +31,7 @@ function PresetManager({ droneSynthRef, ref }: PresetManagerProps) {
     autoFilter: droneSynthRef.current?.autoFilterRef ?? { current: null },
     bitCrusher: droneSynthRef.current?.bitCrusherRef ?? { current: null },
     chebyshev: droneSynthRef.current?.chebyshevRef ?? { current: null },
+    gristleizer: droneSynthRef.current?.gristleizerRef ?? { current: null },
     microlooper: droneSynthRef.current?.microlooperRef ?? { current: null },
     afterFilter: droneSynthRef.current?.afterFilterRef ?? { current: null },
     delay: droneSynthRef.current?.delayRef ?? { current: null },

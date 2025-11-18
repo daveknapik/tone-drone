@@ -7,6 +7,7 @@ import type { BitCrusherHandle } from "../types/BitCrusherParams";
 import type { ChebyshevHandle } from "../types/ChebyshevParams";
 import type { DelayHandle } from "../types/DelayParams";
 import type { FilterHandle } from "../types/FilterParams";
+import type { GristleizerHandle } from "../types/GristleizerParams";
 import type { EffectsBusSendHandle } from "../components/EffectsBusSendControl";
 import type { BpmControlHandle } from "../types/BpmParams";
 import type { ModulationMatrixHandle } from "../types/ModulationMatrixParams";
@@ -33,6 +34,7 @@ export interface PresetComponentRefs {
   autoFilter: React.RefObject<AutoFilterHandle | null>;
   bitCrusher: React.RefObject<BitCrusherHandle | null>;
   chebyshev: React.RefObject<ChebyshevHandle | null>;
+  gristleizer: React.RefObject<GristleizerHandle | null>;
   microlooper: React.RefObject<DelayHandle | null>;
   afterFilter: React.RefObject<FilterHandle | null>;
   delay: React.RefObject<DelayHandle | null>;
@@ -101,6 +103,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
     const autoFilterParams = refs.autoFilter.current?.getParams();
     const bitCrusherParams = refs.bitCrusher.current?.getParams();
     const chebyshevParams = refs.chebyshev.current?.getParams();
+    const gristleizerParams = refs.gristleizer.current?.getParams();
     const microlooperParams = refs.microlooper.current?.getParams();
     const afterFilterParams = refs.afterFilter.current?.getParams();
     const delayParams = refs.delay.current?.getParams();
@@ -116,6 +119,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
       !autoFilterParams ||
       !bitCrusherParams ||
       !chebyshevParams ||
+      !gristleizerParams ||
       !microlooperParams ||
       !afterFilterParams ||
       !delayParams
@@ -132,6 +136,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
         autoFilter: autoFilterParams,
         bitCrusher: bitCrusherParams,
         chebyshev: chebyshevParams,
+        gristleizer: gristleizerParams,
         microlooper: microlooperParams,
         afterFilter: afterFilterParams,
         delay: delayParams,
@@ -159,6 +164,7 @@ export function usePresetManager(refs: PresetComponentRefs) {
       refs.autoFilter.current?.setParams(state.effects.autoFilter);
       refs.bitCrusher.current?.setParams(state.effects.bitCrusher);
       refs.chebyshev.current?.setParams(state.effects.chebyshev);
+      refs.gristleizer.current?.setParams(state.effects.gristleizer);
       refs.microlooper.current?.setParams(state.effects.microlooper);
       refs.afterFilter.current?.setParams(state.effects.afterFilter);
       refs.delay.current?.setParams(state.effects.delay);

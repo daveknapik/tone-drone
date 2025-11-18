@@ -92,6 +92,15 @@ describe("presetSerializer", () => {
         order: 50,
         wet: 0.5,
       },
+      gristleizer: {
+        mode: "vca",
+        waveform: "sine",
+        freq: 4,
+        depth: 0,
+        filterFreq: 200,
+        filterQ: 1,
+        wet: 0,
+      },
       microlooper: {
         time: 0.25,
         feedback: 0.5,

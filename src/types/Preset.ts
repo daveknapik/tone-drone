@@ -3,6 +3,7 @@ import { BitCrusherParams } from "./BitCrusherParams";
 import { ChebyshevParams } from "./ChebyshevParams";
 import { DelayParams } from "./DelayParams";
 import { FilterParams } from "./FilterParams";
+import { GristleizerParams } from "./GristleizerParams";
 import { Sequence } from "./Sequence";
 import { PolySynthsState } from "./PolySynthParams";
 import { OscillatorParams } from "./OscillatorParams";
@@ -36,6 +37,7 @@ export interface PresetState {
     autoFilter: AutoFilterParams;
     bitCrusher: BitCrusherParams;
     chebyshev: ChebyshevParams;
+    gristleizer: GristleizerParams;
     microlooper: DelayParams;
     afterFilter: FilterParams;
     delay: DelayParams;

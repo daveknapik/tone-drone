@@ -61,6 +61,22 @@ declare module 'tone' {
   }
 
   /**
+   * AutoFilter - Modulated filter effect
+   */
+  interface AutoFilter {
+    frequency: ToneParam;
+    depth: ToneParam;
+    baseFrequency: ToneParam;
+    octaves: number;
+    type: ToneOscillatorType;
+    filter: {
+      Q: ToneParam;
+      type: BiquadFilterType;
+      rolloff: Tone.FilterRollOff;
+    };
+  }
+
+  /**
    * BitCrusher - Bit depth reduction effect
    */
   interface BitCrusher {

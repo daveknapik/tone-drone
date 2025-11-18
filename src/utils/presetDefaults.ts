@@ -3,6 +3,7 @@ import type { BitCrusherParams } from "../types/BitCrusherParams";
 import type { ChebyshevParams } from "../types/ChebyshevParams";
 import type { DelayParams } from "../types/DelayParams";
 import type { FilterParams } from "../types/FilterParams";
+import type { GristleizerParams } from "../types/GristleizerParams";
 import type {
   PolySynthParams,
   PolySynthsState,
@@ -119,6 +120,16 @@ export const DEFAULT_CHEBYSHEV_PARAMS: ChebyshevParams = {
   wet: 0.5,
 };
 
+export const DEFAULT_GRISTLEIZER_PARAMS: GristleizerParams = {
+  mode: "vca",
+  waveform: "sine",
+  freq: 4,
+  depth: 0,
+  filterFreq: 200,
+  filterQ: 1,
+  wet: 0,
+};
+
 export const DEFAULT_MICROLOOPER_PARAMS: DelayParams = {
   time: 0.25,
   feedback: 0.5,
@@ -173,6 +184,7 @@ export const DEFAULT_PRESET_STATE: PresetState = {
     autoFilter: DEFAULT_AUTO_FILTER_PARAMS,
     bitCrusher: DEFAULT_BIT_CRUSHER_PARAMS,
     chebyshev: DEFAULT_CHEBYSHEV_PARAMS,
+    gristleizer: DEFAULT_GRISTLEIZER_PARAMS,
     microlooper: DEFAULT_MICROLOOPER_PARAMS,
     afterFilter: DEFAULT_AFTER_FILTER_PARAMS,
     delay: DEFAULT_DELAY_PARAMS,

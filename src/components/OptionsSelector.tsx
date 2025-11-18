@@ -2,12 +2,15 @@ import * as Tone from "tone";
 import { clsx } from "clsx";
 import { useId } from "react";
 import { OscillatorType as OscTypeEnum } from "../types/OscillatorParams";
+import { GristleizerMode, GristleizerWaveform } from "../types/GristleizerParams";
 
 type OptionType =
   | OscillatorType
   | BiquadFilterType
   | Tone.FilterRollOff
-  | OscTypeEnum;
+  | OscTypeEnum
+  | GristleizerMode
+  | GristleizerWaveform;
 
 interface OptionsSelectorProps<T extends OptionType> {
   handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
