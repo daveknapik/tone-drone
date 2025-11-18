@@ -68,9 +68,10 @@ function ModulationLFO({
 
   // Update LFO type immediately (non-audio-rate parameter)
   // Note: Only Tone.LFO has a 'type' property; SampleAndHoldLFO doesn't need it
+  // Don't try to set "sampleandhold" type on Tone.LFO (it's not supported)
   useEffect(() => {
-    if (lfo && 'type' in lfo) {
-      lfo.type = type as "sine" | "triangle" | "square" | "sawtooth";
+    if (lfo && 'type' in lfo && type !== "sampleandhold") {
+      lfo.type = type;
     }
   }, [lfo, type]);
 

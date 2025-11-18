@@ -130,11 +130,78 @@ export function useModulationLFOs() {
     return lfoStatesRef.current[lfoIndex]?.polarityMode ?? "bipolar";
   }, []);
 
+  /**
+   * Change an LFO's waveform type, recreating the LFO instance if switching
+   * between standard waveforms and sample-and-hold
+   */
+  const setLfoType = useCallback((lfoIndex: number, newType: string, frequency: number, amplitude: number) => {
+    const state = lfoStatesRef.current[lfoIndex];
+    if (!state) return;
+
+    const oldLfo = state.lfo;
+    const oldIsSH = oldLfo instanceof SampleAndHoldLFO;
+    const newIsSH = newType === "sampleandhold";
+
+    // If both old and new are standard waveforms, no need to recreate
+    if (!oldIsSH && !newIsSH) {
+      // Just update the type on the existing Tone.LFO
+      if ('type' in oldLfo) {
+        oldLfo.type = newType as "sine" | "triangle" | "square" | "sawtooth";
+      }
+      return;
+    }
+
+    // Need to recreate the LFO (switching between standard and S&H)
+    const now = Tone.now();
+
+    // Fade out the output signal
+    state.outputSignal.linearRampToValueAtTime(0, now + 0.05);
+
+    Tone.Draw.schedule(() => {
+      // Stop and dispose old LFO
+      oldLfo.stop();
+      oldLfo.disconnect();
+      oldLfo.dispose();
+
+      // Create new LFO
+      let newLfo: Tone.LFO | SampleAndHoldLFO;
+      if (newIsSH) {
+        newLfo = new SampleAndHoldLFO(frequency, amplitude);
+        newLfo.start();
+      } else {
+        newLfo = new Tone.LFO({
+          frequency,
+          type: newType as "sine" | "triangle" | "square" | "sawtooth",
+          amplitude,
+          min: -1,
+          max: 1,
+        }).start();
+      }
+
+      // Disconnect old routing
+      state.unipolarScaler.disconnect();
+
+      // Reconnect with same polarity mode
+      if (state.polarityMode === "unipolar") {
+        newLfo.connect(state.unipolarScaler);
+        state.unipolarScaler.connect(state.outputSignal);
+      } else {
+        newLfo.connect(state.outputSignal);
+      }
+
+      // Update state reference
+      state.lfo = newLfo;
+
+      // Signal will fade back in automatically
+    }, now + 0.06);
+  }, []);
+
   return {
     lfos: lfoStatesRef.current.map((state) => state.lfo),
     signals: lfoStatesRef.current.map((state) => state.outputSignal),
     setPolarityMode,
     getPolarityMode,
+    setLfoType,
   };
 }
 

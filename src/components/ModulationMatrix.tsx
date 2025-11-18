@@ -67,7 +67,7 @@ function ModulationMatrix({
   const [lfoParams, setLfoParams] = useState<LFOParams[]>(DEFAULT_LFOS);
   const [routes, setRoutes] = useState<ModulationRoute[]>(DEFAULT_ROUTES);
 
-  const { lfos, signals, setPolarityMode } = useModulationLFOs();
+  const { lfos, signals, setPolarityMode, setLfoType } = useModulationLFOs();
   const stateRef = useRef<ModulationMatrixState>({
     lfos: lfoParams,
     routes: routes,
@@ -210,6 +210,10 @@ function ModulationMatrix({
                 }}
                 onTypeChange={(type) => {
                   handleLfoParamsUpdate(i, { type });
+
+                  // Recreate LFO if switching between standard and sample-and-hold
+                  const currentParams = lfoParams[i];
+                  setLfoType(i, type, currentParams.frequency, currentParams.amplitude);
 
                   // Skip updating Tremolo/AutoPanner for sample-and-hold
                   // (those effects don't support custom waveforms)
