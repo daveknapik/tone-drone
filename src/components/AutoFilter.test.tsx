@@ -69,7 +69,7 @@ describe("AutoFilter", () => {
         Q: 1,
         wet: 0,
         type: "highpass",
-        oscillatorType: "sine",
+        waveform: "sine",
       });
     });
 
@@ -99,7 +99,7 @@ describe("AutoFilter", () => {
         Q: 3,
         wet: 0.7,
         type: "lowpass",
-        oscillatorType: "square",
+        waveform: "square",
       };
 
       // Set new parameters wrapped in act
@@ -183,7 +183,7 @@ describe("AutoFilter", () => {
           Q: 3,
           wet: 0.7,
           type: "lowpass",
-          oscillatorType: "square",
+          waveform: "square",
         });
       });
 
@@ -197,7 +197,7 @@ describe("AutoFilter", () => {
           Q: 5,
           wet: 0.9,
           type: "bandpass",
-          oscillatorType: "triangle",
+          waveform: "triangle",
         });
       });
 
@@ -205,7 +205,7 @@ describe("AutoFilter", () => {
         const finalParams = handle.getParams();
         expect(finalParams?.baseFrequency).toBe(800);
         expect(finalParams?.type).toBe("bandpass");
-        expect(finalParams?.oscillatorType).toBe("triangle");
+        expect(finalParams?.waveform).toBe("triangle");
       });
     });
   });

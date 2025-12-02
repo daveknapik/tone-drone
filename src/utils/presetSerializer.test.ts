@@ -82,7 +82,7 @@ describe("presetSerializer", () => {
         Q: 1,
         wet: 0.5,
         type: "lowpass",
-        oscillatorType: "sine",
+        waveform: "sine",
       },
       bitCrusher: {
         bits: 4,
@@ -118,7 +118,7 @@ describe("presetSerializer", () => {
       const name = "Test Preset";
       const preset = createPreset(name, mockPresetState);
 
-      expect(preset.version).toBe(6);
+      expect(preset.version).toBe(7);
       expect(preset.metadata.name).toBe(name);
       expect(preset.metadata.id).toBeTruthy();
       expect(preset.metadata.created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
@@ -187,8 +187,8 @@ describe("presetSerializer", () => {
       const serialized = JSON.stringify(v2Preset);
       const deserialized = deserializePreset(serialized);
 
-      // Should be migrated to v6
-      expect(deserialized.version).toBe(6);
+      // Should be migrated to v7
+      expect(deserialized.version).toBe(7);
       // Should have BPM added with default value
       expect(deserialized.state.bpm).toBe(120);
       // Should have second polysynth added

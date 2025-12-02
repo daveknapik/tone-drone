@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 7,
   "metadata": {
     "id": "factory-melody-memory",
     "name": "Melody Memory",
@@ -228,7 +228,7 @@
         "Q": 3,
         "wet": 0.5,
         "type": "bandpass",
-        "oscillatorType": "sine"
+        "waveform": "sine"
       },
       "bitCrusher": {
         "bits": 8,

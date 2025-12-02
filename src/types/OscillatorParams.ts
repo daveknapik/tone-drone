@@ -4,11 +4,17 @@
 export type OscillatorType = "basic" | "fat";
 
 /**
+ * Waveform shape for oscillators, LFOs, and other audio sources
+ * Note: This is distinct from the global DOM OscillatorType which includes "custom"
+ */
+export type WaveformType = "sine" | "triangle" | "square" | "sawtooth";
+
+/**
  * Parameters for a single Oscillator component that should be persisted in presets
  */
 export interface OscillatorParams {
   frequency: number;
-  waveform: string; // "sine" | "square" | "triangle" | "sawtooth"
+  waveform: WaveformType;
   volume: number;
   pan: number;
   oscillatorType: OscillatorType;

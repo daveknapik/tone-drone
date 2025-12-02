@@ -7,6 +7,7 @@ import {
 } from "./presetMigration";
 import type { Preset, PresetState } from "../types/Preset";
 import { DEFAULT_BPM } from "./presetDefaults";
+import type { WaveformType } from "../types/OscillatorParams";
 
 describe("presetMigration", () => {
   const createV1Preset = (): Preset => ({
@@ -66,7 +67,7 @@ describe("presetMigration", () => {
       },
       effectsBusSend: 0.5,
       // V1 presets don't have BPM - migration will add it
-    } as PresetState,
+    } as unknown as PresetState,
   });
 
   const createV2Preset = (): Preset => ({
@@ -139,7 +140,7 @@ describe("presetMigration", () => {
       },
       effectsBusSend: 0.5,
       // V2 presets don't have BPM - migration will add it
-    } as PresetState,
+    } as unknown as PresetState,
   });
 
   describe("needsMigration", () => {
@@ -167,7 +168,7 @@ describe("presetMigration", () => {
 
     it("should return correct migration path from v2", () => {
       const path = getMigrationPath(2);
-      expect(path).toEqual([2, 3, 4, 5]); // v2→v3, v3→v4, v4→v5, v5→v6
+      expect(path).toEqual([2, 3, 4, 5, 6]); // v2→v3, v3→v4, v4→v5, v5→v6, v6→v7
     });
 
     it("should return empty array for current version", () => {
@@ -193,8 +194,10 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        // Effects should be preserved (reverb was removed from app, so not added)
-        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
+        // Effects should be preserved, with autoFilter.oscillatorType renamed to waveform
+        expect(migrated.state.effects.autoFilter.waveform).toBe("sine");
+        expect(migrated.state.effects.bitCrusher).toEqual(v1Preset.state.effects.bitCrusher);
+        expect(migrated.state.effects.chebyshev).toEqual(v1Preset.state.effects.chebyshev);
         expect(migrated.state.effectsBusSend).toBe(
           v1Preset.state.effectsBusSend
         );
@@ -224,7 +227,7 @@ describe("presetMigration", () => {
         const polysynthsWithoutPan = [
           {
             frequency: 666,
-            waveform: "sine" as OscillatorType,
+            waveform: "sine" as WaveformType,
             volume: -5,
             attack: 0.5,
             decay: 0.7,
@@ -233,7 +236,7 @@ describe("presetMigration", () => {
           },
           {
             frequency: 999,
-            waveform: "sine" as OscillatorType,
+            waveform: "sine" as WaveformType,
             volume: -5,
             attack: 0.5,
             decay: 0.7,
@@ -260,7 +263,7 @@ describe("presetMigration", () => {
         const polysynthsWithPan = [
           {
             frequency: 666,
-            waveform: "sine" as OscillatorType,
+            waveform: "sine" as WaveformType,
             volume: -5,
             pan: -0.3,
             attack: 0.5,
@@ -270,7 +273,7 @@ describe("presetMigration", () => {
           },
           {
             frequency: 999,
-            waveform: "sine" as OscillatorType,
+            waveform: "sine" as WaveformType,
             volume: -5,
             pan: 0.3,
             attack: 0.5,
@@ -323,8 +326,9 @@ describe("presetMigration", () => {
         });
         // Second polysynth should be added during v3→v4 migration
         expect(migrated.state.polysynths.polysynths).toHaveLength(2);
-        // Effects should be preserved (reverb was removed from app, so not added)
-        expect(migrated.state.effects).toEqual(v2Preset.state.effects);
+        // Effects should be preserved, with autoFilter.oscillatorType renamed to waveform
+        expect(migrated.state.effects.autoFilter.waveform).toBe("sine");
+        expect(migrated.state.effects.bitCrusher).toEqual(v2Preset.state.effects.bitCrusher);
         expect(migrated.state.effectsBusSend).toBe(
           v2Preset.state.effectsBusSend
         );
@@ -348,8 +352,48 @@ describe("presetMigration", () => {
 
         expect(migrated.metadata).toEqual(v1Preset.metadata);
         expect(migrated.state.oscillators).toEqual(v1Preset.state.oscillators);
-        // Effects should be preserved (reverb was removed from app, so not added)
-        expect(migrated.state.effects).toEqual(v1Preset.state.effects);
+        // Effects should be preserved, with autoFilter.oscillatorType renamed to waveform
+        expect(migrated.state.effects.autoFilter.waveform).toBe("sine");
+        expect(migrated.state.effects.bitCrusher).toEqual(v1Preset.state.effects.bitCrusher);
+      });
+    });
+
+    describe("v6 to v7 migration", () => {
+      it("should rename autoFilter.oscillatorType to autoFilter.waveform", () => {
+        const v6Preset = createV2Preset();
+        v6Preset.version = 6;
+        v6Preset.state.bpm = 120;
+        // Add pan to polysynths to simulate v6 preset
+        v6Preset.state.polysynths.polysynths = [
+          { ...v6Preset.state.polysynths.polysynths[0], pan: 0 },
+          { frequency: 999, waveform: "sine" as WaveformType, volume: -5, pan: 0, attack: 0.5, decay: 0.7, sustain: 1, release: 3 },
+        ];
+
+        const migrated = migratePreset(v6Preset);
+
+        expect(migrated.version).toBe(CURRENT_PRESET_VERSION);
+        expect(migrated.state.effects.autoFilter.waveform).toBe("sine");
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        expect((migrated.state.effects.autoFilter as any).oscillatorType).toBeUndefined();
+      });
+
+      it("should preserve waveform value if already present", () => {
+        const v6Preset = createV2Preset();
+        v6Preset.version = 6;
+        v6Preset.state.bpm = 120;
+        v6Preset.state.polysynths.polysynths = [
+          { ...v6Preset.state.polysynths.polysynths[0], pan: 0 },
+          { frequency: 999, waveform: "sine" as WaveformType, volume: -5, pan: 0, attack: 0.5, decay: 0.7, sustain: 1, release: 3 },
+        ];
+        // Preset that somehow already has waveform instead of oscillatorType
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        (v6Preset.state.effects.autoFilter as any).waveform = "square";
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        delete (v6Preset.state.effects.autoFilter as any).oscillatorType;
+
+        const migrated = migratePreset(v6Preset);
+
+        expect(migrated.state.effects.autoFilter.waveform).toBe("square");
       });
     });
 

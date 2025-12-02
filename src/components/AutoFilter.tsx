@@ -6,6 +6,7 @@ import { useEffect, useState, useImperativeHandle, useRef } from "react";
 import OptionsSelector from "./OptionsSelector";
 import { AutoFilterHandle, AutoFilterParams } from "../types/AutoFilterParams";
 import { useRampedParameter } from "../hooks/useRampedParameter";
+import { WaveformType } from "../types/OscillatorParams";
 
 interface AutoFilterProps {
   filter: React.RefObject<Tone.AutoFilter>;
@@ -21,7 +22,7 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
   const [Q, setQ] = useState(1);
   const [wet, setWet] = useState(0);
   const [type, setType] = useState<BiquadFilterType>("highpass");
-  const [oscillatorType, setOscillatorType] = useState<OscillatorType>("sine");
+  const [waveform, setWaveform] = useState<WaveformType>("sine");
 
   // Keep a ref with current state values for imperative access
   const paramsRef = useRef<AutoFilterParams>({
@@ -32,7 +33,7 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
     Q,
     wet,
     type,
-    oscillatorType,
+    waveform,
   });
 
   // Update ref whenever state changes
@@ -45,9 +46,9 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
       Q,
       wet,
       type,
-      oscillatorType,
+      waveform,
     };
-  }, [baseFrequency, depth, frequency, rolloff, Q, wet, type, oscillatorType]);
+  }, [baseFrequency, depth, frequency, rolloff, Q, wet, type, waveform]);
 
   // Smooth ramped parameter updates (prevents clicking)
   // Type assertions needed for AutoFilter's Frequency types
@@ -81,7 +82,7 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
       setQ(params.Q);
       setWet(params.wet);
       setType(params.type);
-      setOscillatorType(params.oscillatorType);
+      setWaveform(params.waveform);
     },
   }));
 
@@ -98,10 +99,10 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
   useEffect(() => {
     if (filter.current) {
       filter.current.filter.type = type;
-      filter.current.type = oscillatorType;
+      filter.current.type = waveform;
       filter.current.filter.rolloff = rolloff;
     }
-  }, [filter, type, oscillatorType, rolloff]);
+  }, [filter, type, waveform, rolloff]);
 
   return (
     <div className="sm:place-items-center sm:border-2 sm:rounded sm:border-pink-500 dark:sm:border-sky-300 p-5">
@@ -197,12 +198,12 @@ function AutoFilter({ filter, ref, onParameterChange }: AutoFilterProps) {
           useDropdownOnSmall={true}
           label="Rolloff"
         />
-        <OptionsSelector<OscillatorType>
+        <OptionsSelector<WaveformType>
           handleChange={(e) => {
-            setOscillatorType(e.target.value as OscillatorType);
+            setWaveform(e.target.value as WaveformType);
             onParameterChange?.();
           }}
-          value={oscillatorType}
+          value={waveform}
           options={["sine", "square", "triangle", "sawtooth"]}
           useDropdownOnSmall={true}
           label="Wave"

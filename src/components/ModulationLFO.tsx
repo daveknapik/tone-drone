@@ -4,16 +4,17 @@ import { useDebounceCallback } from "usehooks-ts";
 import Slider from "./Slider";
 import OptionsSelector from "./OptionsSelector";
 import { LFOPolarityMode } from "../types/ModulationMatrixParams";
+import { WaveformType } from "../types/OscillatorParams";
 
 interface ModulationLFOProps {
   lfo: Tone.LFO;
   lfoIndex: number;
   initialFrequency?: number;
-  initialType?: OscillatorType;
+  initialType?: WaveformType;
   initialAmplitude?: number;
   initialPolarityMode?: LFOPolarityMode;
   onFrequencyChange?: (frequency: number) => void;
-  onTypeChange?: (type: OscillatorType) => void;
+  onTypeChange?: (type: WaveformType) => void;
   onAmplitudeChange?: (amplitude: number) => void;
   onPolarityModeChange?: (mode: LFOPolarityMode) => void;
   onParameterChange?: () => void;
@@ -33,7 +34,7 @@ function ModulationLFO({
   onParameterChange,
 }: ModulationLFOProps) {
   const [frequency, setFrequency] = useState(initialFrequency);
-  const [type, setType] = useState<OscillatorType>(initialType);
+  const [type, setType] = useState<WaveformType>(initialType);
   const [amplitude, setAmplitude] = useState(initialAmplitude);
   const [polarityMode, setPolarityMode] = useState<LFOPolarityMode>(initialPolarityMode);
 
@@ -117,9 +118,9 @@ function ModulationLFO({
             persistAmplitude(newAmp);
           }}
         />
-        <OptionsSelector<OscillatorType>
+        <OptionsSelector<WaveformType>
           handleChange={(e) => {
-            const newType = e.target.value as OscillatorType;
+            const newType = e.target.value as WaveformType;
             setType(newType);
             onTypeChange?.(newType);
             onParameterChange?.();
