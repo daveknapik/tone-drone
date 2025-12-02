@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 7,
   "metadata": {
     "id": "factory-rhythmic-pulsar",
     "name": "Rhythmic Pulsar",
@@ -228,7 +228,7 @@
         "Q": 5,
         "wet": 0.3,
         "type": "highpass",
-        "oscillatorType": "square"
+        "waveform": "square"
       },
       "bitCrusher": {
         "bits": 4,

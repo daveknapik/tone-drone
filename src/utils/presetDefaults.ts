@@ -7,7 +7,7 @@ import type {
   PolySynthParams,
   PolySynthsState,
 } from "../types/PolySynthParams";
-import type { OscillatorParams } from "../types/OscillatorParams";
+import type { OscillatorParams, WaveformType } from "../types/OscillatorParams";
 import type { OscillatorsState } from "../types/OscillatorsParams";
 import type { Sequence } from "../types/Sequence";
 import type { PresetState } from "../types/Preset";
@@ -78,7 +78,7 @@ export const DEFAULT_SYNTH_ENVELOPE_PARAMS: SynthEnvelopeParams = {
 
 export const DEFAULT_POLYSYNTH_PARAMS: PolySynthParams = {
   frequency: 666,
-  waveform: "sine" as OscillatorType,
+  waveform: "sine" as WaveformType,
   volume: -5,
   pan: 0,
   attack: 0.5,
@@ -106,7 +106,7 @@ export const DEFAULT_AUTO_FILTER_PARAMS: AutoFilterParams = {
   Q: 1,
   wet: 0.5,
   type: "lowpass",
-  oscillatorType: "sine",
+  waveform: "sine",
 };
 
 export const DEFAULT_BIT_CRUSHER_PARAMS: BitCrusherParams = {

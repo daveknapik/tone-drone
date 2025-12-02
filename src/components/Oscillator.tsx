@@ -9,7 +9,7 @@ import { useState, useImperativeHandle, useRef, useEffect } from "react";
 
 import { useAudioContext } from "../hooks/useAudioContext";
 import { useKeyDown } from "../hooks/useKeyDown";
-import { OscillatorHandle, OscillatorParams } from "../types/OscillatorParams";
+import { OscillatorHandle, OscillatorParams, WaveformType } from "../types/OscillatorParams";
 import { DEFAULT_OSCILLATOR_PARAMS } from "../utils/presetDefaults";
 
 interface OscillatorProps {
@@ -70,7 +70,7 @@ function Oscillator({
   const [frequency, setFrequency] = useState(
     DEFAULT_OSCILLATOR_PARAMS.frequency
   );
-  const [waveform, setWaveform] = useState("sine");
+  const [waveform, setWaveform] = useState<WaveformType>("sine");
 
   // Tone.Channel properties
   const [volume, setVolume] = useState(-5);
@@ -267,9 +267,9 @@ function Oscillator({
         }}
       />
       <div className="justify-between mt-1">
-        <OptionsSelector
+        <OptionsSelector<WaveformType>
           handleChange={(e) => {
-            const newWaveform = e.target.value;
+            const newWaveform = e.target.value as WaveformType;
             setWaveform(newWaveform);
             onParameterChange?.();
           }}

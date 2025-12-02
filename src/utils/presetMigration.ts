@@ -1,4 +1,5 @@
 import type { Preset } from "../types/Preset";
+import type { WaveformType } from "../types/OscillatorParams";
 import {
   DEFAULT_POLYSYNTHS_STATE,
   DEFAULT_BPM,
@@ -7,7 +8,7 @@ import {
 /**
  * Current preset version
  */
-export const CURRENT_PRESET_VERSION = 6;
+export const CURRENT_PRESET_VERSION = 7;
 
 /**
  * Migrate a preset from an older version to the current version
@@ -48,6 +49,9 @@ function runMigration(preset: Preset, fromVersion: number): Preset {
 
     case 5:
       return migrateV5ToV6(preset);
+
+    case 6:
+      return migrateV6ToV7(preset);
 
     default:
       // No migration needed for this version
@@ -149,6 +153,39 @@ function migrateV5ToV6(preset: Preset): Preset {
     state: {
       ...preset.state,
       // Reverb fields in old presets are ignored (reverb removed from app)
+    },
+  };
+}
+
+/**
+ * Migration from version 6 to version 7
+ * Renames autoFilter.oscillatorType to autoFilter.waveform for type clarity
+ * (oscillatorType was confusing because it's actually a waveform type, not basic/fat)
+ */
+function migrateV6ToV7(preset: Preset): Preset {
+  const autoFilter = preset.state.effects.autoFilter;
+
+  // Handle the field rename: oscillatorType -> waveform
+  // Old presets have oscillatorType, new presets have waveform
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  const waveform: WaveformType = ((autoFilter as any)?.waveform ?? (autoFilter as any)?.oscillatorType ?? "sine") as WaveformType;
+
+  // Create new autoFilter without the old oscillatorType field
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { oscillatorType: _removed, ...restAutoFilter } = autoFilter as typeof autoFilter & { oscillatorType?: string };
+
+  return {
+    ...preset,
+    version: 7,
+    state: {
+      ...preset.state,
+      effects: {
+        ...preset.state.effects,
+        autoFilter: {
+          ...restAutoFilter,
+          waveform,
+        },
+      },
     },
   };
 }

@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 7,
   "metadata": {
     "id": "factory-the-ending-world",
     "name": "The Ending World",
@@ -228,7 +228,7 @@
         "Q": 2,
         "wet": 0.3,
         "type": "lowpass",
-        "oscillatorType": "sine"
+        "waveform": "sine"
       },
       "bitCrusher": {
         "bits": 8,

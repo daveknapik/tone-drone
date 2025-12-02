@@ -1,3 +1,5 @@
+import { WaveformType } from './OscillatorParams';
+
 /**
  * LFO polarity mode
  */
@@ -8,7 +10,7 @@ export type LFOPolarityMode = 'bipolar' | 'unipolar';
  */
 export interface LFOParams {
   frequency: number; // Hz
-  type: OscillatorType; // waveform type
+  type: WaveformType; // waveform shape
   amplitude: number; // 0-1
   polarityMode?: LFOPolarityMode; // bipolar (-1 to +1) or unipolar (0 to +1), defaults to bipolar
 }

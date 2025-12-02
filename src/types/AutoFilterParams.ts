@@ -1,4 +1,5 @@
 import * as Tone from "tone";
+import { WaveformType } from './OscillatorParams';
 
 /**
  * Parameters for the AutoFilter effect that should be persisted in presets
@@ -11,7 +12,7 @@ export interface AutoFilterParams {
   Q: number;
   wet: number;
   type: BiquadFilterType;
-  oscillatorType: OscillatorType;
+  waveform: WaveformType; // LFO waveform for the auto-filter modulation
 }
 
 /**

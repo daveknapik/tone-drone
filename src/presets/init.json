@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 7,
   "metadata": {
     "id": "factory-init",
     "name": "Init",
@@ -228,7 +228,7 @@
         "Q": 1,
         "wet": 0,
         "type": "highpass",
-        "oscillatorType": "sine"
+        "waveform": "sine"
       },
       "bitCrusher": {
         "bits": 5,

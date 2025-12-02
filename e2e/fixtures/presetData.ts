@@ -90,7 +90,7 @@ export const testPreset: Preset = {
         Q: 1,
         wet: 0,
         type: "lowpass",
-        oscillatorType: "sine",
+        waveform: "sine",
       },
       bitCrusher: {
         bits: 4,

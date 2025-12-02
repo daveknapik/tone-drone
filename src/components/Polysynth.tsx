@@ -11,6 +11,7 @@ import { useKeyDown } from "../hooks/useKeyDown";
 import { PolySynthHandle, PolySynthParams } from "../types/PolySynthParams";
 import { useRampedParameter } from "../hooks/useRampedParameter";
 import { useDebounceCallback } from "usehooks-ts";
+import { WaveformType } from "../types/OscillatorParams";
 
 interface PolysynthProps {
   polySynth: Tone.PolySynth;
@@ -30,7 +31,7 @@ function PolySynth({
   onParameterChange,
 }: PolysynthProps) {
   const [frequency, setFrequency] = useState(initialParams?.frequency ?? 666);
-  const [waveform, setWaveform] = useState<OscillatorType>(
+  const [waveform, setWaveform] = useState<WaveformType>(
     initialParams?.waveform ?? "sine"
   );
   const [volume, setVolume] = useState(initialParams?.volume ?? -5);
@@ -219,9 +220,9 @@ function PolySynth({
           onParameterChange?.();
         }}
       />
-      <OptionsSelector<OscillatorType>
+      <OptionsSelector<WaveformType>
         handleChange={(e) => {
-          setWaveform(e.target.value as OscillatorType);
+          setWaveform(e.target.value as WaveformType);
           onParameterChange?.();
         }}
         value={waveform}

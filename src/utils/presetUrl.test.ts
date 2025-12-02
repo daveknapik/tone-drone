@@ -70,7 +70,7 @@ describe("presetUrl", () => {
         Q: 1,
         wet: 0.5,
         type: "lowpass",
-        oscillatorType: "sine",
+        waveform: "sine",
       },
       bitCrusher: {
         bits: 4,
